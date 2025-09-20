@@ -2,13 +2,13 @@
   "name": "backend",
   "version": "2.0.0",
   "description": "backend",
-  "main": "dist/server.js",
+  "main": "server.js",
   "type": "module",
   "author": "Megitsune",
   "license": "ISC",
   "scripts": {
     "start": "node .",
-    "build": "npm i && tsc && tsc-alias",
+    "build": "tsc && tsc-alias",
     "dev": "tsx watch src/server.ts",
     "update": "ncu -u && npm install"
   },

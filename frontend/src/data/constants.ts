@@ -77,7 +77,7 @@ export const projects: Project[] = [
     },
     links: {
       repository: 'https://github.com/Megitsune14/Zone-Debrid',
-      app: 'https://megitsune.xyz/zone-debrid'
+      app: 'https://zone-debrid.megitsune.xyz'
     },
     icon: 'fas fa-download'
   },
