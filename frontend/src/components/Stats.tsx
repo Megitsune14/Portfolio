@@ -103,8 +103,8 @@ const Stats = () => {
     }
 
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+        <div className="space-y-4 flex-1 lg:max-w-[85%]">
           <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
             <span className="text-gray">Status</span>
             <span className="text-vert">{spotifyData.isPlaying ? 'Now Playing' : 'Paused'}</span>
@@ -133,7 +133,7 @@ const Stats = () => {
         </div>
         
         {spotifyData.image && (
-          <div className="flex justify-center lg:justify-end">
+          <div className="flex justify-center lg:justify-end flex-shrink-0">
             <img 
               src={spotifyData.image} 
               alt={spotifyData.album}
