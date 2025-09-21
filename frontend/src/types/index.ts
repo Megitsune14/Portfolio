@@ -19,6 +19,7 @@ export interface SpotifyResponse {
   isPlaying?: boolean;
   authenticated?: boolean;
   message?: string;
+  trackId?: string;
 }
 
 // Riot API Types

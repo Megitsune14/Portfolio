@@ -10,8 +10,6 @@ const Stats = () => {
   const { 
     data: riotData, 
     isLoading: riotLoading, 
-    lastUpdate, 
-    nextUpdate,
     formatTier,
     formatWinRate,
     formatWinLoss,
@@ -42,7 +40,8 @@ const Stats = () => {
   }, []);
 
   const renderSpotifyStats = () => {
-    if (spotifyLoading) {
+    // Afficher le loading seulement si on n'a pas de données ET qu'on est en train de charger
+    if (spotifyLoading && !spotifyData) {
       return (
         <div className="space-y-4">
           <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
@@ -149,7 +148,7 @@ const Stats = () => {
     if (riotLoading) {
       return (
         <div className="space-y-4">
-          {['Status', 'Summoner Level', 'Rank', 'LP', 'Win/Loss', 'Win Rate', 'Top Champion', 'Mastery Points'].map((label, index) => (
+          {['Summoner Level', 'Rank', 'LP', 'Win/Loss', 'Win Rate', 'Top Champion', 'Mastery Points'].map((label, index) => (
             <div key={index} className="flex justify-between items-center p-4 glass-effect rounded-2xl">
               <span className="text-gray">{label}</span>
               <span className="text-jinx animate-pulse">Loading...</span>
@@ -163,10 +162,6 @@ const Stats = () => {
       return (
         <div className="space-y-4">
           <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-            <span className="text-gray">Status</span>
-            <span className="text-red-500">Connection Error</span>
-          </div>
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
             <span className="text-gray">Summoner Level</span>
             <span className="text-red-500">Unable to fetch data</span>
           </div>
@@ -176,11 +171,6 @@ const Stats = () => {
 
     return (
       <div className="space-y-4">
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-          <span className="text-gray">Status</span>
-          <span className="text-vert">Connected</span>
-        </div>
-        
         <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
           <span className="text-gray">Summoner Level</span>
           <span className="text-light">{riotData.summonerLevel || 'N/A'}</span>
@@ -219,16 +209,6 @@ const Stats = () => {
               : 'N/A'
             }
           </span>
-        </div>
-        
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-          <span className="text-gray">Last Update</span>
-          <span className="text-light">{lastUpdate ? lastUpdate.toLocaleString() : 'Never'}</span>
-        </div>
-        
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-          <span className="text-gray">Next Update</span>
-          <span className="text-light">{nextUpdate ? nextUpdate.toLocaleString() : 'Calculating...'}</span>
         </div>
       </div>
     );
