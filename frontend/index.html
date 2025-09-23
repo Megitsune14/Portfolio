@@ -1,11 +1,143 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
+    <!-- Basic Meta Tags -->
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/src/assets/images/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    
+    <!-- Primary Meta Tags -->
     <title>Megitsune - Portfolio</title>
+    <meta name="title" content="Megitsune - Portfolio" />
+    <meta name="description" content="Megitsune's portfolio - Full stack developer passionate about modern web development. Discover my React, Node.js, TypeScript projects and Spotify & League of Legends integrations." />
+    <meta name="keywords" content="Megitsune, portfolio, developer, full stack, React, Node.js, TypeScript, JavaScript, web development, Spotify API, League of Legends, Riot Games, Jinx bot, Discord bot, Zone-Debrid" />
+    <meta name="author" content="Megitsune" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://megitsune.xyz" />
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/png" href="/src/assets/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/src/assets/images/favicon.png" />
+    <link rel="shortcut icon" href="/src/assets/images/favicon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://megitsune.xyz" />
+    <meta property="og:title" content="Megitsune - Portfolio" />
+    <meta property="og:description" content="Megitsune's portfolio - Full stack developer passionate about modern web development. Discover my React, Node.js, TypeScript projects and Spotify & League of Legends integrations." />
+    <meta property="og:image" content="https://megitsune.xyz/src/assets/images/profil_picture.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Megitsune - Full Stack Developer" />
+    <meta property="og:site_name" content="Megitsune Portfolio" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://megitsune.xyz" />
+    <meta property="twitter:title" content="Megitsune - Portfolio" />
+    <meta property="twitter:description" content="Megitsune's portfolio - Full stack developer passionate about modern web development. Discover my React, Node.js, TypeScript projects and Spotify & League of Legends integrations." />
+    <meta property="twitter:image" content="https://megitsune.xyz/src/assets/images/profil_picture.png" />
+    <meta property="twitter:image:alt" content="Megitsune - Full Stack Developer" />
+    <meta property="twitter:creator" content="@Megitsune" />
+    <meta property="twitter:site" content="@Megitsune" />
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#9B5DF5" />
+    <meta name="msapplication-TileColor" content="#9B5DF5" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- Geo Tags -->
+    <meta name="geo.region" content="US" />
+    <meta name="geo.placename" content="Global" />
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    <link rel="preconnect" href="https://api.megitsune.xyz" />
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+    <link rel="dns-prefetch" href="//api.megitsune.xyz" />
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Structured Data - JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Megitsune",
+      "url": "https://megitsune.xyz",
+      "image": "https://megitsune.xyz/src/assets/images/profil_picture.png",
+      "description": "Passionate full stack developer, specialized in React, Node.js, TypeScript and API integrations",
+      "jobTitle": "Full Stack Developer",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Freelance"
+      },
+      "knowsAbout": [
+        "React",
+        "Node.js", 
+        "TypeScript",
+        "JavaScript",
+        "Web Development",
+        "API Integration",
+        "Spotify API",
+        "Riot Games API",
+        "Discord Bot Development"
+      ],
+      "sameAs": [
+        "https://github.com/Megitsune14",
+        "https://discord.gg/Q6yztF4rFG"
+      ],
+      "alumniOf": {
+        "@type": "EducationalOrganization",
+        "name": "Self-taught Developer"
+      }
+    }
+    </script>
+    
+    <!-- Website Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Megitsune Portfolio",
+      "url": "https://megitsune.xyz",
+      "description": "Professional portfolio of Megitsune, full stack developer",
+      "author": {
+        "@type": "Person",
+        "name": "Megitsune"
+      },
+      "inLanguage": "en",
+      "copyrightYear": "2025",
+      "genre": "Portfolio",
+      "keywords": "portfolio, developer, full stack, React, Node.js, TypeScript, web development"
+    }
+    </script>
+    
+    <!-- Project Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      "name": "Zone-Debrid",
+      "description": "Web application that optimizes downloads through intelligent webscraping of Zone Téléchargement with Alldebrid API integration",
+      "url": "https://zone-debrid.megitsune.xyz",
+      "author": {
+        "@type": "Person",
+        "name": "Megitsune"
+      },
+      "programmingLanguage": ["React", "TypeScript", "Node.js", "Express"],
+      "applicationCategory": "WebApplication"
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
