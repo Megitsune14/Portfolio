@@ -6,7 +6,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const UPDATE_INTERVAL = 10000; // 10 seconds
 const PROGRESS_UPDATE_INTERVAL = 1000; // 1 second for artificial progress
 
-export const useSpotifyStats = (userId?: string | null) => {
+export const useSpotifyStats = (userId?: string | null, onTrackChange?: () => void) => {
   const [data, setData] = useState<SpotifyResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -183,6 +183,10 @@ export const useSpotifyStats = (userId?: string | null) => {
               if (!isSameTrack) {
                 console.log('Track changed during initial load');
                 lastTrackIdRef.current = currentTrackId;
+                // Appeler le callback pour rafraîchir l'historique
+                if (onTrackChange) {
+                  onTrackChange();
+                }
               } else if (hasStatusChanged) {
                 console.log('Status changed during initial load');
               }
@@ -237,6 +241,10 @@ export const useSpotifyStats = (userId?: string | null) => {
           if (!isSameTrack) {
             console.log('New track detected, updating cache');
             lastTrackIdRef.current = currentTrackId;
+            // Appeler le callback pour rafraîchir l'historique
+            if (onTrackChange) {
+              onTrackChange();
+            }
           } else if (hasStatusChanged) {
             console.log('Status changed (play/pause), updating cache');
           }

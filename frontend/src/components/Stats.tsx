@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 import { useSpotifyStats } from '../hooks/useSpotifyStats';
+import { useSpotifyRecentlyPlayed } from '../hooks/useSpotifyRecentlyPlayed';
 import { useRiotStats } from '../hooks/useRiotStats';
 import riotLogo from '../assets/logos/riot-games.png';
 
 const Stats = () => {
   // Use a default user ID for now - in production this would come from authentication
   const spotifyUserId = localStorage.getItem('spotify_user_id') || '31tnhkxqxn5gwjigyqh5tatdq54q';
-  const { data: spotifyData, isLoading: spotifyLoading, formatTime } = useSpotifyStats(spotifyUserId);
+  const { data: recentlyPlayedData, isLoading: recentlyPlayedLoading, formatTimeAgo, refreshHistory } = useSpotifyRecentlyPlayed(spotifyUserId, 3);
+  const { data: spotifyData, isLoading: spotifyLoading, formatTime } = useSpotifyStats(spotifyUserId, refreshHistory);
   const { 
     data: riotData, 
     isLoading: riotLoading, 
@@ -38,6 +40,66 @@ const Stats = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
+
+  const renderRecentlyPlayed = () => {
+    if (recentlyPlayedLoading && !recentlyPlayedData) {
+      return (
+        <div className="space-y-3">
+          {[1, 2, 3].map((index) => (
+            <div key={index} className="flex items-center gap-4 p-3 glass-effect rounded-xl">
+              <div className="w-12 h-12 bg-gray-700 rounded-lg animate-pulse"></div>
+              <div className="flex-1">
+                <div className="h-4 bg-gray-700 rounded animate-pulse mb-2"></div>
+                <div className="h-3 bg-gray-700 rounded animate-pulse w-2/3"></div>
+              </div>
+              <div className="h-3 bg-gray-700 rounded animate-pulse w-12"></div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (!recentlyPlayedData || !recentlyPlayedData.authenticated) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-gray">No recently played tracks available</p>
+        </div>
+      );
+    }
+
+    if (!recentlyPlayedData.tracks || recentlyPlayedData.tracks.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-gray">No recently played tracks found</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {recentlyPlayedData.tracks.map((track, index) => (
+          <div key={`${track.name}-${track.artist}-${index}`} className="flex items-center gap-4 p-3 glass-effect rounded-xl hover:bg-white/5 transition-colors duration-200">
+            {track.image && (
+              <img 
+                src={track.image} 
+                alt={track.album}
+                className="w-12 h-12 object-cover rounded-lg shadow-lg"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-light truncate">{track.name}</div>
+              <div className="text-sm text-gray truncate">by {track.artist}</div>
+            </div>
+            {track.playedAt && (
+              <div className="text-xs text-gray-400 whitespace-nowrap">
+                {formatTimeAgo(track.playedAt)}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   const renderSpotifyStats = () => {
     // Afficher le loading seulement si on n'a pas de données ET qu'on est en train de charger
@@ -102,44 +164,58 @@ const Stats = () => {
     }
 
     return (
-      <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-        <div className="space-y-4 flex-1 lg:max-w-[85%]">
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-            <span className="text-gray">Status</span>
-            <span className="text-vert">{spotifyData.isPlaying ? 'Now Playing' : 'Paused'}</span>
-          </div>
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-            <span className="text-gray">Currently Playing</span>
-            <div className="text-right max-w-[60%]">
-              <div className="font-semibold text-light">{spotifyData.name}</div>
-              <div className="text-sm text-gray">by {spotifyData.artist}</div>
+      <div className="space-y-6">
+        {/* Currently Playing Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+          <div className="space-y-4 flex-1 lg:max-w-[85%]">
+            <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+              <span className="text-gray">Status</span>
+              <span className="text-vert">{spotifyData.isPlaying ? 'Now Playing' : 'Paused'}</span>
             </div>
+            <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+              <span className="text-gray">Currently Playing</span>
+              <div className="text-right max-w-[60%]">
+                <div className="font-semibold text-light">{spotifyData.name}</div>
+                <div className="text-sm text-gray">by {spotifyData.artist}</div>
+              </div>
+            </div>
+            {spotifyData.progress && spotifyData.duration && (
+              <div className="p-4 glass-effect rounded-2xl">
+                <div className="bg-gray-800 h-1 rounded-full overflow-hidden mb-2">
+                  <div 
+                    className="bg-vert h-full transition-all duration-300"
+                    style={{ width: `${(spotifyData.progress / spotifyData.duration) * 100}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray">
+                  <span>{formatTime(spotifyData.progress)}</span>
+                  <span>{formatTime(spotifyData.duration)}</span>
+                </div>
+              </div>
+            )}
           </div>
-          {spotifyData.progress && spotifyData.duration && (
-            <div className="p-4 glass-effect rounded-2xl">
-              <div className="bg-gray-800 h-1 rounded-full overflow-hidden mb-2">
-                <div 
-                  className="bg-vert h-full transition-all duration-300"
-                  style={{ width: `${(spotifyData.progress / spotifyData.duration) * 100}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-xs text-gray">
-                <span>{formatTime(spotifyData.progress)}</span>
-                <span>{formatTime(spotifyData.duration)}</span>
-              </div>
+          
+          {spotifyData.image && (
+            <div className="flex justify-center lg:justify-end flex-shrink-0">
+              <img 
+                src={spotifyData.image} 
+                alt={spotifyData.album}
+                className="w-40 h-40 sm:w-48 sm:h-48 lg:w-56 lg:h-56 object-cover rounded-2xl shadow-2xl hover:scale-105 transition-transform duration-300"
+              />
             </div>
           )}
         </div>
-        
-        {spotifyData.image && (
-          <div className="flex justify-center lg:justify-end flex-shrink-0">
-            <img 
-              src={spotifyData.image} 
-              alt={spotifyData.album}
-              className="w-40 h-40 sm:w-48 sm:h-48 lg:w-56 lg:h-56 object-cover rounded-2xl shadow-2xl hover:scale-105 transition-transform duration-300"
-            />
+
+        {/* Recently Played Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-spotify/20 rounded-lg flex items-center justify-center">
+              <i className="fas fa-history text-spotify text-sm"></i>
+            </div>
+            <h4 className="text-lg font-semibold text-light">Recently Played</h4>
           </div>
-        )}
+          {renderRecentlyPlayed()}
+        </div>
       </div>
     );
   };

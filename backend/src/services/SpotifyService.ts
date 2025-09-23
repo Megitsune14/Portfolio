@@ -193,6 +193,63 @@ export async function checkAuthStatus(userId: string, clientId: string, clientSe
   }
 }
 
+// Get recently played tracks
+export async function getRecentlyPlayed(userId: string, clientId: string, clientSecret: string, redirectUri: string, limit: number = 3): Promise<{ tracks: SpotifyTrack[]; authenticated: boolean; message?: string }> {
+  try {
+    // Try to refresh token if needed
+    const accessToken = await refreshUserTokenIfNeeded(userId, clientId, clientSecret, redirectUri);
+    
+    if (!accessToken) {
+      return {
+        tracks: [],
+        authenticated: false,
+        message: 'User not authenticated. Please login to Spotify.'
+      };
+    }
+
+    const api = initializeSpotifyApi(clientId, clientSecret, redirectUri);
+    api.setAccessToken(accessToken);
+    const recentlyPlayedData = await api.getMyRecentlyPlayedTracks({ limit });
+
+    if (recentlyPlayedData.body && recentlyPlayedData.body.items) {
+      const tracks: SpotifyTrack[] = recentlyPlayedData.body.items.map((item: any) => {
+        const track = item.track;
+        
+        // Type guard to ensure it's a track, not an episode
+        if ('artists' in track && 'album' in track && track.artists && track.artists.length > 0) {
+          return {
+            name: track.name,
+            artist: track.artists[0]!.name,
+            album: track.album.name,
+            isPlaying: false, // Recently played tracks are not currently playing
+            progress: 0,
+            duration: track.duration_ms,
+            image: track.album.images[0]?.url,
+            externalUrl: track.external_urls.spotify,
+            playedAt: item.played_at // Add timestamp when the track was played
+          } as SpotifyTrack & { playedAt: string };
+        }
+        return null;
+      }).filter((track): track is SpotifyTrack & { playedAt: string } => track !== null);
+
+      return {
+        tracks,
+        authenticated: true
+      };
+    }
+    
+    return {
+      tracks: [],
+      authenticated: true,
+      message: 'No recently played tracks found'
+    };
+
+  } catch (error) {
+    console.error('Recently Played API Error:', error instanceof Error ? error.message : 'Unknown error');
+    throw new Error(`Failed to fetch recently played tracks: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 // Logout user
 export function logoutUser(userId: string): { success: boolean; message: string } {
   userTokens.delete(userId);

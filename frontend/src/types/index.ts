@@ -7,6 +7,7 @@ export interface SpotifyTrack {
   progress: number;
   duration: number;
   isPlaying: boolean;
+  playedAt?: string; // For recently played tracks
 }
 
 export interface SpotifyResponse {
@@ -20,6 +21,12 @@ export interface SpotifyResponse {
   authenticated?: boolean;
   message?: string;
   trackId?: string;
+}
+
+export interface SpotifyRecentlyPlayedResponse {
+  tracks: SpotifyTrack[];
+  authenticated: boolean;
+  message?: string;
 }
 
 // Riot API Types

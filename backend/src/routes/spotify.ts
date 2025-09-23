@@ -10,6 +10,7 @@ spotifyRouter.get('/auth/callback', SpotifyController.handleSpotifyCallback);
 
 // Spotify API Routes
 spotifyRouter.get('/currently-playing/:userId', SpotifyController.getSpotifyCurrentlyPlaying);
+spotifyRouter.get('/recently-played/:userId', SpotifyController.getSpotifyRecentlyPlayed);
 spotifyRouter.get('/auth/status/:userId', SpotifyController.checkSpotifyAuthStatus);
 spotifyRouter.get('/auth/logout/:userId', SpotifyController.logoutSpotifyUser);
 

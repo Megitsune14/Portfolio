@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { generateAuthUrl, exchangeCodeForTokens, getCurrentlyPlaying, checkAuthStatus, logoutUser, setUserToken, mapUserIds, getSpotifyUserId } from '../services/SpotifyService.js';
+import { generateAuthUrl, exchangeCodeForTokens, getCurrentlyPlaying, getRecentlyPlayed, checkAuthStatus, logoutUser, setUserToken, mapUserIds, getSpotifyUserId } from '../services/SpotifyService.js';
 import type { ApiResponse } from '../../types/index.js';
 
 // Generate Spotify authorization URL
@@ -145,6 +145,45 @@ export async function checkSpotifyAuthStatus(c: Context): Promise<Response> {
     return c.json({
       success: false,
       error: 'Error checking authentication status',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    } as ApiResponse, 500);
+  }
+}
+
+// Get recently played tracks
+export async function getSpotifyRecentlyPlayed(c: Context): Promise<Response> {
+  try {
+    const frontendUserId = c.req.param('userId');
+    const limit = parseInt(c.req.query('limit') || '3');
+    
+    if (!frontendUserId) {
+      return c.json({
+        success: false,
+        error: 'User ID is required',
+        message: 'Please provide a valid user ID'
+      } as ApiResponse, 400);
+    }
+
+    // Get the actual Spotify user ID
+    const spotifyUserId = getSpotifyUserId(frontendUserId) || frontendUserId;
+
+    const result = await getRecentlyPlayed(
+      spotifyUserId,
+      process.env.SPOTIFY_CLIENT_ID!,
+      process.env.SPOTIFY_CLIENT_SECRET!,
+      `${process.env.BACKEND_URL}${process.env.REDIRECT_ENDPOINT}`,
+      limit
+    );
+    
+    return c.json({
+      success: true,
+      data: result
+    } as ApiResponse);
+  } catch (error) {
+    console.error('Recently Played API Error:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to fetch recently played tracks',
       message: error instanceof Error ? error.message : 'Unknown error'
     } as ApiResponse, 500);
   }

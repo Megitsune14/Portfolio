@@ -8,6 +8,7 @@ export interface SpotifyTrack {
   duration: number;
   image?: string | undefined;
   externalUrl?: string;
+  playedAt?: string; // For recently played tracks
 }
 
 export interface SpotifyUserToken {
@@ -20,6 +21,12 @@ export interface SpotifyAuthResponse {
   isPlaying: boolean;
   message?: string;
   authenticated?: boolean;
+}
+
+export interface SpotifyRecentlyPlayedResponse {
+  tracks: SpotifyTrack[];
+  authenticated: boolean;
+  message?: string;
 }
 
 // Riot Games Types
