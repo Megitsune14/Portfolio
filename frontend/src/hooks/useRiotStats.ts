@@ -31,9 +31,9 @@ export const useRiotStats = () => {
     }
   }, []);
 
-  const formatTier = useCallback((tier: string): string => {
+  const formatTier = useCallback((tier: string, division: string): string => {
     if (!tier) return 'Unranked';
-    return tier.charAt(0).toUpperCase() + tier.slice(1);
+    return tier.slice(0, 1).toUpperCase() + tier.slice(1).toLowerCase() + ' ' + division;
   }, []);
 
   const formatWinRate = useCallback((winRate: string): string => {

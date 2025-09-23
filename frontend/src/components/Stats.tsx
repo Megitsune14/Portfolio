@@ -1,14 +1,18 @@
 import { useEffect } from 'react';
 import { useSpotifyStats } from '../hooks/useSpotifyStats';
-import { useSpotifyRecentlyPlayed } from '../hooks/useSpotifyRecentlyPlayed';
 import { useRiotStats } from '../hooks/useRiotStats';
 import riotLogo from '../assets/logos/riot-games.png';
 
 const Stats = () => {
   // Use a default user ID for now - in production this would come from authentication
   const spotifyUserId = localStorage.getItem('spotify_user_id') || '31tnhkxqxn5gwjigyqh5tatdq54q';
-  const { data: recentlyPlayedData, isLoading: recentlyPlayedLoading, formatTimeAgo, refreshHistory } = useSpotifyRecentlyPlayed(spotifyUserId, 3);
-  const { data: spotifyData, isLoading: spotifyLoading, formatTime } = useSpotifyStats(spotifyUserId, refreshHistory);
+  const { 
+    data: spotifyData, 
+    recentlyPlayed, 
+    isLoading: spotifyLoading, 
+    isLoadingRecentlyPlayed,
+    formatTime 
+  } = useSpotifyStats(spotifyUserId);
   const { 
     data: riotData, 
     isLoading: riotLoading, 
@@ -41,8 +45,19 @@ const Stats = () => {
     }
   }, []);
 
+  const formatPlayedAt = (playedAt: string): string => {
+    const date = new Date(playedAt);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return `${Math.floor(diffInMinutes / 1440)}d ago`;
+  };
+
   const renderRecentlyPlayed = () => {
-    if (recentlyPlayedLoading && !recentlyPlayedData) {
+    if (isLoadingRecentlyPlayed) {
       return (
         <div className="space-y-3">
           {[1, 2, 3].map((index) => (
@@ -52,49 +67,59 @@ const Stats = () => {
                 <div className="h-4 bg-gray-700 rounded animate-pulse mb-2"></div>
                 <div className="h-3 bg-gray-700 rounded animate-pulse w-2/3"></div>
               </div>
-              <div className="h-3 bg-gray-700 rounded animate-pulse w-12"></div>
+              <div className="h-3 bg-gray-700 rounded animate-pulse w-16"></div>
             </div>
           ))}
         </div>
       );
     }
 
-    if (!recentlyPlayedData || !recentlyPlayedData.authenticated) {
+    if (!recentlyPlayed || !recentlyPlayed.authenticated) {
       return (
         <div className="text-center py-8">
-          <p className="text-gray">No recently played tracks available</p>
+          <div className="text-gray-500 mb-2">
+            <i className="fas fa-music text-2xl"></i>
+          </div>
+          <p className="text-gray-400">No recently played tracks</p>
         </div>
       );
     }
 
-    if (!recentlyPlayedData.tracks || recentlyPlayedData.tracks.length === 0) {
+    if (!recentlyPlayed.tracks || recentlyPlayed.tracks.length === 0) {
       return (
         <div className="text-center py-8">
-          <p className="text-gray">No recently played tracks found</p>
+          <div className="text-gray-500 mb-2">
+            <i className="fas fa-history text-2xl"></i>
+          </div>
+          <p className="text-gray-400">No recently played tracks found</p>
         </div>
       );
     }
 
     return (
       <div className="space-y-3">
-        {recentlyPlayedData.tracks.map((track, index) => (
+        {recentlyPlayed.tracks.map((track, index) => (
           <div key={`${track.name}-${track.artist}-${index}`} className="flex items-center gap-4 p-3 glass-effect rounded-xl hover:bg-white/5 transition-colors duration-200">
-            {track.image && (
-              <img 
-                src={track.image} 
-                alt={track.album}
-                className="w-12 h-12 object-cover rounded-lg shadow-lg"
-              />
-            )}
+            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+              {track.image ? (
+                <img 
+                  src={track.image} 
+                  alt={track.album}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                  <i className="fas fa-music text-gray-500"></i>
+                </div>
+              )}
+            </div>
             <div className="flex-1 min-w-0">
               <div className="font-medium text-light truncate">{track.name}</div>
               <div className="text-sm text-gray truncate">by {track.artist}</div>
             </div>
-            {track.playedAt && (
-              <div className="text-xs text-gray-400 whitespace-nowrap">
-                {formatTimeAgo(track.playedAt)}
-              </div>
-            )}
+            <div className="text-xs text-gray-400 flex-shrink-0">
+              {track.playedAt ? formatPlayedAt(track.playedAt) : 'Unknown'}
+            </div>
           </div>
         ))}
       </div>
@@ -254,7 +279,7 @@ const Stats = () => {
         
         <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
           <span className="text-gray">Rank</span>
-          <span className="text-light">{riotData.rank ? formatTier(riotData.rank.tier) : 'Unranked'}</span>
+          <span className="text-light">{riotData.rank ? formatTier(riotData.rank.tier, riotData.rank.division) : 'Unranked'}</span>
         </div>
         
         <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
@@ -264,12 +289,7 @@ const Stats = () => {
         
         <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
           <span className="text-gray">Win/Loss</span>
-          <span className="text-light">{riotData.rank ? formatWinLoss(riotData.rank.wins, riotData.rank.losses) : 'N/A'}</span>
-        </div>
-        
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-          <span className="text-gray">Win Rate</span>
-          <span className="text-light">{riotData.rank ? formatWinRate(riotData.rank.winRate) : 'N/A'}</span>
+          <span className="text-light">{riotData.rank ? formatWinLoss(riotData.rank.wins, riotData.rank.losses) : 'N/A'} ({riotData.rank ? formatWinRate(riotData.rank.winRate) : 'N/A'})</span>
         </div>
         
         <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
