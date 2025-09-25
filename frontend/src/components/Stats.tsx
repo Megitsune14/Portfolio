@@ -126,7 +126,7 @@ const Stats = () => {
     );
   };
 
-  const renderSpotifyStats = () => {
+  const renderCurrentlyPlaying = () => {
     // Afficher le loading seulement si on n'a pas de données ET qu'on est en train de charger
     if (spotifyLoading && !spotifyData) {
       return (
@@ -230,8 +230,17 @@ const Stats = () => {
             </div>
           )}
         </div>
+      </div>
+    );
+  };
 
-        {/* Recently Played Section */}
+  const renderSpotifyStats = () => {
+    return (
+      <div className="space-y-6">
+        {/* Currently Playing Section */}
+        {renderCurrentlyPlaying()}
+
+        {/* Recently Played Section - Always visible */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-spotify/20 rounded-lg flex items-center justify-center">

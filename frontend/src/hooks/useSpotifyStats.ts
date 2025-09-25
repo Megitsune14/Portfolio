@@ -5,6 +5,7 @@ import { spotifyCache } from '../utils/cache';
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const UPDATE_INTERVAL = 10000; // 10 seconds
 const PROGRESS_UPDATE_INTERVAL = 1000; // 1 second for artificial progress
+const RECENTLY_PLAYED_UPDATE_INTERVAL = 60 * 60 * 1000; // 1 hour for recently played
 
 export const useSpotifyStats = (userId?: string | null) => {
     const [data, setData] = useState<SpotifyResponse | null>(null);
@@ -15,6 +16,7 @@ export const useSpotifyStats = (userId?: string | null) => {
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const endTrackTimerRef = useRef<NodeJS.Timeout | null>(null);
     const recentlyPlayedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const recentlyPlayedIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const lastTrackIdRef = useRef<string | null>(null);
 
     // Fonction utilitaire pour comparer les données Spotify
@@ -103,6 +105,14 @@ export const useSpotifyStats = (userId?: string | null) => {
         }
     }, []);
 
+    // Nettoyer l'intervalle des recently played
+    const clearRecentlyPlayedInterval = useCallback(() => {
+        if (recentlyPlayedIntervalRef.current) {
+            clearInterval(recentlyPlayedIntervalRef.current);
+            recentlyPlayedIntervalRef.current = null;
+        }
+    }, []);
+
     // Fonction pour mettre à jour les recently played avec délai
     const updateRecentlyPlayedWithDelay = useCallback((delay: number = 2000) => {
         clearRecentlyPlayedTimeout();
@@ -114,6 +124,19 @@ export const useSpotifyStats = (userId?: string | null) => {
             });
         }, delay);
     }, [fetchRecentlyPlayed, clearRecentlyPlayedTimeout]);
+
+    // Fonction pour démarrer l'intervalle de mise à jour des recently played
+    const startRecentlyPlayedInterval = useCallback(() => {
+        clearRecentlyPlayedInterval();
+        recentlyPlayedIntervalRef.current = setInterval(() => {
+            console.log('Auto-updating recently played (hourly)');
+            fetchRecentlyPlayed(3).then(recentData => {
+                if (recentData) {
+                    setRecentlyPlayed(recentData);
+                }
+            });
+        }, RECENTLY_PLAYED_UPDATE_INTERVAL);
+    }, [fetchRecentlyPlayed, clearRecentlyPlayedInterval]);
 
     // Fonction pour mettre à jour la progression artificiellement
     const updateProgress = useCallback(() => {
@@ -333,6 +356,7 @@ export const useSpotifyStats = (userId?: string | null) => {
             setRecentlyPlayed(null);
             setIsLoading(false);
             stopProgressTimer();
+            clearRecentlyPlayedInterval();
             return;
         }
 
@@ -342,6 +366,9 @@ export const useSpotifyStats = (userId?: string | null) => {
         // Initial fetch of recently played avec un délai pour éviter les conflits
         updateRecentlyPlayedWithDelay(1000);
 
+        // Démarrer l'intervalle de mise à jour des recently played (toutes les heures)
+        startRecentlyPlayedInterval();
+
         // Set up interval for updates
         const interval = setInterval(() => updateStats(false), UPDATE_INTERVAL);
 
@@ -349,16 +376,18 @@ export const useSpotifyStats = (userId?: string | null) => {
             clearInterval(interval);
             stopProgressTimer();
             clearRecentlyPlayedTimeout();
+            clearRecentlyPlayedInterval();
         };
-    }, [updateStats, updateRecentlyPlayedWithDelay, userId, stopProgressTimer, clearRecentlyPlayedTimeout]);
+    }, [updateStats, updateRecentlyPlayedWithDelay, startRecentlyPlayedInterval, userId, stopProgressTimer, clearRecentlyPlayedTimeout, clearRecentlyPlayedInterval]);
 
     // Nettoyer les timers quand le composant se démonte
     useEffect(() => {
         return () => {
             stopProgressTimer();
             clearRecentlyPlayedTimeout();
+            clearRecentlyPlayedInterval();
         };
-    }, [stopProgressTimer, clearRecentlyPlayedTimeout]);
+    }, [stopProgressTimer, clearRecentlyPlayedTimeout, clearRecentlyPlayedInterval]);
 
     return {
         data,
