@@ -55,7 +55,11 @@ export interface RiotResponse {
   summonerLevel: number;
   rank?: RiotRank;
   icon?: string;
-  topMastery: RiotMastery;
+  topMastery: {
+    champions: RiotMastery[];
+    totalLevel: number;
+    totalPoints: number;
+  };
 }
 
 // Social Media Types

@@ -241,9 +241,11 @@ export async function getSummonerInfo(gameName: string, tag: string, apiKey: str
     }
     
     // 5. Récupérer le top champion mastery
-    const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=1`;
+    const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=3`;
     const masteryEntries: RiotChampionMastery[] = await makeRiotRequest(masteryUrl);
     const topMastery = masteryEntries[0];
+
+    console.log('mastery :', masteryEntries);
     
     // 6. Récupérer le nom du champion et la version Data Dragon
     const [championData, version] = await Promise.all([
@@ -264,11 +266,15 @@ export async function getSummonerInfo(gameName: string, tag: string, apiKey: str
       rank: rankData,
       icon: iconUrl,
       topMastery: {
-        championId: topMastery.championId.toString(),
-        championName,
-        masteryLevel: topMastery.championLevel,
-        masteryPoints: topMastery.championPoints,
-      },
+        champions: masteryEntries.map(entry => ({
+          championId: entry.championId.toString(),
+          championName: championData[entry.championId.toString()] || `Champion ${entry.championId}`,
+          masteryLevel: entry.championLevel,
+          masteryPoints: entry.championPoints,
+        })),
+        totalLevel: masteryEntries.reduce((acc, entry) => acc + entry.championLevel, 0),
+        totalPoints: masteryEntries.reduce((acc, entry) => acc + entry.championPoints, 0),
+      }
     };
   } catch (error) {
     console.error('Riot API Error:', error);

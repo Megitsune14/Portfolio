@@ -63,9 +63,12 @@ export interface RiotResponse {
   summonerLevel: number;
   rank?: RiotRank | undefined;
   icon?: string;
-  topMastery: RiotMastery;
+  topMastery: {
+    champions: RiotMastery[];
+    totalLevel: number;
+    totalPoints: number;
+  };
 }
-
 
 // API Response Types
 export interface ApiResponse<T = any> {

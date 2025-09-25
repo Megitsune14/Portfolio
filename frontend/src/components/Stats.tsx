@@ -258,12 +258,48 @@ const Stats = () => {
     if (riotLoading) {
       return (
         <div className="space-y-4">
-          {['Summoner Level', 'Rank', 'LP', 'Win/Loss', 'Win Rate', 'Top Champion', 'Mastery Points'].map((label, index) => (
+          {['Summoner Level', 'Rank', 'LP', 'Win/Loss', 'Win Rate'].map((label, index) => (
             <div key={index} className="flex justify-between items-center p-4 glass-effect rounded-2xl">
               <span className="text-gray">{label}</span>
               <span className="text-jinx animate-pulse">Loading...</span>
             </div>
           ))}
+          {/* Loading for Top 3 Champions */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
+                <i className="fas fa-trophy text-red-400 text-sm"></i>
+              </div>
+              <h4 className="text-lg font-semibold text-light">Top 3 Champions</h4>
+            </div>
+            
+            {/* Loading for totals */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-3 glass-effect rounded-xl">
+                <div className="h-3 bg-gray-700 rounded animate-pulse mb-2 w-16"></div>
+                <div className="h-5 bg-gray-700 rounded animate-pulse w-12"></div>
+              </div>
+              <div className="p-3 glass-effect rounded-xl">
+                <div className="h-3 bg-gray-700 rounded animate-pulse mb-2 w-20"></div>
+                <div className="h-5 bg-gray-700 rounded animate-pulse w-16"></div>
+              </div>
+            </div>
+            {[1, 2, 3].map((index) => (
+              <div key={index} className="flex items-center justify-between p-3 glass-effect rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gray-700 rounded-lg animate-pulse"></div>
+                  <div>
+                    <div className="h-4 bg-gray-700 rounded animate-pulse mb-2 w-24"></div>
+                    <div className="h-3 bg-gray-700 rounded animate-pulse w-16"></div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="h-4 bg-gray-700 rounded animate-pulse mb-1 w-16"></div>
+                  <div className="h-3 bg-gray-700 rounded animate-pulse w-12"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       );
     }
@@ -301,19 +337,51 @@ const Stats = () => {
           <span className="text-light">{riotData.rank ? formatWinLoss(riotData.rank.wins, riotData.rank.losses) : 'N/A'} ({riotData.rank ? formatWinRate(riotData.rank.winRate) : 'N/A'})</span>
         </div>
         
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-          <span className="text-gray">Top Champion</span>
-          <span className="text-light">{riotData.topMastery?.championName || 'N/A'}</span>
-        </div>
-        
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-          <span className="text-gray">Mastery Points</span>
-          <span className="text-light">
-            {riotData.topMastery ? 
-              `${riotData.topMastery.masteryPoints?.toLocaleString() || 'N/A'} pts (Level ${riotData.topMastery.masteryLevel || 'N/A'})` 
-              : 'N/A'
-            }
-          </span>
+        {/* Top 3 Champions */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
+              <i className="fas fa-trophy text-red-400 text-sm"></i>
+            </div>
+            <h4 className="text-lg font-semibold text-light">Top 3 Champions</h4>
+          </div>
+          
+          {/* Totaux des Top 3 */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="p-3 glass-effect rounded-xl">
+              <div className="text-xs text-gray mb-1">Total Level</div>
+              <div className="text-lg font-semibold text-light">{riotData.topMastery?.totalLevel?.toLocaleString() || 'N/A'}</div>
+            </div>
+            <div className="p-3 glass-effect rounded-xl">
+              <div className="text-xs text-gray mb-1">Total Points</div>
+              <div className="text-lg font-semibold text-light">{riotData.topMastery?.totalPoints?.toLocaleString() || 'N/A'}</div>
+            </div>
+          </div>
+          
+          {riotData.topMastery?.champions?.map((champion, index) => (
+            <div key={champion.championId} className="flex items-center justify-between p-3 glass-effect rounded-xl hover:bg-white/5 transition-colors duration-200">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
+                  <span className="text-red-400 font-bold text-sm">#{index + 1}</span>
+                </div>
+                <div>
+                  <div className="font-medium text-light">{champion.championName}</div>
+                  <div className="text-sm text-gray">Level {champion.masteryLevel}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-light font-semibold">{champion.masteryPoints.toLocaleString()}</div>
+                <div className="text-xs text-gray">points</div>
+              </div>
+            </div>
+          )) || (
+            <div className="text-center py-4">
+              <div className="text-gray-500 mb-2">
+                <i className="fas fa-exclamation-triangle text-xl"></i>
+              </div>
+              <p className="text-gray-400">No mastery data available</p>
+            </div>
+          )}
         </div>
       </div>
     );
