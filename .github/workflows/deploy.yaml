@@ -21,7 +21,7 @@ jobs:
       - name: Sync the application with the server
         run: |
           rsync -avz ./compose.yaml ${{ secrets.REMOTE_HOST }}:./portfolio
-          rsync -avz ./apps/backend/ ${{ secrets.REMOTE_HOST }}:./portfolio/backend
+          rsync -avz ./backend/ ${{ secrets.REMOTE_HOST }}:./portfolio/backend
         shell: bash
 
       - name: Build and restart Docker app on remote host
