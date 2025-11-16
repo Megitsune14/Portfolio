@@ -11,6 +11,6 @@ FROM node:alpine
 WORKDIR /app
 COPY --from=build /app/dist .
 COPY --from=build /app/package.json /app/package-lock.json .
-RUN npm ci
+RUN npm install
 
 CMD ["npm", "run", "start"]
