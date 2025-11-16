@@ -56,7 +56,6 @@ try {
 
     // Start server
     const port = process.env.PORT;
-    const hostname = '127.0.0.1';
 
     console.log('🚀 Starting API...');
     console.log(`🎮 Riot API: ${process.env.RIOT_API_KEY ? `Configured (${process.env.RIOT_API_KEY.substring(0, 8)}...)` : 'Not configured'}`);
@@ -65,8 +64,7 @@ try {
 
     serve({
         fetch: app.fetch,
-        port: parseInt(port),
-        hostname
+        port: parseInt(port)
     }, (info) => {
         console.log(`🚀 Server running on http://${info.address}:${info.port}`);
     });
