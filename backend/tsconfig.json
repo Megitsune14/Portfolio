@@ -13,12 +13,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"outDir": "dist",
 		"rootDir": "src",
-		"ignoreDeprecations": "5.0",
-		"typeRoots": ["types", "node_modules/@types"],
-		"baseUrl": "./src",
-		"paths": {
-			"@/*": ["*"]
-		}
+		"typeRoots": ["types", "node_modules/@types"]
 	},
 	"tsc-alias": {
 		"resolveFullPaths": true
