@@ -18,7 +18,10 @@
 		"start": "npm-run-all --parallel start:backend start:frontend:wait",
 		"start:frontend:wait": "npm-run-all --sequential wait-backend start:frontend",
 		"start:frontend": "cd frontend && npm run preview",
-		"start:backend": "cd backend && npm run start"
+		"start:backend": "cd backend && npm run start",
+		"update": "npm-run-all --parallel update:backend update:frontend",
+		"update:frontend": "cd frontend && npm run update",
+		"update:backend": "cd backend && npm run update"
 	},
 	"devDependencies": {
 		"wait-on": "^7.2.0",

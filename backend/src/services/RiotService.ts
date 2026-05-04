@@ -244,9 +244,7 @@ export async function getSummonerInfo(gameName: string, tag: string, apiKey: str
     const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=3`;
     const masteryEntries: RiotChampionMastery[] = await makeRiotRequest(masteryUrl);
     const topMastery = masteryEntries[0];
-
-    console.log('mastery :', masteryEntries);
-    
+      
     // 6. Récupérer le nom du champion et la version Data Dragon
     const [championData, version] = await Promise.all([
       getChampionData(),
@@ -312,9 +310,6 @@ export async function testApiKey(apiKey: string): Promise<{ status: string; mess
         headers: { 'X-Riot-Token': apiKey }
       }
     );
-
-    console.log(`Test API URL: https://euw1.api.riotgames.com/lol/platform/v3/champion-rotations`);
-    console.log(`Test API Key: ${apiKey.substring(0, 8)}...`);
 
     if (testResponse.ok) {
       return {

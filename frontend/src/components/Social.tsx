@@ -1,6 +1,7 @@
 import { socialLinks } from '../data/constants';
 import battleNetLogo from '../assets/logos/battle-net.png';
 import riotLogo from '../assets/logos/riot-games.png';
+import epicGamesLogo from '../assets/logos/epic-games.png';
 
 const Social = () => {
   const getIcon = (icon: string) => {
@@ -10,32 +11,36 @@ const Social = () => {
     if (icon === 'riot') {
       return <img src={riotLogo} alt="Riot Games" className="w-8 h-8 object-contain" />;
     }
+    if (icon === 'epicgames') {
+      return <img src={epicGamesLogo} alt="Epic Games" className="w-8 h-8 object-contain" />;
+    }
     return <i className={`${icon} text-2xl`}></i>;
   };
 
   const getColorClasses = (color: string) => {
     const colorMap: { [key: string]: string } = {
-      discord: 'bg-discord/20 text-discord hover:border-discord hover:bg-discord/30',
-      github: 'bg-gray-800/20 text-gray-300 hover:border-gray-300 hover:bg-gray-800/30',
-      spotify: 'bg-spotify/20 text-spotify hover:border-spotify hover:bg-spotify/30',
-      battlenet: 'bg-battlenet/20 text-battlenet hover:border-battlenet hover:bg-battlenet/30',
-      riot: 'bg-red-500/20 text-red-400 hover:border-red-400 hover:bg-red-500/30',
-      tiktok: 'bg-pink-500/20 text-pink-400 hover:border-pink-400 hover:bg-pink-500/30',
-      twitch: 'bg-twitch/20 text-twitch hover:border-twitch hover:bg-twitch/30',
-      youtube: 'bg-red-600/20 text-red-400 hover:border-red-400 hover:bg-red-600/30',
-      mangacollec: 'bg-jinx/20 text-jinx hover:border-jinx hover:bg-jinx/30'
+      discord: 'bg-[#7289DA]/18 text-[#3853c8] dark:text-[#8ea1ff] border-[#7289DA]/35 hover:bg-[#7289DA]/26',
+      github: 'bg-zinc-500/18 text-zinc-700 dark:text-zinc-300 border-zinc-400/45 dark:border-zinc-300/35 hover:bg-zinc-500/26',
+      spotify: 'bg-[#1DB954]/18 text-[#0f8b3f] dark:text-[#48d07f] border-[#1DB954]/35 hover:bg-[#1DB954]/26',
+      battlenet: 'bg-[#0070D2]/18 text-[#0052a0] dark:text-[#4ca8ff] border-[#0070D2]/35 hover:bg-[#0070D2]/26',
+      riot: 'bg-red-500/18 text-red-600 dark:text-red-300 border-red-400/45 dark:border-red-300/35 hover:bg-red-500/26',
+      tiktok: 'bg-pink-500/18 text-pink-600 dark:text-pink-300 border-pink-400/45 dark:border-pink-300/35 hover:bg-pink-500/26',
+      twitch: 'bg-[#9146FF]/18 text-[#6f2fd0] dark:text-[#b48bff] border-[#9146FF]/35 hover:bg-[#9146FF]/26',
+      youtube: 'bg-red-600/18 text-red-600 dark:text-red-300 border-red-500/45 dark:border-red-300/35 hover:bg-red-600/26',
+      mangacollec: 'bg-[color-mix(in_oklch,var(--chart-3)_20%,transparent)] text-[color-mix(in_oklch,var(--chart-3)_68%,black)] dark:text-(--chart-3) border-[color-mix(in_oklch,var(--chart-3)_38%,transparent)] hover:bg-[color-mix(in_oklch,var(--chart-3)_30%,transparent)]',
+      epicgames: 'bg-slate-500/18 text-slate-700 dark:text-slate-200 border-slate-400/45 dark:border-slate-300/35 hover:bg-slate-500/26'
     };
-    return colorMap[color] || 'bg-white/10 text-light hover:border-light hover:bg-white/20';
+    return colorMap[color] || 'bg-white/10 text-foreground border-theme hover:bg-white/20';
   };
 
   return (
-    <section id="social" className="py-24 bg-darker">
-      <div className="max-w-6xl mx-auto px-8">
+    <section id="social" className="w-full px-4 py-12 sm:px-6 lg:px-10 xl:px-14">
+      <div className="w-full">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 gradient-text">My Social Networks</h2>
-          <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
+          <h2 className="font-jp text-4xl leading-[1.2] pb-1 font-bold gradient-text sm:text-5xl">My Social Networks</h2>
+          <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-[linear-gradient(135deg,var(--primary),var(--accent))]" />
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {socialLinks.map((link, index) => (
             <a
@@ -43,14 +48,14 @@ const Social = () => {
               href={link.url}
               target={link.url !== '#' ? "_blank" : undefined}
               rel={link.url !== '#' ? "noopener noreferrer" : undefined}
-              className={`group glass-effect rounded-3xl p-4 sm:p-6 flex items-center gap-4 sm:gap-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-jinx/20 ${getColorClasses(link.color)}`}
+              className={`focus-ring group flex items-center gap-4 rounded-3xl border p-4 shadow-(--shadow-card) backdrop-blur-md transition-all duration-300 hover:-translate-y-1 sm:gap-6 sm:p-6 ${getColorClasses(link.color)}`}
               title={link.url === '#' ? link.username : undefined}
             >
-              <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-current/30 bg-black/10 transition-transform duration-300 group-hover:scale-110 sm:h-16 sm:w-16">
                 {getIcon(link.icon)}
               </div>
               <div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-1">{link.name}</h3>
+                <h3 className="mb-1 text-lg font-semibold sm:text-xl">{link.name}</h3>
                 <p className="text-xs sm:text-sm opacity-70">{link.username}</p>
               </div>
             </a>

@@ -19,7 +19,7 @@ try {
 
     // Global middleware
     app.use('*', corsMiddleware);
-    app.use('*', loggerMiddleware);
+    // app.use('*', loggerMiddleware);
 
     // Error handler
     app.onError(errorHandler);

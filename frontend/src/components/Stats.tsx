@@ -61,7 +61,7 @@ const Stats = () => {
       return (
         <div className="space-y-3">
           {[1, 2, 3].map((index) => (
-            <div key={index} className="flex items-center gap-4 p-3 glass-effect rounded-xl">
+            <div key={index} className="flex items-center gap-4 rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
               <div className="w-12 h-12 bg-gray-700 rounded-lg animate-pulse"></div>
               <div className="flex-1">
                 <div className="h-4 bg-gray-700 rounded animate-pulse mb-2"></div>
@@ -99,8 +99,8 @@ const Stats = () => {
     return (
       <div className="space-y-3">
         {recentlyPlayed.tracks.map((track, index) => (
-          <div key={`${track.name}-${track.artist}-${index}`} className="flex items-center gap-4 p-3 glass-effect rounded-xl hover:bg-white/5 transition-colors duration-200">
-            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+          <div key={`${track.name}-${track.artist}-${index}`} className="flex items-center gap-4 rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md transition-colors duration-200 hover:bg-white/10">
+            <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0">
               {track.image ? (
                 <img 
                   src={track.image} 
@@ -114,10 +114,10 @@ const Stats = () => {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-light truncate">{track.name}</div>
-              <div className="text-sm text-gray truncate">by {track.artist}</div>
+              <div className="truncate font-medium text-foreground">{track.name}</div>
+              <div className="truncate text-sm text-muted">by {track.artist}</div>
             </div>
-            <div className="text-xs text-gray-400 flex-shrink-0">
+            <div className="text-xs text-gray-400 shrink-0">
               {track.playedAt ? formatPlayedAt(track.playedAt) : 'Unknown'}
             </div>
           </div>
@@ -131,13 +131,13 @@ const Stats = () => {
     if (spotifyLoading && !spotifyData) {
       return (
         <div className="space-y-4">
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Status</span>
-            <span className="text-jinx animate-pulse">Loading...</span>
+            <span className="animate-pulse text-(--primary)">Loading...</span>
           </div>
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Currently Playing</span>
-            <span className="text-jinx animate-pulse">Loading...</span>
+            <span className="animate-pulse text-(--primary)">Loading...</span>
           </div>
         </div>
       );
@@ -146,11 +146,11 @@ const Stats = () => {
     if (!spotifyData) {
       return (
         <div className="space-y-4">
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Status</span>
             <span className="text-red-500">Connection Error</span>
           </div>
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Currently Playing</span>
             <span className="text-red-500">Unable to fetch data</span>
           </div>
@@ -161,11 +161,11 @@ const Stats = () => {
     if (spotifyData.authenticated === false) {
       return (
         <div className="space-y-4">
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Status</span>
             <span className="text-yellow-500">Not Authenticated</span>
           </div>
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Currently Playing</span>
             <span className="text-gray">Megitsune is not authentificate</span>
           </div>
@@ -176,11 +176,11 @@ const Stats = () => {
     if (!spotifyData.isPlaying && spotifyData.message) {
       return (
         <div className="space-y-4">
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Status</span>
             <span className="text-gray">Not Playing</span>
           </div>
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Currently Playing</span>
             <span className="text-gray">{spotifyData.message}</span>
           </div>
@@ -193,19 +193,19 @@ const Stats = () => {
         {/* Currently Playing Section */}
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="space-y-4 flex-1 lg:max-w-[85%]">
-            <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+            <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
               <span className="text-gray">Status</span>
-              <span className="text-vert">{spotifyData.isPlaying ? 'Now Playing' : 'Paused'}</span>
+              <span className="text-emerald-600 dark:text-emerald-400">{spotifyData.isPlaying ? 'Now Playing' : 'Paused'}</span>
             </div>
-            <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+            <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
               <span className="text-gray">Currently Playing</span>
               <div className="text-right max-w-[60%]">
-                <div className="font-semibold text-light">{spotifyData.name}</div>
-                <div className="text-sm text-gray">by {spotifyData.artist}</div>
+                <div className="font-semibold text-foreground">{spotifyData.name}</div>
+                <div className="text-sm text-muted">by {spotifyData.artist}</div>
               </div>
             </div>
             {spotifyData.progress && spotifyData.duration && (
-              <div className="p-4 glass-effect rounded-2xl">
+              <div className="rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
                 <div className="bg-gray-800 h-1 rounded-full overflow-hidden mb-2">
                   <div 
                     className="bg-vert h-full transition-all duration-300"
@@ -221,7 +221,7 @@ const Stats = () => {
           </div>
           
           {spotifyData.image && (
-            <div className="flex justify-center lg:justify-end flex-shrink-0">
+            <div className="flex justify-center lg:justify-end shrink-0">
               <img 
                 src={spotifyData.image} 
                 alt={spotifyData.album}
@@ -246,7 +246,7 @@ const Stats = () => {
             <div className="w-8 h-8 bg-spotify/20 rounded-lg flex items-center justify-center">
               <i className="fas fa-history text-spotify text-sm"></i>
             </div>
-            <h4 className="text-lg font-semibold text-light">Recently Played</h4>
+            <h4 className="text-lg font-semibold text-foreground">Recently Played</h4>
           </div>
           {renderRecentlyPlayed()}
         </div>
@@ -259,9 +259,9 @@ const Stats = () => {
       return (
         <div className="space-y-4">
           {['Summoner Level', 'Rank', 'LP', 'Win/Loss', 'Win Rate'].map((label, index) => (
-            <div key={index} className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+            <div key={index} className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
               <span className="text-gray">{label}</span>
-              <span className="text-jinx animate-pulse">Loading...</span>
+              <span className="animate-pulse text-(--primary)">Loading...</span>
             </div>
           ))}
           {/* Loading for Top 3 Champions */}
@@ -270,22 +270,22 @@ const Stats = () => {
               <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
                 <i className="fas fa-trophy text-red-400 text-sm"></i>
               </div>
-              <h4 className="text-lg font-semibold text-light">Top 3 Champions</h4>
+              <h4 className="text-lg font-semibold text-foreground">Top 3 Champions</h4>
             </div>
             
             {/* Loading for totals */}
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 glass-effect rounded-xl">
+              <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
                 <div className="h-3 bg-gray-700 rounded animate-pulse mb-2 w-16"></div>
                 <div className="h-5 bg-gray-700 rounded animate-pulse w-12"></div>
               </div>
-              <div className="p-3 glass-effect rounded-xl">
+              <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
                 <div className="h-3 bg-gray-700 rounded animate-pulse mb-2 w-20"></div>
                 <div className="h-5 bg-gray-700 rounded animate-pulse w-16"></div>
               </div>
             </div>
             {[1, 2, 3].map((index) => (
-              <div key={index} className="flex items-center justify-between p-3 glass-effect rounded-xl">
+              <div key={index} className="flex items-center justify-between rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-gray-700 rounded-lg animate-pulse"></div>
                   <div>
@@ -307,7 +307,7 @@ const Stats = () => {
     if (!riotData) {
       return (
         <div className="space-y-4">
-          <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+          <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
             <span className="text-gray">Summoner Level</span>
             <span className="text-red-500">Unable to fetch data</span>
           </div>
@@ -315,27 +315,33 @@ const Stats = () => {
       );
     }
 
+    const rank = riotData.rank;
+
     return (
       <div className="space-y-4">
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+        <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
           <span className="text-gray">Summoner Level</span>
-          <span className="text-light">{riotData.summonerLevel || 'N/A'}</span>
+          <span className="text-foreground">{riotData.summonerLevel || 'N/A'}</span>
         </div>
         
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
+        <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
           <span className="text-gray">Rank</span>
-          <span className="text-light">{riotData.rank ? formatTier(riotData.rank.tier, riotData.rank.division) : 'Unranked'}</span>
+          <span className="text-foreground">{rank ? formatTier(rank.tier, rank.division) : 'Unranked'}</span>
         </div>
-        
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-          <span className="text-gray">LP</span>
-          <span className="text-light">{riotData.rank ? formatLP(riotData.rank.lp) : 'N/A'}</span>
-        </div>
-        
-        <div className="flex justify-between items-center p-4 glass-effect rounded-2xl">
-          <span className="text-gray">Win/Loss</span>
-          <span className="text-light">{riotData.rank ? formatWinLoss(riotData.rank.wins, riotData.rank.losses) : 'N/A'} ({riotData.rank ? formatWinRate(riotData.rank.winRate) : 'N/A'})</span>
-        </div>
+
+        {rank ? (
+          <>
+            <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
+              <span className="text-gray">LP</span>
+              <span className="text-foreground">{formatLP(rank.lp)}</span>
+            </div>
+
+            <div className="flex items-center justify-between rounded-2xl border border-theme bg-card/70 p-4 backdrop-blur-md">
+              <span className="text-gray">Win/Loss</span>
+              <span className="text-foreground">{formatWinLoss(rank.wins, rank.losses)} ({formatWinRate(rank.winRate)})</span>
+            </div>
+          </>
+        ) : null}
         
         {/* Top 3 Champions */}
         <div className="space-y-3">
@@ -343,35 +349,35 @@ const Stats = () => {
             <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
               <i className="fas fa-trophy text-red-400 text-sm"></i>
             </div>
-            <h4 className="text-lg font-semibold text-light">Top 3 Champions</h4>
+            <h4 className="text-lg font-semibold text-foreground">Top 3 Champions</h4>
           </div>
           
           {/* Totaux des Top 3 */}
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="p-3 glass-effect rounded-xl">
+            <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
               <div className="text-xs text-gray mb-1">Total Level</div>
-              <div className="text-lg font-semibold text-light">{riotData.topMastery?.totalLevel?.toLocaleString() || 'N/A'}</div>
+              <div className="text-lg font-semibold text-foreground">{riotData.topMastery?.totalLevel?.toLocaleString() || 'N/A'}</div>
             </div>
-            <div className="p-3 glass-effect rounded-xl">
+            <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
               <div className="text-xs text-gray mb-1">Total Points</div>
-              <div className="text-lg font-semibold text-light">{riotData.topMastery?.totalPoints?.toLocaleString() || 'N/A'}</div>
+              <div className="text-lg font-semibold text-foreground">{riotData.topMastery?.totalPoints?.toLocaleString() || 'N/A'}</div>
             </div>
           </div>
           
           {riotData.topMastery?.champions?.map((champion, index) => (
-            <div key={champion.championId} className="flex items-center justify-between p-3 glass-effect rounded-xl hover:bg-white/5 transition-colors duration-200">
+            <div key={champion.championId} className="flex items-center justify-between rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md transition-colors duration-200 hover:bg-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
                   <span className="text-red-400 font-bold text-sm">#{index + 1}</span>
                 </div>
                 <div>
-                  <div className="font-medium text-light">{champion.championName}</div>
-                  <div className="text-sm text-gray">Level {champion.masteryLevel}</div>
+                  <div className="font-medium text-foreground">{champion.championName}</div>
+                  <div className="text-sm text-muted">Level {champion.masteryLevel}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-light font-semibold">{champion.masteryPoints.toLocaleString()}</div>
-                <div className="text-xs text-gray">points</div>
+                <div className="font-semibold text-foreground">{champion.masteryPoints.toLocaleString()}</div>
+                <div className="text-xs text-muted">points</div>
               </div>
             </div>
           )) || (
@@ -388,37 +394,37 @@ const Stats = () => {
   };
 
   return (
-    <section id="stats" className="py-24 bg-dark">
-      <div className="max-w-6xl mx-auto px-8">
+    <section id="stats" className="w-full px-4 py-12 sm:px-6 lg:px-10 xl:px-14">
+      <div className="w-full">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 gradient-text">My Stats</h2>
-          <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
+          <h2 className="font-jp text-4xl leading-[1.2] pb-1 font-bold gradient-text sm:text-5xl">My Stats</h2>
+          <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-[linear-gradient(135deg,var(--primary),var(--accent))]" />
         </div>
         
         <div className="space-y-8">
           {/* Spotify Stats */}
-          <div className="glass-effect rounded-3xl p-8 hover-lift transition-all duration-300">
-            <div className="flex items-center gap-6 mb-8 pb-6 border-b border-white/10">
-              <div className="w-16 h-16 bg-spotify/20 rounded-2xl flex items-center justify-center">
-                <i className="fab fa-spotify text-3xl text-spotify"></i>
+          <div className="surface-panel p-8 transition-transform duration-300 hover:-translate-y-0.5">
+            <div className="mb-8 flex items-center gap-6 border-b border-theme pb-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[#1DB954]/35 bg-[#1DB954]/18">
+                <i className="fab fa-spotify text-3xl text-[#1DB954]"></i>
               </div>
-              <h3 className="text-2xl font-bold text-light">Spotify</h3>
+              <h3 className="text-2xl font-bold text-foreground">Spotify</h3>
             </div>
             {renderSpotifyStats()}
           </div>
           
           {/* League of Legends Stats */}
-          <div className="glass-effect rounded-3xl p-8 hover-lift transition-all duration-300">
-            <div className="flex items-center gap-6 mb-8 pb-6 border-b border-white/10">
-              <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center">
+          <div className="surface-panel p-8 transition-transform duration-300 hover:-translate-y-0.5">
+            <div className="mb-8 flex items-center gap-6 border-b border-theme pb-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-red-400/30 bg-red-500/16">
                 <img src={riotLogo} alt="Riot Games" className="w-8 h-8 object-contain" />
               </div>
-              <h3 className="text-2xl font-bold text-light">League of Legends</h3>
+              <h3 className="text-2xl font-bold text-foreground">League of Legends</h3>
               {riotData?.icon && (
                 <img 
                   src={riotData.icon} 
                   alt="Summoner Icon" 
-                  className="w-20 h-20 rounded-lg border-2 border-jinx/30 hover:border-jinx transition-colors duration-300 ml-auto"
+                  className="ml-auto h-20 w-20 rounded-lg border-2 border-[color-mix(in_oklch,var(--chart-3)_40%,transparent)] transition-colors duration-300 hover:border-(--chart-3)"
                 />
               )}
             </div>

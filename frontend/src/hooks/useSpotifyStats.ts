@@ -13,10 +13,10 @@ export const useSpotifyStats = (userId?: string | null) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingRecentlyPlayed, setIsLoadingRecentlyPlayed] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-    const endTrackTimerRef = useRef<NodeJS.Timeout | null>(null);
-    const recentlyPlayedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const recentlyPlayedIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const endTrackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const recentlyPlayedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const recentlyPlayedIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const lastTrackIdRef = useRef<string | null>(null);
 
     // Fonction utilitaire pour comparer les données Spotify

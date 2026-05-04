@@ -1,60 +1,161 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../tailwind.config.js";
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@import "@fontsource/shippori-mincho/400.css";
+@import "@fontsource/shippori-mincho/700.css";
+
+@theme {
+  --font-sans: "Geist Variable", Geist, ui-sans-serif, system-ui, sans-serif;
+  --font-jp: "Shippori Mincho", "Times New Roman", serif;
+  --font-heading: var(--font-jp);
+}
+
+:root {
+  --background: oklch(0.95 0.03 295);
+  --foreground: oklch(0.28 0.07 288);
+  --card: oklch(0.985 0.015 292 / 0.9);
+  --popover: oklch(0.99 0.012 292 / 0.94);
+  --primary: oklch(0.62 0.21 27);
+  --primary-foreground: oklch(0.985 0.01 42);
+  --secondary: oklch(0.9 0.03 289 / 0.72);
+  --secondary-foreground: oklch(0.32 0.08 288);
+  --muted: oklch(0.9 0.025 289 / 0.62);
+  --muted-foreground: oklch(0.55 0.05 285);
+  --accent: oklch(0.88 0.11 78);
+  --accent-foreground: oklch(0.26 0.03 45);
+  --border: oklch(0.74 0.09 78 / 0.28);
+  --input: oklch(0.97 0.014 292 / 0.92);
+  --ring: oklch(0.62 0.21 27 / 0.62);
+  --chart-1: oklch(0.62 0.21 27);
+  --chart-2: oklch(0.88 0.11 78);
+  --chart-3: oklch(0.72 0.16 298);
+  --chart-4: oklch(0.64 0.14 286);
+  --chart-5: oklch(0.78 0.12 310);
+
+  --shadow-card: 0 0 0 1px oklch(0.74 0.09 78 / 0.3), 0 16px 34px -18px oklch(0.42 0.09 292 / 0.34), 0 0 35px -20px oklch(0.62 0.21 27 / 0.25);
+  --shadow-panel: 0 0 0 1px oklch(0.72 0.08 78 / 0.24), 0 20px 38px -20px oklch(0.44 0.1 291 / 0.28), 0 0 44px -28px oklch(0.62 0.21 27 / 0.24);
+  --shadow-nav: 0 0 0 1px oklch(0.74 0.09 78 / 0.24), 0 10px 24px -14px oklch(0.45 0.09 290 / 0.34);
+  --shadow-footer: 0 -1px 0 oklch(0.74 0.09 78 / 0.24), 0 -10px 22px -18px oklch(0.48 0.08 290 / 0.32);
+  --shadow-popover: 0 0 0 1px oklch(0.74 0.09 78 / 0.26), 0 18px 42px -24px oklch(0.4 0.09 293 / 0.42);
+}
+
+.dark {
+  --background: oklch(0.09 0.08 292);
+  --foreground: oklch(0.94 0.02 72);
+  --card: oklch(0.16 0.08 288 / 0.82);
+  --popover: oklch(0.17 0.08 289 / 0.9);
+  --primary: oklch(0.58 0.2 27);
+  --primary-foreground: oklch(0.97 0.01 45);
+  --secondary: oklch(0.2 0.08 289 / 0.7);
+  --secondary-foreground: oklch(0.9 0.02 72);
+  --muted: oklch(0.2 0.08 288 / 0.58);
+  --muted-foreground: oklch(0.74 0.03 285);
+  --accent: oklch(0.84 0.12 78);
+  --accent-foreground: oklch(0.2 0.03 40);
+  --border: oklch(0.72 0.1 78 / 0.22);
+  --input: oklch(0.16 0.07 289 / 0.84);
+  --ring: oklch(0.58 0.2 27 / 0.72);
+  --chart-1: oklch(0.58 0.2 27);
+  --chart-2: oklch(0.84 0.12 78);
+  --chart-3: oklch(0.56 0.16 303);
+  --chart-4: oklch(0.48 0.14 285);
+  --chart-5: oklch(0.62 0.15 292);
+
+  --shadow-card: 0 0 0 1px oklch(0.72 0.1 78 / 0.18), 0 24px 80px -24px oklch(0.12 0.1 295 / 0.92), 0 0 60px -12px oklch(0.58 0.2 27 / 0.22);
+  --shadow-panel: 0 0 0 1px oklch(0.72 0.1 78 / 0.16), 0 26px 70px -20px oklch(0.11 0.11 295 / 0.9), 0 0 64px -20px oklch(0.58 0.2 27 / 0.26);
+  --shadow-nav: 0 0 0 1px oklch(0.72 0.1 78 / 0.16), 0 18px 40px -24px oklch(0.1 0.11 295 / 0.9);
+  --shadow-footer: 0 -1px 0 oklch(0.72 0.1 78 / 0.18), 0 -24px 56px -36px oklch(0.08 0.09 295 / 0.94);
+  --shadow-popover: 0 0 0 1px oklch(0.72 0.1 78 / 0.18), 0 26px 74px -24px oklch(0.08 0.12 295 / 0.95);
+}
 
 @layer base {
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
-    font-family: 'Inter', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: clip;
+    font-family: var(--font-sans);
     line-height: 1.6;
-    color: #ffffff;
-    background: #0a0a0a;
-    overflow-x: hidden;
+    color: var(--foreground);
+    background: var(--background);
   }
-  
-  h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
-    line-height: 1.2;
+
+  * {
+    border-color: var(--border);
   }
 }
 
 @layer components {
+  .app-shell {
+    @apply relative isolate min-h-screen w-full;
+    color: var(--foreground);
+    background: var(--background);
+  }
+
+  .app-backdrop {
+    @apply pointer-events-none fixed inset-0;
+  }
+
+  .surface-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    @apply rounded-3xl backdrop-blur-md;
+  }
+
+  .surface-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-panel);
+    @apply rounded-3xl backdrop-blur-md;
+  }
+
   .gradient-text {
-    @apply bg-gradient-to-r from-jinx to-violet bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--primary), var(--chart-3), var(--accent));
+    @apply bg-clip-text text-transparent;
   }
-  
-  .glass-effect {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+
+  .eyebrow {
+    @apply inline-flex items-center rounded-full px-4 py-1 text-sm font-semibold;
+    background: color-mix(in oklch, var(--primary) 18%, transparent);
+    border: 1px solid color-mix(in oklch, var(--primary) 32%, transparent);
+    color: color-mix(in oklch, var(--foreground) 88%, var(--primary));
   }
-  
-  .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl;
-  }
-  
-  .btn-primary {
-    @apply bg-gradient-primary text-light px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-jinx/30;
-  }
-  
-  .btn-secondary {
-    @apply bg-transparent text-light border-2 border-jinx px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:bg-jinx hover:-translate-y-1;
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    --tw-ring-color: var(--ring);
+    --tw-ring-offset-color: var(--background);
   }
 }
 
 @layer utilities {
-  .text-shadow {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  .font-jp {
+    font-family: var(--font-jp);
   }
-  
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+
+  .bg-background {
+    background: var(--background);
   }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+
+  .bg-card {
+    background: var(--card);
+  }
+
+  .text-foreground {
+    color: var(--foreground);
+  }
+
+  .text-muted {
+    color: var(--muted-foreground);
+  }
+
+  .border-theme {
+    border-color: var(--border);
   }
 }

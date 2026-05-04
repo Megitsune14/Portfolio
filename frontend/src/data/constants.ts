@@ -63,6 +63,13 @@ export const socialLinks: SocialLink[] = [
     url: 'https://www.mangacollec.com/user/megitsune14/collection',
     icon: 'fas fa-book',
     color: 'mangacollec'
+  },
+  {
+    name: 'Epic Games',
+    username: 'Megitsune14',
+    url: '#',
+    icon: 'epicgames',
+    color: 'epicgames'
   }
 ];
 

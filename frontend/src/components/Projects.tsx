@@ -2,118 +2,114 @@ import { projects } from '../data/constants';
 
 const Projects = () => {
   return (
-    <section id="projects" className="py-24 bg-dark">
-      <div className="max-w-6xl mx-auto px-8">
+    <section id="projects" className="w-full px-4 py-12 sm:px-6 lg:px-10 xl:px-14">
+      <div className="w-full">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 gradient-text">My Projects</h2>
-          <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
+          <h2 className="font-jp text-4xl leading-[1.2] pb-1 font-bold gradient-text sm:text-5xl">My Projects</h2>
+          <div className="mx-auto mt-4 h-1 w-24 rounded-full bg-[linear-gradient(135deg,var(--primary),var(--accent))]" />
         </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {projects.map((project, index) => (
-            <div 
+            <div
               key={index}
-              className="glass-effect rounded-3xl overflow-hidden hover-lift hover:border-jinx transition-all duration-300 flex flex-col"
+              className="surface-card flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1"
             >
-              {/* Project Image Placeholder */}
-              <div className="h-48 bg-darker flex items-center justify-center">
-                <i className={`${project.icon} text-5xl text-jinx`}></i>
+              <div className="relative flex h-48 items-center justify-center overflow-hidden bg-[color-mix(in_oklch,var(--secondary)_76%,transparent)]">
+                <div className="absolute inset-0 bg-[linear-gradient(140deg,color-mix(in_oklch,var(--primary)_12%,transparent),transparent,color-mix(in_oklch,var(--accent)_16%,transparent))]" />
+                <i className={`${project.icon} relative text-5xl text-(--primary)`} />
               </div>
-              
-              {/* Project Content */}
-              <div className="p-6 lg:p-8 flex flex-col flex-grow">
-                <h3 className="text-xl lg:text-2xl font-semibold text-light mb-4">{project.title}</h3>
-                <p className="text-gray mb-6 leading-relaxed text-sm lg:text-base">{project.description}</p>
-                
-                {/* Tech Stack */}
+
+              <div className="flex grow flex-col p-6 lg:p-8">
+                <h3 className="mb-4 text-xl font-semibold text-foreground lg:text-2xl">{project.title}</h3>
+                <p className="mb-6 text-sm leading-relaxed text-muted lg:text-base">{project.description}</p>
+
                 {project.techStack && (
                   <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-light mb-3">Tech Stack</h4>
-                     {project.techStack.backend && (
-                       <div className="mb-3">
-                         <h5 className="text-sm font-medium text-orange mb-2">
-                           {project.title === 'Jinx' ? 'Backend (Discord Bot)' : 'Backend'}
-                         </h5>
-                         <div className="flex flex-wrap gap-2">
-                           {project.techStack.backend.map((tech, techIndex) => (
-                             <span 
-                               key={techIndex}
-                               className="bg-gradient-to-r from-rouge to-orange text-light px-3 py-1 rounded-full text-xs font-medium"
-                             >
-                               {tech}
-                             </span>
-                           ))}
-                         </div>
-                       </div>
-                     )}
-                     {project.techStack.frontend && (
-                       <div>
-                         <h5 className="text-sm font-medium text-vert mb-2">
-                           {project.title === 'Jinx' ? 'Frontend (Website)' : 'Frontend'}
-                         </h5>
-                         <div className="flex flex-wrap gap-2">
-                           {project.techStack.frontend.map((tech, techIndex) => (
-                             <span 
-                               key={techIndex}
-                               className="bg-gradient-to-r from-vert to-jinx text-light px-3 py-1 rounded-full text-xs font-medium"
-                             >
-                               {tech}
-                             </span>
-                           ))}
-                         </div>
-                       </div>
-                     )}
+                    <h4 className="mb-3 text-lg font-semibold text-foreground">Tech Stack</h4>
+                    {project.techStack.backend && (
+                      <div className="mb-3">
+                        <h5 className="mb-2 text-sm font-medium text-(--primary)">
+                          {project.title === 'Jinx' ? 'Backend (Discord Bot)' : 'Backend'}
+                        </h5>
+                        <div className="flex flex-wrap gap-2">
+                          {project.techStack.backend.map((tech, techIndex) => (
+                            <span
+                              key={techIndex}
+                              className="rounded-full border border-[color-mix(in_oklch,var(--primary)_35%,transparent)] bg-[color-mix(in_oklch,var(--primary)_20%,transparent)] px-3 py-1 text-xs font-medium text-foreground"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {project.techStack.frontend && (
+                      <div>
+                        <h5 className="mb-2 text-sm font-medium text-(--chart-5)">
+                          {project.title === 'Jinx' ? 'Frontend (Website)' : 'Frontend'}
+                        </h5>
+                        <div className="flex flex-wrap gap-2">
+                          {project.techStack.frontend.map((tech, techIndex) => (
+                            <span
+                              key={techIndex}
+                              className="rounded-full border border-[color-mix(in_oklch,var(--chart-5)_36%,transparent)] bg-[color-mix(in_oklch,var(--chart-5)_20%,transparent)] px-3 py-1 text-xs font-medium text-foreground"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
-                
-                {/* Tags */}
+
                 {project.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.tags.map((tag, tagIndex) => (
-                      <span 
+                      <span
                         key={tagIndex}
-                        className="bg-gradient-secondary text-light px-3 py-1 rounded-full text-sm font-medium"
+                        className="rounded-full border border-[color-mix(in_oklch,var(--accent)_35%,transparent)] bg-[color-mix(in_oklch,var(--accent)_20%,transparent)] px-3 py-1 text-sm font-medium text-foreground"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
                 )}
-                
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3 lg:gap-4 justify-center mt-auto pt-6">
+
+                <div className="mt-auto flex flex-wrap justify-center gap-3 pt-6 lg:gap-4">
                   {project.links.repository && (
-                    <a 
+                    <a
                       href={project.links.repository}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-gradient-to-r from-jinx to-violet text-light px-4 lg:px-6 py-2 lg:py-3 rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-jinx/30 flex items-center gap-2 text-xs lg:text-sm"
+                      className="focus-ring flex items-center gap-2 rounded-full border border-[color-mix(in_oklch,var(--chart-3)_38%,transparent)] bg-[linear-gradient(135deg,color-mix(in_oklch,var(--chart-3)_30%,transparent),color-mix(in_oklch,var(--primary)_34%,transparent))] px-4 py-2 text-xs font-semibold text-foreground transition hover:-translate-y-0.5 lg:px-6 lg:py-3 lg:text-sm"
                     >
-                      <i className="fab fa-github"></i>
+                      <i className="fab fa-github" />
                       Repository
                     </a>
                   )}
-                  
+
                   {project.links.app && (
-                    <a 
+                    <a
                       href={project.links.app}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-gradient-to-r from-orange to-rouge text-light px-4 lg:px-6 py-2 lg:py-3 rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-orange/30 flex items-center gap-2 text-xs lg:text-sm"
+                      className="focus-ring flex items-center gap-2 rounded-full border border-[color-mix(in_oklch,var(--primary)_45%,transparent)] bg-[linear-gradient(135deg,color-mix(in_oklch,var(--primary)_34%,transparent),color-mix(in_oklch,var(--accent)_26%,transparent))] px-4 py-2 text-xs font-semibold text-foreground transition hover:-translate-y-0.5 lg:px-6 lg:py-3 lg:text-sm"
                     >
-                      <i className="fas fa-external-link-alt"></i>
+                      <i className="fas fa-external-link-alt" />
                       Use App
                     </a>
                   )}
-                  
+
                   {project.links.support && (
-                    <a 
+                    <a
                       href={project.links.support}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-discord/20 text-discord border-2 border-discord/30 px-4 lg:px-6 py-2 lg:py-3 rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-discord/30 hover:bg-discord/30 hover:border-discord flex items-center gap-2 text-xs lg:text-sm"
+                      className="focus-ring flex items-center gap-2 rounded-full border border-[color-mix(in_oklch,var(--chart-4)_42%,transparent)] bg-[color-mix(in_oklch,var(--chart-4)_22%,transparent)] px-4 py-2 text-xs font-semibold text-foreground transition hover:-translate-y-0.5 lg:px-6 lg:py-3 lg:text-sm"
                     >
-                      <i className="fab fa-discord"></i>
+                      <i className="fab fa-discord" />
                       Support
                     </a>
                   )}

@@ -8,11 +8,6 @@ export async function generateSpotifyAuthUrl(c: Context): Promise<Response> {
     const { state } = c.req.query();
     const redirectUri = `${process.env.BACKEND_URL}${process.env.REDIRECT_ENDPOINT}`;
     
-    console.log('Generating Spotify auth URL:');
-    console.log('- Client ID:', process.env.SPOTIFY_CLIENT_ID);
-    console.log('- Redirect URI:', redirectUri);
-    console.log('- State:', state);
-    
     const authUrl = generateAuthUrl(
       process.env.SPOTIFY_CLIENT_ID!,
       process.env.SPOTIFY_CLIENT_SECRET!,
@@ -20,7 +15,6 @@ export async function generateSpotifyAuthUrl(c: Context): Promise<Response> {
       state
     );
     
-    console.log('Generated auth URL:', authUrl);
     return c.redirect(authUrl);
   } catch (error) {
     console.error('Auth URL generation error:', error);
@@ -37,13 +31,6 @@ export async function handleSpotifyCallback(c: Context): Promise<Response> {
   try {
     const { code, error, state } = c.req.query();
     
-    // Debug logs
-    console.log('Spotify callback received:');
-    console.log('- code:', code);
-    console.log('- error:', error);
-    console.log('- state:', state);
-    console.log('- full URL:', c.req.url);
-
     if (error) {
       console.error('Spotify auth error:', error);
       return c.redirect(`${process.env.PROJECT_URL}/?error=auth_failed#stats`);
