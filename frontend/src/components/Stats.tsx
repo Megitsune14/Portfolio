@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useSpotifyStats } from '../hooks/useSpotifyStats';
 import { useRiotStats } from '../hooks/useRiotStats';
+import { useDiscordProfile } from '../hooks/useDiscordProfile';
 import riotLogo from '../assets/logos/riot-games.png';
 
 const Stats = () => {
@@ -21,6 +22,11 @@ const Stats = () => {
     formatWinLoss,
     formatLP
   } = useRiotStats();
+  const {
+    data: discordData,
+    isLoading: discordLoading,
+    error: discordError,
+  } = useDiscordProfile();
 
   // Handle URL parameters for OAuth callback
   useEffect(() => {
@@ -44,6 +50,105 @@ const Stats = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
+
+  const formatAccountCreated = (iso: string): string =>
+    new Date(iso).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+  const renderDiscordProfile = () => {
+    if (discordLoading && !discordData) {
+      return (
+        <div className="overflow-hidden rounded-2xl border border-theme">
+          <div className="h-36 animate-pulse bg-gray-700 sm:h-40" />
+          <div className="space-y-4 px-6 pb-6 pt-14">
+            <div className="h-6 w-48 animate-pulse rounded bg-gray-700" />
+            <div className="h-4 w-32 animate-pulse rounded bg-gray-700" />
+            <div className="flex flex-wrap gap-2">
+              <div className="h-7 w-20 animate-pulse rounded-full bg-gray-700" />
+              <div className="h-7 w-24 animate-pulse rounded-full bg-gray-700" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (discordError || !discordData) {
+      return (
+        <div className="rounded-2xl border border-theme bg-card/70 px-6 py-8 text-center backdrop-blur-md">
+          <p className="text-muted">{discordError ?? 'Discord profile unavailable'}</p>
+        </div>
+      );
+    }
+
+    const d = discordData;
+
+    return (
+      <div className="overflow-hidden rounded-2xl border border-theme">
+        <div className="relative h-36 sm:h-40">
+          {d.bannerUrl ? (
+            <img src={d.bannerUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div
+              className="h-full w-full bg-[color-mix(in_oklch,var(--secondary)_72%,transparent)]"
+              style={
+                d.accentColor
+                  ? { backgroundColor: d.accentColor }
+                  : undefined
+              }
+            />
+          )}
+          <div className="absolute -bottom-14 left-6 sm:-bottom-16 sm:left-8">
+            <img
+              src={d.avatarUrl}
+              alt={d.displayName}
+              className="h-28 w-28 rounded-full border-4 border-card object-cover shadow-(--shadow-card) sm:h-36 sm:w-36"
+            />
+          </div>
+        </div>
+
+        <div className="border-t border-theme px-6 pb-6 pt-16 sm:pt-20">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-2xl font-bold text-foreground">{d.displayName}</p>
+              <p className="text-sm text-muted">{d.handle}</p>
+            </div>
+          </div>
+
+          <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
+            <div className="rounded-xl border border-theme bg-card/70 px-4 py-3 backdrop-blur-md">
+              <dt className="text-muted">Account created</dt>
+              <dd className="font-semibold text-foreground">{formatAccountCreated(d.accountCreatedAt)}</dd>
+            </div>
+            <div className="rounded-xl border border-theme bg-card/70 px-4 py-3 backdrop-blur-md">
+              <dt className="text-muted">Server tag</dt>
+              <dd className="font-semibold text-foreground">
+                {d.primaryGuildTag ?? '—'}
+              </dd>
+            </div>
+          </dl>
+
+          {d.badges.length > 0 ? (
+            <div className="mt-6">
+              <p className="mb-2 text-sm font-medium text-muted">Badges</p>
+              <div className="flex flex-wrap gap-2">
+                {d.badges.map((badge) => (
+                  <span
+                    key={badge.id}
+                    className="rounded-full border border-[color-mix(in_oklch,var(--primary)_35%,transparent)] bg-[color-mix(in_oklch,var(--primary)_14%,transparent)] px-3 py-1 text-xs font-medium text-foreground"
+                  >
+                    {badge.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  };
 
   const formatPlayedAt = (playedAt: string): string => {
     const date = new Date(playedAt);
@@ -402,6 +507,17 @@ const Stats = () => {
         </div>
         
         <div className="space-y-8">
+          {/* Discord Profile */}
+          <div className="surface-panel p-8 transition-transform duration-300 hover:-translate-y-0.5">
+            <div className="mb-8 flex items-center gap-6 border-b border-theme pb-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[#5865F2]/35 bg-[#5865F2]/18">
+                <i className="fab fa-discord text-3xl text-[#5865F2]" />
+              </div>
+              <h3 className="text-2xl font-bold text-foreground">Discord</h3>
+            </div>
+            {renderDiscordProfile()}
+          </div>
+
           {/* Spotify Stats */}
           <div className="surface-panel p-8 transition-transform duration-300 hover:-translate-y-0.5">
             <div className="mb-8 flex items-center gap-6 border-b border-theme pb-6">

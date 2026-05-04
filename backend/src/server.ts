@@ -10,6 +10,7 @@ import 'dotenv/config';
 // Routes
 import spotifyRouter from './routes/spotify.js';
 import riotRouter from './routes/riot.js';
+import discordRouter from './routes/discord.js';
 import healthRouter from './routes/health.js';
 
 try {
@@ -30,6 +31,7 @@ try {
     // API routes
     app.route('/spotify', spotifyRouter);
     app.route('/riot', riotRouter);
+    app.route('/discord', discordRouter);
 
     // Root route
     app.get('/', (c) => {
@@ -40,7 +42,8 @@ try {
             endpoints: {
                 health: '/health',
                 spotify: '/spotify',
-                riot: '/riot'
+                riot: '/riot',
+                discord: '/discord'
             }
         });
     });
@@ -60,6 +63,7 @@ try {
     console.log('🚀 Starting API...');
     console.log(`🎮 Riot API: ${process.env.RIOT_API_KEY ? `Configured (${process.env.RIOT_API_KEY.substring(0, 8)}...)` : 'Not configured'}`);
     console.log(`🎵 Spotify API: ${process.env.SPOTIFY_CLIENT_ID ? 'Configured' : 'Not configured'}`);
+    console.log(`💬 Discord API: ${process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_USER_ID ? 'Configured' : 'Not configured'}`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 
     serve({

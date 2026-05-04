@@ -70,6 +70,29 @@ export interface RiotResponse {
   };
 }
 
+// Discord (Bot API — GET /users/:id)
+export interface DiscordProfileBadge {
+  id: string;
+  label: string;
+}
+
+export interface DiscordProfileResponse {
+  id: string;
+  displayName: string;
+  username: string;
+  discriminator: string;
+  handle: string;
+  avatarUrl: string;
+  bannerUrl: string | null;
+  accentColor: string | null;
+  accountCreatedAt: string;
+  premiumType: 'none' | 'nitro_classic' | 'nitro' | 'nitro_basic';
+  premiumLabel: string;
+  badges: DiscordProfileBadge[];
+  avatarDecorationAsset: string | null;
+  primaryGuildTag: string | null;
+}
+
 // API Response Types
 export interface ApiResponse<T = any> {
   success: boolean;
