@@ -33,7 +33,7 @@ function AppContent() {
       <div className="app-backdrop -z-40 bg-background" aria-hidden />
 
       <div
-        className="app-backdrop -z-30 hidden dark:block"
+        className="app-backdrop pointer-events-none -z-30 hidden dark:block"
         aria-hidden
         style={{
           background:
@@ -41,7 +41,7 @@ function AppContent() {
         }}
       />
       <div
-        className="app-backdrop -z-20 hidden opacity-90 dark:block"
+        className="app-backdrop pointer-events-none -z-20 hidden opacity-90 dark:block"
         aria-hidden
         style={{
           background:
@@ -49,7 +49,7 @@ function AppContent() {
         }}
       />
       <div
-        className="app-backdrop -z-10 hidden opacity-40 mix-blend-soft-light dark:block"
+        className="app-backdrop pointer-events-none -z-10 hidden opacity-40 mix-blend-soft-light dark:block"
         aria-hidden
         style={{
           backgroundImage:
@@ -57,7 +57,7 @@ function AppContent() {
         }}
       />
       <div
-        className="app-backdrop -z-10 hidden dark:block"
+        className="app-backdrop pointer-events-none -z-10 hidden dark:block"
         aria-hidden
         style={{
           background:
@@ -66,7 +66,7 @@ function AppContent() {
       />
 
       <div
-        className="app-backdrop -z-30 dark:hidden"
+        className="app-backdrop pointer-events-none -z-30 dark:hidden"
         aria-hidden
         style={{
           background:
@@ -74,7 +74,7 @@ function AppContent() {
         }}
       />
       <div
-        className="app-backdrop -z-20 opacity-85 dark:hidden"
+        className="app-backdrop pointer-events-none -z-20 opacity-85 dark:hidden"
         aria-hidden
         style={{
           background:
@@ -82,7 +82,7 @@ function AppContent() {
         }}
       />
       <div
-        className="app-backdrop -z-10 opacity-25 dark:hidden"
+        className="app-backdrop pointer-events-none -z-10 opacity-25 dark:hidden"
         aria-hidden
         style={{
           backgroundImage:
@@ -90,7 +90,7 @@ function AppContent() {
         }}
       />
       <div
-        className="app-backdrop -z-10 dark:hidden"
+        className="app-backdrop pointer-events-none -z-10 dark:hidden"
         aria-hidden
         style={{
           background:
