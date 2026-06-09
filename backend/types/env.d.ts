@@ -24,7 +24,7 @@ declare global {
 			// Nexus Dashboard
 			NEXUS_MASTER_PASSWORD: string;
 
-			// MongoDB (database name in URL path, e.g. mongodb://localhost:27017/portfolio)
+			// MongoDB
 			MONGODB_URL: string;
 
 			// Server
