@@ -62,7 +62,7 @@ const Stats = () => {
     if (discordLoading && !discordData) {
       return (
         <div className="overflow-hidden rounded-2xl border border-theme">
-          <div className="h-28 w-full animate-pulse bg-gray-700 sm:h-32" />
+          <div className="h-[255px] animate-pulse bg-gray-700" />
           <div className="space-y-4 px-6 pb-6 pt-14">
             <div className="h-6 w-48 animate-pulse rounded bg-gray-700" />
             <div className="h-4 w-32 animate-pulse rounded bg-gray-700" />
@@ -87,14 +87,18 @@ const Stats = () => {
 
     return (
       <div className="overflow-hidden rounded-2xl border border-theme">
-        <div
-          className="relative h-28 w-full overflow-hidden sm:h-32"
-          style={d.accentColor && !d.bannerUrl ? { backgroundColor: d.accentColor } : undefined}
-        >
+        <div className="relative h-[255px]">
           {d.bannerUrl ? (
-            <img src={d.bannerUrl} alt="" className="h-full w-full object-contain object-center" />
+            <img src={d.bannerUrl} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="h-full w-full bg-[color-mix(in_oklch,var(--secondary)_72%,transparent)]" />
+            <div
+              className="h-full w-full bg-[color-mix(in_oklch,var(--secondary)_72%,transparent)]"
+              style={
+                d.accentColor
+                  ? { backgroundColor: d.accentColor }
+                  : undefined
+              }
+            />
           )}
           <div className="absolute -bottom-14 left-6 sm:-bottom-16 sm:left-8">
             <img
