@@ -12,8 +12,12 @@ import spotifyRouter from './routes/spotify.js';
 import riotRouter from './routes/riot.js';
 import discordRouter from './routes/discord.js';
 import healthRouter from './routes/health.js';
+import nexusRouter from './routes/nexus.js';
+import { connectMongo } from './db/mongodb.js';
 
 try {
+
+    await connectMongo();
 
     // Create Hono app
     const app = new Hono();
@@ -32,6 +36,7 @@ try {
     app.route('/spotify', spotifyRouter);
     app.route('/riot', riotRouter);
     app.route('/discord', discordRouter);
+    app.route('/nexus', nexusRouter);
 
     // Root route
     app.get('/', (c) => {
@@ -43,7 +48,8 @@ try {
                 health: '/health',
                 spotify: '/spotify',
                 riot: '/riot',
-                discord: '/discord'
+                discord: '/discord',
+                nexus: '/nexus'
             }
         });
     });
@@ -64,6 +70,8 @@ try {
     console.log(`🎮 Riot API: ${process.env.RIOT_API_KEY ? `Configured (${process.env.RIOT_API_KEY.substring(0, 8)}...)` : 'Not configured'}`);
     console.log(`🎵 Spotify API: ${process.env.SPOTIFY_CLIENT_ID ? 'Configured' : 'Not configured'}`);
     console.log(`💬 Discord API: ${process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_USER_ID ? 'Configured' : 'Not configured'}`);
+    console.log(`🔐 Nexus: ${process.env.NEXUS_MASTER_PASSWORD ? 'Configured' : 'Not configured'}`);
+    console.log(`🍃 MongoDB: ${process.env.MONGODB_URL ? 'Configured' : 'Not configured'}`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 
     serve({
