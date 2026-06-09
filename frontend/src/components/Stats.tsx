@@ -62,7 +62,7 @@ const Stats = () => {
     if (discordLoading && !discordData) {
       return (
         <div className="overflow-hidden rounded-2xl border border-theme">
-          <div className="aspect-5/2 w-full animate-pulse bg-gray-700" />
+          <div className="h-36 animate-pulse bg-gray-700 sm:h-40" />
           <div className="space-y-4 px-6 pb-6 pt-14">
             <div className="h-6 w-48 animate-pulse rounded bg-gray-700" />
             <div className="h-4 w-32 animate-pulse rounded bg-gray-700" />
@@ -87,19 +87,13 @@ const Stats = () => {
 
     return (
       <div className="overflow-hidden rounded-2xl border border-theme">
-        <div className="relative w-full">
+        <div
+          className="relative h-36 w-full overflow-hidden bg-[color-mix(in_oklch,var(--secondary)_72%,transparent)] sm:h-40"
+          style={d.accentColor ? { backgroundColor: d.accentColor } : undefined}
+        >
           {d.bannerUrl ? (
-            <img src={d.bannerUrl} alt="" className="block w-full h-auto" />
-          ) : (
-            <div
-              className="aspect-5/2 w-full bg-[color-mix(in_oklch,var(--secondary)_72%,transparent)]"
-              style={
-                d.accentColor
-                  ? { backgroundColor: d.accentColor }
-                  : undefined
-              }
-            />
-          )}
+            <img src={d.bannerUrl} alt="" className="h-full w-full object-contain" />
+          ) : null}
           <div className="absolute -bottom-14 left-6 sm:-bottom-16 sm:left-8">
             <img
               src={d.avatarUrl}
