@@ -1,15 +1,31 @@
 services:
   portfolio-backend:
     build: ./backend
-    env_file:
-      - .env
     restart: unless-stopped
     volumes:
       - ./.env:/app/.env
     networks:
       - web
+      - portfolio
+    depends_on:
+      - database
+  database:
+    image: mongo
+    ports:
+      - 27018:27017
+    command:
+      - --auth
+    env_file:
+      - db.env
+    volumes:
+      - ./data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: unless-stopped
+    networks:
+      - portfolio
 
 networks:
+  portfolio:
   web:
     name: pangolin
     external: true
