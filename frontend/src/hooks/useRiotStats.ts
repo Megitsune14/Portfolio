@@ -53,9 +53,8 @@ export const useRiotStats = () => {
 
   const updateStats = useCallback(async () => {
     try {
-      setIsLoading(true);
       setError(null);
-      
+
       // Vérifier d'abord le cache
       const cachedData = riotCache.get();
       if (cachedData) {
@@ -95,11 +94,9 @@ export const useRiotStats = () => {
   }, [fetchRiotStats]);
 
   useEffect(() => {
-    // Initial fetch
-    updateStats();
+    void updateStats();
 
-    // Set up interval for updates
-    const interval = setInterval(updateStats, UPDATE_INTERVAL);
+    const interval = setInterval(() => void updateStats(), UPDATE_INTERVAL);
 
     return () => clearInterval(interval);
   }, [updateStats]);

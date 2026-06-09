@@ -18,6 +18,7 @@ export const useSpotifyStats = (userId?: string | null) => {
     const recentlyPlayedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const recentlyPlayedIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const lastTrackIdRef = useRef<string | null>(null);
+    const updateStatsRef = useRef<(isInitialLoad?: boolean) => Promise<void>>(() => Promise.resolve());
 
     // Fonction utilitaire pour comparer les données Spotify
     const areSpotifyDataEqual = useCallback((data1: SpotifyResponse | null, data2: SpotifyResponse | null): boolean => {
@@ -233,7 +234,7 @@ export const useSpotifyStats = (userId?: string | null) => {
                     // Programmer le timer si la musique est en cours
                     if (cachedData.isPlaying && cachedData.progress !== undefined && cachedData.duration !== undefined) {
                         startProgressTimer();
-                        scheduleEndTrackFetch(cachedData, updateStats);
+                        scheduleEndTrackFetch(cachedData, (flag) => updateStatsRef.current(flag));
                     }
 
                     // Récupérer les données fraîches en arrière-plan
@@ -261,7 +262,7 @@ export const useSpotifyStats = (userId?: string | null) => {
 
                             if (freshData.isPlaying && freshData.progress !== undefined && freshData.duration !== undefined) {
                                 startProgressTimer();
-                                scheduleEndTrackFetch(freshData, updateStats);
+                                scheduleEndTrackFetch(freshData, (flag) => updateStatsRef.current(flag));
                             }
                         }
                     }
@@ -329,7 +330,7 @@ export const useSpotifyStats = (userId?: string | null) => {
                     // Le timer partira de la progression réelle de Spotify et avancera seconde par seconde
                     startProgressTimer();
                     // Programmer un fetch automatique quand la musique va se terminer
-                    scheduleEndTrackFetch(freshData, updateStats);
+                    scheduleEndTrackFetch(freshData, (flag) => updateStatsRef.current(flag));
                 } else {
                     stopProgressTimer();
                 }
@@ -348,29 +349,31 @@ export const useSpotifyStats = (userId?: string | null) => {
                 setIsLoading(false);
             }
         }
-    }, [fetchCurrentlyPlaying, userId, startProgressTimer, stopProgressTimer, scheduleEndTrackFetch]);
+    }, [fetchCurrentlyPlaying, userId, startProgressTimer, stopProgressTimer, scheduleEndTrackFetch, areSpotifyDataEqual, updateRecentlyPlayedWithDelay]);
+
+    useEffect(() => {
+        updateStatsRef.current = updateStats;
+    }, [updateStats]);
 
     useEffect(() => {
         if (!userId) {
-            setData(null);
-            setRecentlyPlayed(null);
-            setIsLoading(false);
-            stopProgressTimer();
-            clearRecentlyPlayedInterval();
+            void Promise.resolve().then(() => {
+                setData(null);
+                setRecentlyPlayed(null);
+                setIsLoading(false);
+                stopProgressTimer();
+                clearRecentlyPlayedInterval();
+            });
             return;
         }
 
-        // Initial fetch
-        updateStats(true);
-        
-        // Initial fetch of recently played avec un délai pour éviter les conflits
+        void updateStats(true);
+
         updateRecentlyPlayedWithDelay(1000);
 
-        // Démarrer l'intervalle de mise à jour des recently played (toutes les heures)
         startRecentlyPlayedInterval();
 
-        // Set up interval for updates
-        const interval = setInterval(() => updateStats(false), UPDATE_INTERVAL);
+        const interval = setInterval(() => void updateStats(false), UPDATE_INTERVAL);
 
         return () => {
             clearInterval(interval);

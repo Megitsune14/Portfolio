@@ -7,7 +7,6 @@ export function useNexusAuth() {
   const [error, setError] = useState<string | null>(null);
 
   const verify = useCallback(async () => {
-    setIsLoading(true);
     const authenticated = await checkNexusAuth();
     setIsAuthenticated(authenticated);
     setIsLoading(false);
@@ -15,7 +14,7 @@ export function useNexusAuth() {
   }, []);
 
   useEffect(() => {
-    verify();
+    void verify();
   }, [verify]);
 
   const login = async (password: string) => {

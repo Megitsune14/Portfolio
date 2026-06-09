@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { GoalsPageLayout } from '../components/goals/GoalsPageLayout';
 import { StatusSelect } from '../components/goals/StatusSelect';
@@ -103,16 +103,22 @@ export default function NexusGoalsProfilePage() {
             <label className={labelClass} htmlFor="gender">
               Genre
             </label>
-            <StatusSelect
-              id="gender"
-              value={form.watch('gender')}
-              onChange={(value) => form.setValue('gender', value as ProfileForm['gender'])}
-              options={[
-                { value: 'Homme', label: 'Homme' },
-                { value: 'Femme', label: 'Femme' },
-                { value: 'MTF', label: 'MTF' },
-                { value: 'FTM', label: 'FTM' },
-              ]}
+            <Controller
+              name="gender"
+              control={form.control}
+              render={({ field }) => (
+                <StatusSelect
+                  id="gender"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={[
+                    { value: 'Homme', label: 'Homme' },
+                    { value: 'Femme', label: 'Femme' },
+                    { value: 'MTF', label: 'MTF' },
+                    { value: 'FTM', label: 'FTM' },
+                  ]}
+                />
+              )}
             />
           </div>
 

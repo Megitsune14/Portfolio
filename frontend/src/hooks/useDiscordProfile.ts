@@ -29,15 +29,14 @@ export const useDiscordProfile = () => {
   }, []);
 
   const load = useCallback(async () => {
-    setIsLoading(true);
     const profile = await fetchProfile();
     setData(profile);
     setIsLoading(false);
   }, [fetchProfile]);
 
   useEffect(() => {
-    load();
-    const interval = setInterval(load, UPDATE_INTERVAL);
+    void load();
+    const interval = setInterval(() => void load(), UPDATE_INTERVAL);
     return () => clearInterval(interval);
   }, [load]);
 

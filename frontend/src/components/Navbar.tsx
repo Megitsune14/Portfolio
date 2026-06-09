@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useTheme } from './theme-provider';
+import { useTheme } from '../hooks/use-theme';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

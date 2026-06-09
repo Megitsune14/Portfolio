@@ -30,7 +30,7 @@ const CACHE_CONFIG: CacheConfig = {
 };
 
 // Cache en mémoire
-const memoryCache = new Map<string, CacheItem<any>>();
+const memoryCache = new Map<string, CacheItem<unknown>>();
 
 /**
  * Récupère une valeur du cache si elle existe et n'est pas expirée
@@ -44,9 +44,9 @@ const get = <T>(key: string): T | null => {
         try {
             const stored = sessionStorage.getItem(`cache_${key}`);
             if (stored) {
-                item = JSON.parse(stored);
+                item = JSON.parse(stored) as CacheItem<unknown>;
                 // Remettre en mémoire pour les accès suivants
-                memoryCache.set(key, item as CacheItem<any>);
+                memoryCache.set(key, item);
             }
         } catch (error) {
             console.warn('Error reading from sessionStorage:', error);
