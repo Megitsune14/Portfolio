@@ -91,7 +91,6 @@ export default function NexusGoalsProfilePage() {
   return (
     <GoalsPageLayout>
       <div className="surface-panel flex-1 p-6 sm:p-8">
-        <p className="eyebrow mb-3">Goals</p>
         <h2 className="font-jp text-2xl font-bold text-foreground">Profil</h2>
         <p className="mt-2 mb-8 text-sm text-muted">
           Modifie ta taille, ton poids de référence et ton objectif global. Ces valeurs servent au calcul de l&apos;IMC

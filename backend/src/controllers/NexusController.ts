@@ -7,6 +7,7 @@ import {
   extractBearerToken,
 } from '../services/NexusAuthService.js';
 import { getVisitors, getVisitorStats, recordVisit } from '../services/VisitorService.js';
+import { logAnalytics } from '../utils/analyticsLogger.js';
 
 function getClientIp(c: Context): string {
   const forwarded = c.req.header('x-forwarded-for');
@@ -84,29 +85,44 @@ export async function me(c: Context): Promise<Response> {
 
 export async function trackVisit(c: Context): Promise<Response> {
   try {
-    let path = '/';
+    const queryPath = c.req.query('path')?.trim();
+    let path = queryPath || '/';
+    let bodyParsed = false;
 
     try {
       const body = await c.req.json<{ path?: string }>();
+      bodyParsed = true;
       if (body.path) {
         path = body.path;
       }
     } catch {
-      // Beacon may send empty body
+      if (!queryPath) {
+        logAnalytics('Corps requête track illisible — path par défaut', {
+          contentType: c.req.header('content-type') ?? null,
+        });
+      }
     }
 
+    const ip = getClientIp(c);
+    logAnalytics('Requête track visit reçue', { ip, path, bodyParsed, queryPath: queryPath ?? null });
+
     const visit = await recordVisit({
-      ip: getClientIp(c),
+      ip,
       userAgent: c.req.header('user-agent') || 'unknown',
       referrer: c.req.header('referer') || c.req.header('referrer') || null,
       path,
     });
+
+    logAnalytics('Track visit enregistré', { id: visit._id?.toString(), ip, path });
 
     return c.json({
       success: true,
       data: { id: visit._id?.toString() },
     } as ApiResponse);
   } catch (error) {
+    logAnalytics('Track visit — échec', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
     console.error('Track visit error:', error);
     return c.json(
       {
@@ -122,7 +138,7 @@ export async function trackVisit(c: Context): Promise<Response> {
 export async function listVisitors(c: Context): Promise<Response> {
   try {
     const page = Math.max(1, parseInt(c.req.query('page') || '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt(c.req.query('limit') || '50', 10)));
+    const limit = Math.min(100, Math.max(1, parseInt(c.req.query('limit') || '25', 10)));
 
     const result = await getVisitors({ page, limit });
 

@@ -1,5 +1,6 @@
 import { Collection, ObjectId } from 'mongodb';
 import { getDb } from '../db/mongodb.js';
+import { logAnalytics } from '../utils/analyticsLogger.js';
 
 export interface VisitorDocument {
   _id?: ObjectId;
@@ -33,6 +34,9 @@ export async function recordVisit(data: {
   referrer: string | null;
   path: string;
 }): Promise<VisitorDocument> {
+  const start = Date.now();
+  logAnalytics('Enregistrement visite — début', { ip: data.ip, path: data.path });
+
   const collection = await getCollection();
 
   const document: VisitorDocument = {
@@ -41,7 +45,16 @@ export async function recordVisit(data: {
   };
 
   const result = await collection.insertOne(document);
-  return { ...document, _id: result.insertedId };
+  const visit = { ...document, _id: result.insertedId };
+
+  logAnalytics('Enregistrement visite — terminé', {
+    id: visit._id?.toString(),
+    ip: data.ip,
+    path: data.path,
+    durationMs: Date.now() - start,
+  });
+
+  return visit;
 }
 
 export async function getVisitors(options: {

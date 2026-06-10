@@ -29,7 +29,6 @@ export default function NexusLogin() {
     <div className="app-shell flex items-center justify-center px-4">
       <div className="surface-panel w-full max-w-md p-8">
         <div className="mb-8 text-center">
-          <p className="eyebrow mb-3">Accès restreint</p>
           <h1 className="font-jp text-3xl font-bold text-foreground">Nexus</h1>
           <p className="mt-2 text-sm text-muted">Dashboard privé — authentification requise</p>
         </div>

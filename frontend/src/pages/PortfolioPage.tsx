@@ -4,11 +4,8 @@ import Projects from '../components/Projects';
 import Social from '../components/Social';
 import Stats from '../components/Stats';
 import Footer from '../components/Footer';
-import { useVisitorTracking } from '../hooks/useVisitorTracking';
 
 export default function PortfolioPage() {
-  useVisitorTracking();
-
   return (
     <div className="app-shell">
       <div className="app-backdrop -z-40 bg-background" aria-hidden />

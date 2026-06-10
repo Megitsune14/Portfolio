@@ -5,7 +5,7 @@ import nexusGoalsRouter from './nexusGoals.js';
 
 const nexusRouter = new Hono();
 
-nexusRouter.post('/track', NexusController.trackVisit);
+nexusRouter.post('/visit', NexusController.trackVisit);
 nexusRouter.post('/auth/login', NexusController.login);
 nexusRouter.get('/auth/me', NexusController.me);
 

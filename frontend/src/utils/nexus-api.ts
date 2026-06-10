@@ -86,27 +86,10 @@ export interface VisitorsResponse {
   };
 }
 
-export async function fetchVisitors(page = 1, limit = 50): Promise<VisitorsResponse> {
+export async function fetchVisitors(page = 1, limit = 25): Promise<VisitorsResponse> {
   return nexusFetch<VisitorsResponse>(`/visitors?page=${page}&limit=${limit}`);
 }
 
 export async function fetchVisitorStats(): Promise<VisitorStats> {
   return nexusFetch<VisitorStats>('/visitors/stats');
-}
-
-export function trackVisit(path: string): void {
-  const payload = JSON.stringify({ path });
-
-  if (navigator.sendBeacon) {
-    const blob = new Blob([payload], { type: 'application/json' });
-    navigator.sendBeacon(`${API_BASE}/nexus/track`, blob);
-    return;
-  }
-
-  fetch(`${API_BASE}/nexus/track`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: payload,
-    keepalive: true,
-  }).catch(() => {});
 }
