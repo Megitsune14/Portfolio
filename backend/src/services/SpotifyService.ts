@@ -32,7 +32,7 @@ export function generateAuthUrl(clientId: string, clientSecret: string, redirect
 }
 
 // Exchange authorization code for tokens
-export async function exchangeCodeForTokens(code: string, clientId: string, clientSecret: string, redirectUri: string): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
+export async function exchangeCodeForTokens(code: string, clientId: string, clientSecret: string, redirectUri: string): Promise<{ accessToken: string; refreshToken: string; userId: string; displayName?: string }> {
   try {
     const api = initializeSpotifyApi(clientId, clientSecret, redirectUri);
     const data = await api.authorizationCodeGrant(code);
@@ -48,7 +48,8 @@ export async function exchangeCodeForTokens(code: string, clientId: string, clie
     return {
       accessToken: access_token,
       refreshToken: refresh_token,
-      userId
+      userId,
+      displayName: userData.body.display_name ?? undefined,
     };
   } catch (error) {
     throw new Error(`Failed to exchange code for tokens: ${error instanceof Error ? error.message : 'Unknown error'}`);

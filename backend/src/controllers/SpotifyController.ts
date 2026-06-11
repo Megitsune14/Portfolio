@@ -1,5 +1,7 @@
 import { Context } from 'hono';
 import { generateAuthUrl, exchangeCodeForTokens, getCurrentlyPlaying, getRecentlyPlayed, checkAuthStatus, logoutUser, setUserToken, mapUserIds, getSpotifyUserId } from '../services/SpotifyService.js';
+import { saveSyncToken } from '../services/SpotifySyncTokenService.js';
+import { triggerSpotifySync } from '../services/SpotifySyncService.js';
 import type { ApiResponse } from '../../types/index.js';
 
 // Generate Spotify authorization URL
@@ -41,7 +43,7 @@ export async function handleSpotifyCallback(c: Context): Promise<Response> {
       return c.redirect(`${process.env.PROJECT_URL}/?error=no_code#stats`);
     }
 
-    const { accessToken, refreshToken, userId: spotifyUserId } = await exchangeCodeForTokens(
+    const { accessToken, refreshToken, userId: spotifyUserId, displayName } = await exchangeCodeForTokens(
       code,
       process.env.SPOTIFY_CLIENT_ID!,
       process.env.SPOTIFY_CLIENT_SECRET!,
@@ -50,6 +52,15 @@ export async function handleSpotifyCallback(c: Context): Promise<Response> {
     
     // Store user tokens using Spotify user ID
     setUserToken(spotifyUserId, accessToken, refreshToken);
+
+    // Persist sync token for background job (independent from Stats in-memory tokens)
+    await saveSyncToken({
+      spotifyUserId,
+      accessToken,
+      refreshToken,
+      displayName,
+    });
+    triggerSpotifySync({ backfill: true });
 
     // If we have a frontend user ID in state, map it
     if (state) {

@@ -14,6 +14,7 @@ import NexusGoalsProfilePage from './pages/NexusGoalsProfilePage';
 import GoalsQueryLayout from './components/goals/GoalsQueryLayout';
 import GoalsProfileGuard from './components/goals/GoalsProfileGuard';
 import NexusProtectedRoute from './components/NexusProtectedRoute';
+import SpotifyQueryLayout from './components/spotify/SpotifyQueryLayout';
 
 function VisitorTracker() {
   useVisitorTracking();
@@ -31,7 +32,9 @@ function App() {
         <Route element={<NexusProtectedRoute />}>
           <Route path="/nexus" element={<NexusHub />} />
           <Route path="/nexus/analytics" element={<NexusAnalyticsPage />} />
-          <Route path="/nexus/spotify" element={<NexusSpotifyPage />} />
+          <Route element={<SpotifyQueryLayout />}>
+            <Route path="/nexus/spotify" element={<NexusSpotifyPage />} />
+          </Route>
           <Route element={<GoalsQueryLayout />}>
             <Route path="/nexus/goals/onboarding" element={<NexusGoalsOnboardingPage />} />
             <Route element={<GoalsProfileGuard />}>

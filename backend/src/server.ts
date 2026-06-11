@@ -14,10 +14,12 @@ import discordRouter from './routes/discord.js';
 import healthRouter from './routes/health.js';
 import nexusRouter from './routes/nexus.js';
 import { connectMongo } from './db/mongodb.js';
+import { startSpotifyScheduler } from './jobs/spotifyScheduler.js';
 
 try {
 
     await connectMongo();
+    startSpotifyScheduler();
 
     // Create Hono app
     const app = new Hono();

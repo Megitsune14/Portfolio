@@ -30,9 +30,9 @@ const services: NexusService[] = [
   {
     id: 'spotify',
     title: 'Spotify',
-    description: 'Gestion Spotify et statistiques d’écoute — bientôt disponible.',
+    description: 'Statistiques d’écoute — wrapped annuel, historique et tops Spotify.',
     to: '/nexus/spotify',
-    status: 'in-progress',
+    status: 'available',
   },
 ];
 

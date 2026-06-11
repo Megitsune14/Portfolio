@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import * as NexusController from '../controllers/NexusController.js';
 import { nexusAuthMiddleware } from '../middleware/nexusAuth.js';
 import nexusGoalsRouter from './nexusGoals.js';
+import nexusSpotifyRouter from './nexusSpotify.js';
 
 const nexusRouter = new Hono();
 
@@ -15,5 +16,6 @@ protectedVisitors.get('/', NexusController.listVisitors);
 protectedVisitors.get('/stats', NexusController.visitorStats);
 nexusRouter.route('/visitors', protectedVisitors);
 nexusRouter.route('/goals', nexusGoalsRouter);
+nexusRouter.route('/spotify', nexusSpotifyRouter);
 
 export default nexusRouter;

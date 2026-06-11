@@ -13,6 +13,8 @@ declare global {
             SPOTIFY_CLIENT_ID: string;
             SPOTIFY_CLIENT_SECRET: string;
             REDIRECT_ENDPOINT: string;
+            SPOTIFY_SYNC_INTERVAL_MS?: string;
+            BACKEND_URL: string;
 
             // Discord Bot API (profile via GET /users/:id — bot must share a server with the user)
             DISCORD_BOT_TOKEN: string;
