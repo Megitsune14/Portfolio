@@ -36,8 +36,9 @@ export default function NexusSpotifyPage() {
   const queryClient = useQueryClient();
   const currentYear = new Date().getFullYear();
   const [periodSelection, setPeriodSelection] = useState<WrappedPeriodSelection>({
-    kind: 'year',
+    kind: 'month',
     year: currentYear,
+    month: 'current',
   });
 
   const statusQuery = useQuery({

@@ -41,7 +41,11 @@ export function SpotifyWrappedPeriodSelect({ periods, selection, onChange }: Pro
               return;
             }
             const year = parseInt(value.replace('year:', ''), 10);
-            onChange({ kind: 'year', year });
+            if (year === currentYear) {
+              onChange({ kind: 'month', year, month: 'current' });
+            } else {
+              onChange({ kind: 'year', year });
+            }
           }}
           className={selectClass}
         >
