@@ -3,21 +3,18 @@ import { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { z } from 'zod';
+import { NexusDeleteDialog } from '@/components/nexus/NexusDeleteDialog';
+import { NexusPageHeader } from '@/components/nexus/NexusPageHeader';
+import { NexusEmptyState, NexusErrorState, NexusLoadingState } from '@/components/nexus/NexusStates';
 import { GoalDescriptionPromptButton } from '../components/goals/GoalDescriptionPromptButton';
 import { GoalProgressBar } from '../components/goals/GoalProgressBar';
-import { GoalsPageLayout } from '../components/goals/GoalsPageLayout';
 import { StatusSelect } from '../components/goals/StatusSelect';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { computeGoalProgress, type GoalProgressContext } from '../lib/goals/goalProgress';
 import { goalEditFormSchema, newGoalWithTargetSchema, subGoalFormSchema } from '../lib/goals/schemas';
-import {
-  btnDanger,
-  btnGhost,
-  btnPrimary,
-  errorClass,
-  inputClass,
-  labelClass,
-  textareaClass,
-} from '../lib/goals/ui';
+import { errorClass, inputClass, labelClass, textareaClass } from '../lib/goals/ui';
 import type { DashboardResponse, Goal, SubGoal } from '../types/goals';
 import { goalsApiRequest } from '../utils/nexus-goals-api';
 
@@ -250,29 +247,31 @@ export default function NexusGoalsPage() {
 
   if (goalsQuery.isLoading) {
     return (
-      <GoalsPageLayout>
-        <div className="surface-panel flex flex-1 items-center justify-center p-12">
-          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-(--primary)" />
-        </div>
-      </GoalsPageLayout>
+      <>
+        <NexusPageHeader title="Objectifs" description="Gestion des objectifs et sous-objectifs." />
+        <NexusLoadingState />
+      </>
     );
   }
 
   if (goalsQuery.isError) {
     return (
-      <GoalsPageLayout>
-        <div className="surface-panel flex-1 p-6">
-          <p className="font-semibold text-foreground">Impossible de charger les objectifs.</p>
-        </div>
-      </GoalsPageLayout>
+      <>
+        <NexusPageHeader title="Objectifs" />
+        <NexusErrorState message="Impossible de charger les objectifs." />
+      </>
     );
   }
 
   return (
-    <GoalsPageLayout>
-      <div className="surface-panel mb-10 flex-1 overflow-x-auto p-4 sm:p-6">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted">Objectifs principaux</h2>
-          <div className="w-full">
+    <>
+      <NexusPageHeader title="Objectifs" description="Gestion des objectifs et sous-objectifs." />
+      <Card className="overflow-hidden">
+        <CardHeader>
+          <CardTitle>Objectifs principaux</CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto p-4 sm:p-6">
+          <div className="w-full min-w-[720px]">
             <div
               className={`${goalGrid} border-b border-theme pb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted`}
             >
@@ -314,14 +313,14 @@ export default function NexusGoalsPage() {
               <div className="text-xs text-muted lg:flex lg:items-center">—</div>
               <div className="hidden lg:block" />
               <div className="flex lg:justify-end">
-                <button type="submit" className={`${btnPrimary} w-full lg:w-auto lg:min-w-26`} disabled={createGoalMut.isPending}>
+                <Button type="submit" className="w-full lg:w-auto" disabled={createGoalMut.isPending}>
                   {createGoalMut.isPending ? '…' : 'Créer'}
-                </button>
+                </Button>
               </div>
             </form>
 
             {goals.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted">Aucun objectif — remplis la ligne « Créer » ci-dessus.</p>
+              <NexusEmptyState message="Aucun objectif — remplis la ligne « Créer » ci-dessus." />
             ) : (
               goals.map((g) => {
                 const isEdit = editingGoalId === g._id;
@@ -392,12 +391,12 @@ export default function NexusGoalsPage() {
                           <GoalProgressBar percent={progressResult?.percent ?? null} detail={progressResult?.detail} />
                         </div>
                         <div className="flex flex-wrap gap-2 lg:flex-col">
-                          <button type="submit" className={`${btnPrimary} flex-1`} disabled={updateGoalMut.isPending}>
+                          <Button type="submit" className="flex-1" disabled={updateGoalMut.isPending}>
                             {updateGoalMut.isPending ? '…' : 'Enregistrer'}
-                          </button>
-                          <button type="button" className={btnGhost} onClick={cancelEditGoal}>
+                          </Button>
+                          <Button type="button" variant="outline" onClick={cancelEditGoal}>
                             Annuler
-                          </button>
+                          </Button>
                         </div>
                       </form>
                     ) : (
@@ -408,43 +407,37 @@ export default function NexusGoalsPage() {
                           {g.targetWeightKg != null ? `${g.targetWeightKg} kg` : '—'}
                         </div>
                         <div>
-                          <span
-                            className={
-                              g.status === 'active'
-                                ? 'inline-block rounded-full border border-theme bg-(--secondary) px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground'
-                                : 'inline-block rounded-full border border-theme px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted'
-                            }
-                          >
+                          <Badge variant={g.status === 'active' ? 'default' : 'outline'}>
                             {g.status === 'active' ? 'Actif' : 'Terminé'}
-                          </span>
+                          </Badge>
                         </div>
                         <div className="lg:pt-1">
                           <GoalProgressBar percent={progressResult?.percent ?? null} detail={progressResult?.detail} />
                         </div>
                         <div className="flex flex-wrap gap-2 lg:flex-col lg:items-stretch">
-                          <button type="button" className={btnGhost} onClick={() => startEditGoal(g)}>
+                          <Button type="button" variant="outline" size="sm" onClick={() => startEditGoal(g)}>
                             Modifier
-                          </button>
-                          <button type="button" className={btnGhost} onClick={() => toggleGoal(g)} disabled={updateGoalMut.isPending}>
+                          </Button>
+                          <Button type="button" variant="outline" size="sm" onClick={() => toggleGoal(g)} disabled={updateGoalMut.isPending}>
                             {g.status === 'active' ? 'Terminer' : 'Réactiver'}
-                          </button>
-                          <button
-                            type="button"
-                            className={btnDanger}
-                            onClick={() => {
-                              if (confirm('Supprimer cet objectif et tous ses sous-objectifs ?')) deleteGoalMut.mutate(g._id);
-                            }}
-                            disabled={deleteGoalMut.isPending}
+                          </Button>
+                          <NexusDeleteDialog
+                            title="Supprimer cet objectif ?"
+                            description="L'objectif et tous ses sous-objectifs seront supprimés définitivement."
+                            onConfirm={() => deleteGoalMut.mutate(g._id)}
                           >
-                            Supprimer
-                          </button>
-                          <button
+                            <Button type="button" variant="destructive" size="sm" disabled={deleteGoalMut.isPending}>
+                              Supprimer
+                            </Button>
+                          </NexusDeleteDialog>
+                          <Button
                             type="button"
-                            className={btnGhost}
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setExpanded((p) => ({ ...p, [g._id]: !p[g._id] }))}
                           >
                             {isOpen ? '▼ Sous-objectifs' : '▶ Sous-objectifs'} ({subs.length})
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -480,18 +473,18 @@ export default function NexusGoalsPage() {
                                 <textarea {...subCreateForm.register('description')} className={`${inputClass} min-h-12 resize-y`} />
                               </div>
                               <div className="flex flex-wrap gap-2 sm:flex-col sm:pb-0.5">
-                                <button type="submit" className={`${btnPrimary} text-xs`} disabled={createSubMut.isPending}>
+                                <Button type="submit" size="sm" disabled={createSubMut.isPending}>
                                   Créer
-                                </button>
-                                <button type="button" className={`${btnGhost} text-xs`} onClick={() => setSubFormGoalId(null)}>
+                                </Button>
+                                <Button type="button" variant="outline" size="sm" onClick={() => setSubFormGoalId(null)}>
                                   Annuler
-                                </button>
+                                </Button>
                               </div>
                             </form>
                           ) : (
-                            <button type="button" className={`${btnGhost} mb-2 mt-1 w-full text-xs sm:w-auto`} onClick={() => setSubFormGoalId(g._id)}>
+                            <Button type="button" variant="outline" size="sm" className="mb-2 mt-1 w-full sm:w-auto" onClick={() => setSubFormGoalId(g._id)}>
                               + Ajouter un sous-objectif
-                            </button>
+                            </Button>
                           )}
 
                           {subs.length === 0 && subFormGoalId !== g._id ? (
@@ -520,12 +513,12 @@ export default function NexusGoalsPage() {
                                       <textarea {...subEditForm.register('description')} className={`${inputClass} min-h-12 resize-y`} />
                                     </div>
                                     <div className="flex flex-wrap gap-2 sm:flex-col sm:pb-0.5">
-                                      <button type="submit" className={`${btnPrimary} text-xs`} disabled={updateSubMut.isPending}>
+                                      <Button type="submit" size="sm" disabled={updateSubMut.isPending}>
                                         Enregistrer
-                                      </button>
-                                      <button type="button" className={`${btnGhost} text-xs`} onClick={cancelEditSub}>
+                                      </Button>
+                                      <Button type="button" variant="outline" size="sm" onClick={cancelEditSub}>
                                         Annuler
-                                      </button>
+                                      </Button>
                                     </div>
                                   </form>
                                 );
@@ -538,27 +531,27 @@ export default function NexusGoalsPage() {
                                     {s.status === 'active' ? 'À faire' : 'Fait'}
                                   </span>
                                   <div className="flex flex-wrap gap-2">
-                                    <button type="button" className={`${btnGhost} text-[11px]`} onClick={() => startEditSub(g, s)}>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => startEditSub(g, s)}>
                                       Modifier
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                       type="button"
-                                      className={`${btnGhost} text-[11px]`}
+                                      variant="outline"
+                                      size="sm"
                                       onClick={() => toggleSub(g._id, s)}
                                       disabled={updateSubMut.isPending}
                                     >
                                       {s.status === 'active' ? 'Cocher' : 'Rouvrir'}
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className={`${btnDanger} text-[11px]`}
-                                      onClick={() => {
-                                        if (confirm('Supprimer ce sous-objectif ?')) deleteSubMut.mutate({ goalId: g._id, subId: s._id });
-                                      }}
-                                      disabled={deleteSubMut.isPending}
+                                    </Button>
+                                    <NexusDeleteDialog
+                                      title="Supprimer ce sous-objectif ?"
+                                      description="Cette action est irréversible."
+                                      onConfirm={() => deleteSubMut.mutate({ goalId: g._id, subId: s._id })}
                                     >
-                                      Suppr.
-                                    </button>
+                                      <Button type="button" variant="destructive" size="sm" disabled={deleteSubMut.isPending}>
+                                        Suppr.
+                                      </Button>
+                                    </NexusDeleteDialog>
                                   </div>
                                 </div>
                               );
@@ -572,7 +565,8 @@ export default function NexusGoalsPage() {
               })
             )}
           </div>
-        </div>
-    </GoalsPageLayout>
+        </CardContent>
+      </Card>
+    </>
   );
 }

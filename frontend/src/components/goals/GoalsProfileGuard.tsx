@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, Outlet } from 'react-router-dom';
-import { GoalsPageLayout } from './GoalsPageLayout';
-import { goalsApiRequest } from '../../utils/nexus-goals-api';
-import type { Profile } from '../../types/goals';
+import { NexusLoadingState } from '@/components/nexus/NexusStates';
+import { goalsApiRequest } from '@/utils/nexus-goals-api';
+import type { Profile } from '@/types/goals';
 
 export default function GoalsProfileGuard() {
   const { data, isLoading } = useQuery({
@@ -11,13 +11,7 @@ export default function GoalsProfileGuard() {
   });
 
   if (isLoading) {
-    return (
-      <GoalsPageLayout>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-(--primary)" />
-        </div>
-      </GoalsPageLayout>
-    );
+    return <NexusLoadingState />;
   }
 
   if (!data?.profile) {

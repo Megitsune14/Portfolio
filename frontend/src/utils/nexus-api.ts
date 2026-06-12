@@ -2,15 +2,15 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const TOKEN_KEY = 'nexus_token';
 
 export function getNexusToken(): string | null {
-  return sessionStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 export function setNexusToken(token: string): void {
-  sessionStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
 export function clearNexusToken(): void {
-  sessionStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(TOKEN_KEY);
 }
 
 async function nexusFetch<T>(path: string, options: RequestInit = {}): Promise<T> {

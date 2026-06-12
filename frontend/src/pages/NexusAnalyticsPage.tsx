@@ -1,11 +1,19 @@
-import { useEffect, useState } from 'react';
-import { NexusPageLayout } from '../components/nexus/NexusPageLayout';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { NexusPageHeader } from '@/components/nexus/NexusPageHeader';
+import { NexusStatCard } from '@/components/nexus/NexusStatCard';
+import { NexusEmptyState, NexusErrorState, NexusLoadingState } from '@/components/nexus/NexusStates';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  fetchVisitorStats,
-  fetchVisitors,
-  type VisitorRecord,
-  type VisitorStats,
-} from '../utils/nexus-api';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { fetchVisitorStats, fetchVisitors } from '@/utils/nexus-api';
 
 const VISITORS_PAGE_SIZE = 25;
 
@@ -24,146 +32,121 @@ function truncate(value: string, max = 60): string {
 }
 
 export default function NexusAnalyticsPage() {
-  const [stats, setStats] = useState<VisitorStats | null>(null);
-  const [visitors, setVisitors] = useState<VisitorRecord[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const statsQuery = useQuery({
+    queryKey: ['nexus-visitor-stats'],
+    queryFn: fetchVisitorStats,
+  });
 
-    async function load() {
-      setIsLoading(true);
-      setError(null);
+  const visitorsQuery = useQuery({
+    queryKey: ['nexus-visitors', page],
+    queryFn: () => fetchVisitors(page, VISITORS_PAGE_SIZE),
+  });
 
-      try {
-        const [statsData, visitorsData] = await Promise.all([
-          fetchVisitorStats(),
-          fetchVisitors(page, VISITORS_PAGE_SIZE),
-        ]);
+  const totalPages = visitorsQuery.data?.pagination.totalPages ?? 1;
+  const visitors = visitorsQuery.data?.visitors ?? [];
 
-        if (!cancelled) {
-          setStats(statsData);
-          setVisitors(visitorsData.visitors);
-          setTotalPages(visitorsData.pagination.totalPages || 1);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Impossible de charger les données');
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
+  if (statsQuery.isLoading && visitorsQuery.isLoading) {
+    return (
+      <>
+        <NexusPageHeader
+          title="Analytics"
+          description="Statistiques de visites du portfolio — pages vues, IPs uniques et provenance."
+        />
+        <NexusLoadingState />
+      </>
+    );
+  }
 
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [page]);
+  if (statsQuery.isError || visitorsQuery.isError) {
+    return (
+      <>
+        <NexusPageHeader title="Analytics" />
+        <NexusErrorState message="Impossible de charger les données analytics." />
+      </>
+    );
+  }
 
   return (
-    <NexusPageLayout title="Analytics">
-      {error && (
-        <div className="surface-panel mb-6 p-4 text-sm text-foreground">{error}</div>
-      )}
+    <>
+      <NexusPageHeader
+        title="Analytics"
+        description="Statistiques de visites du portfolio — pages vues, IPs uniques et provenance."
+      />
 
-      {isLoading && !stats ? (
-        <div className="surface-panel flex items-center justify-center p-12">
-          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-(--primary)" />
-        </div>
-      ) : (
-        <>
-          {stats && (
-            <section className="mb-8 grid gap-4 sm:grid-cols-2">
-              <StatCard label="Visites totales" value={stats.totalVisits} />
-              <StatCard label="IPs uniques" value={stats.uniqueIps} />
-            </section>
-          )}
+      {statsQuery.data ? (
+        <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <NexusStatCard label="Visites totales" value={statsQuery.data.totalVisits} />
+          <NexusStatCard label="IPs uniques" value={statsQuery.data.uniqueIps} />
+        </section>
+      ) : null}
 
-          <section className="surface-panel overflow-hidden">
-            <div className="border-b border-theme px-6 py-4">
-              <h2 className="font-jp text-xl font-bold text-foreground">Visites récentes</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Visites récentes</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>IP</TableHead>
+                <TableHead>Page</TableHead>
+                <TableHead>Provenance</TableHead>
+                <TableHead className="hidden lg:table-cell">User-Agent</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {visitors.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <NexusEmptyState message="Aucune visite enregistrée pour le moment." />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                visitors.map((visitor) => (
+                  <TableRow key={visitor.id}>
+                    <TableCell className="whitespace-nowrap">{formatDate(visitor.createdAt)}</TableCell>
+                    <TableCell className="font-mono">{visitor.ip}</TableCell>
+                    <TableCell className="font-mono">{visitor.path}</TableCell>
+                    <TableCell>
+                      {visitor.referrer ? truncate(visitor.referrer, 40) : '—'}
+                    </TableCell>
+                    <TableCell className="hidden text-muted-foreground lg:table-cell" title={visitor.userAgent}>
+                      {truncate(visitor.userAgent, 50)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+
+          {totalPages > 1 ? (
+            <div className="flex items-center justify-between border-t border-border px-6 py-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={page <= 1 || visitorsQuery.isFetching}
+              >
+                Précédent
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {page} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                disabled={page >= totalPages || visitorsQuery.isFetching}
+              >
+                Suivant
+              </Button>
             </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-(--secondary)/40 text-muted">
-                  <tr>
-                    <th className="px-6 py-3 font-medium">Date</th>
-                    <th className="px-6 py-3 font-medium">IP</th>
-                    <th className="px-6 py-3 font-medium">Page</th>
-                    <th className="px-6 py-3 font-medium">Provenance</th>
-                    <th className="px-6 py-3 font-medium">User-Agent</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visitors.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-muted">
-                        Aucune visite enregistrée pour le moment
-                      </td>
-                    </tr>
-                  ) : (
-                    visitors.map((visitor) => (
-                      <tr key={visitor.id} className="border-t border-theme/60">
-                        <td className="px-6 py-4 whitespace-nowrap text-foreground">
-                          {formatDate(visitor.createdAt)}
-                        </td>
-                        <td className="px-6 py-4 font-mono text-foreground">{visitor.ip}</td>
-                        <td className="px-6 py-4 font-mono text-foreground">{visitor.path}</td>
-                        <td className="px-6 py-4 text-foreground">
-                          {visitor.referrer ? truncate(visitor.referrer, 40) : '—'}
-                        </td>
-                        <td className="px-6 py-4 text-muted" title={visitor.userAgent}>
-                          {truncate(visitor.userAgent, 50)}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-theme px-6 py-4">
-                <button
-                  type="button"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  disabled={page <= 1 || isLoading}
-                  className="focus-ring rounded-lg border border-theme px-3 py-1.5 text-sm disabled:opacity-50"
-                >
-                  Précédent
-                </button>
-                <span className="text-sm text-muted">
-                  Page {page} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                  disabled={page >= totalPages || isLoading}
-                  className="focus-ring rounded-lg border border-theme px-3 py-1.5 text-sm disabled:opacity-50"
-                >
-                  Suivant
-                </button>
-              </div>
-            )}
-          </section>
-        </>
-      )}
-    </NexusPageLayout>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="surface-panel p-6">
-      <p className="text-sm text-muted">{label}</p>
-      <p className="mt-2 font-jp text-3xl font-bold text-foreground">{value.toLocaleString('fr-FR')}</p>
-    </div>
+          ) : null}
+        </CardContent>
+      </Card>
+    </>
   );
 }

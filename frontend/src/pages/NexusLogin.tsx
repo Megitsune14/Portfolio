@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useNexusAuth } from '../hooks/useNexusAuth';
+import { Link, Navigate } from 'react-router-dom';
+import { useNexusAuth } from '@/hooks/useNexusAuth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function NexusLogin() {
   const { isAuthenticated, isLoading, error, login } = useNexusAuth();
@@ -19,52 +23,69 @@ export default function NexusLogin() {
     try {
       await login(password);
     } catch {
-      // Error handled in hook
+      // Error handled in provider
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="app-shell flex items-center justify-center px-4">
-      <div className="surface-panel w-full max-w-md p-8">
-        <div className="mb-8 text-center">
-          <h1 className="font-jp text-3xl font-bold text-foreground">Nexus</h1>
-          <p className="mt-2 text-sm text-muted">Dashboard privé — authentification requise</p>
-        </div>
+    <div className="app-shell relative flex min-h-screen items-center justify-center px-4">
+      <div
+        className="app-backdrop pointer-events-none -z-30 hidden dark:block"
+        aria-hidden
+        style={{
+          background:
+            'linear-gradient(168deg, oklch(0.09 0.08 292) 0%, oklch(0.11 0.09 288) 42%, oklch(0.06 0.055 305) 100%)',
+        }}
+      />
+      <div
+        className="app-backdrop pointer-events-none -z-30 dark:hidden"
+        aria-hidden
+        style={{
+          background:
+            'linear-gradient(168deg, oklch(0.97 0.02 296) 0%, oklch(0.985 0.013 82) 43%, oklch(0.92 0.05 292) 100%)',
+        }}
+      />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-medium text-foreground">
-              Mot de passe maître
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="focus-ring w-full rounded-xl border border-theme bg-(--input) px-4 py-3 text-foreground"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              required
-            />
+      <Card className="relative z-10 w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="font-jp text-3xl">Nexus</CardTitle>
+          <CardDescription>Dashboard privé — authentification requise</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe maître</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            {error ? (
+              <p className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground">
+                {error}
+              </p>
+            ) : null}
+
+            <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>
+              {isSubmitting ? 'Connexion…' : 'Se connecter'}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <Button variant="ghost" asChild>
+              <Link to="/">Retour au portfolio</Link>
+            </Button>
           </div>
-
-          {error && (
-            <p className="rounded-xl border border-(--primary)/30 bg-(--primary)/10 px-4 py-3 text-sm text-foreground">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting || isLoading}
-            className="focus-ring w-full rounded-xl bg-(--primary) px-4 py-3 font-semibold text-(--primary-foreground) transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isSubmitting ? 'Connexion...' : 'Se connecter'}
-          </button>
-        </form>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -3,11 +3,25 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
-import { GoalsPageLayout } from '../components/goals/GoalsPageLayout';
-import { btnDanger, btnGhost, btnPrimary, errorClass, inputClass, labelClass, textareaClass } from '../lib/goals/ui';
-import { weightCreateFormSchema, weightEditFormSchema } from '../lib/goals/schemas';
-import type { WeightEntry } from '../types/goals';
-import { goalsApiRequest } from '../utils/nexus-goals-api';
+import { NexusDeleteDialog } from '@/components/nexus/NexusDeleteDialog';
+import { NexusPageHeader } from '@/components/nexus/NexusPageHeader';
+import { NexusEmptyState, NexusLoadingState } from '@/components/nexus/NexusStates';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { errorClass, labelClass } from '@/lib/goals/ui';
+import { weightCreateFormSchema, weightEditFormSchema } from '@/lib/goals/schemas';
+import type { WeightEntry } from '@/types/goals';
+import { goalsApiRequest } from '@/utils/nexus-goals-api';
 
 type CreateFormIn = z.input<typeof weightCreateFormSchema>;
 type CreateFormOut = z.output<typeof weightCreateFormSchema>;
@@ -110,103 +124,165 @@ export default function NexusGoalsMeasuresPage() {
     });
   });
 
-  const gridClass =
-    'grid grid-cols-1 gap-3 border-b border-theme/60 py-3 sm:grid-cols-[minmax(0,0.5fr)_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-4';
-
   if (weightsQuery.isLoading) {
     return (
-      <GoalsPageLayout>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-(--primary)" />
-        </div>
-      </GoalsPageLayout>
+      <>
+        <NexusPageHeader title="Pesées" description="Historique et saisie de tes pesées." />
+        <NexusLoadingState />
+      </>
     );
   }
 
+  const renderEditForm = () => (
+    <form onSubmit={onUpdate} className="grid gap-3" noValidate>
+      <div>
+        <Label>Poids (kg)</Label>
+        <Input {...editForm.register('weightKg')} />
+      </div>
+      <div>
+        <Label>Note</Label>
+        <Input {...editForm.register('note')} />
+      </div>
+      <div>
+        <Label>Date</Label>
+        <Input type="datetime-local" {...editForm.register('measuredAt')} />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" size="sm" disabled={updateMut.isPending}>
+          Enregistrer
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => setEditingId(null)}>
+          Annuler
+        </Button>
+      </div>
+    </form>
+  );
+
   return (
-    <GoalsPageLayout>
-      <div className="surface-panel flex-1 overflow-x-auto p-4 sm:p-6">
-          <h2 className="mb-4 font-jp text-xl font-bold text-foreground">Pesées</h2>
+    <>
+      <NexusPageHeader title="Pesées" description="Historique et saisie de tes pesées." />
 
-          <div className={`${gridClass} border-b border-theme pb-3 text-[11px] font-bold uppercase tracking-wider text-muted`}>
-            <span>Poids (kg)</span>
-            <span>Note</span>
-            <span>Date</span>
-            <span>Actions</span>
-          </div>
-
-          <form onSubmit={onCreate} className={`${gridClass} bg-(--secondary)/20`} noValidate>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Nouvelle pesée</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onCreate} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" noValidate>
             <div>
-              <label className={`${labelClass} sm:sr-only`}>Poids</label>
-              <input {...createForm.register('weightKg')} className={inputClass} placeholder="70.5" />
+              <Label className={labelClass}>Poids (kg)</Label>
+              <Input {...createForm.register('weightKg')} placeholder="70.5" />
               {createForm.formState.errors.weightKg ? (
                 <p className={errorClass}>{String(createForm.formState.errors.weightKg.message)}</p>
               ) : null}
             </div>
             <div>
-              <label className={`${labelClass} sm:sr-only`}>Note</label>
-              <textarea {...createForm.register('note')} className={`${textareaClass} min-h-12`} placeholder="Optionnel" />
+              <Label className={labelClass}>Note</Label>
+              <Input {...createForm.register('note')} placeholder="Optionnel" />
             </div>
             <div>
-              <label className={`${labelClass} sm:sr-only`}>Date</label>
-              <input type="datetime-local" {...createForm.register('measuredAt')} className={inputClass} />
+              <Label className={labelClass}>Date</Label>
+              <Input type="datetime-local" {...createForm.register('measuredAt')} />
             </div>
-            <div>
-              <button type="submit" className={`${btnPrimary} w-full sm:w-auto`} disabled={createMut.isPending}>
+            <div className="flex items-end">
+              <Button type="submit" disabled={createMut.isPending}>
                 {createMut.isPending ? '…' : 'Ajouter'}
-              </button>
+              </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
 
-          {entries.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted">Aucune pesée enregistrée.</p>
-          ) : (
-            entries.map((entry) =>
-              editingId === entry._id ? (
-                <form key={entry._id} onSubmit={onUpdate} className={gridClass} noValidate>
-                  <div>
-                    <input {...editForm.register('weightKg')} className={inputClass} />
-                  </div>
-                  <div>
-                    <textarea {...editForm.register('note')} className={`${textareaClass} min-h-12`} />
-                  </div>
-                  <div>
-                    <input type="datetime-local" {...editForm.register('measuredAt')} className={inputClass} />
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button type="submit" className={btnPrimary} disabled={updateMut.isPending}>
-                      Enregistrer
-                    </button>
-                    <button type="button" className={btnGhost} onClick={() => setEditingId(null)}>
-                      Annuler
-                    </button>
-                  </div>
-                </form>
+      <Card className="hidden md:block">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Poids</TableHead>
+                <TableHead>Note</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {entries.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4}>
+                    <NexusEmptyState message="Aucune pesée enregistrée." />
+                  </TableCell>
+                </TableRow>
               ) : (
-                <div key={entry._id} className={gridClass}>
-                  <span className="font-mono font-semibold text-foreground">{entry.weightKg} kg</span>
-                  <span className="text-sm text-muted">{entry.note ?? '—'}</span>
-                  <span className="text-sm text-foreground">{formatDate(entry.measuredAt)}</span>
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" className={btnGhost} onClick={() => startEdit(entry)}>
-                      Modifier
-                    </button>
-                    <button
-                      type="button"
-                      className={btnDanger}
-                      onClick={() => {
-                        if (confirm('Supprimer cette pesée ?')) deleteMut.mutate(entry._id);
-                      }}
-                      disabled={deleteMut.isPending}
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                </div>
-              ),
-            )
-          )}
-        </div>
-    </GoalsPageLayout>
+                entries.map((entry) =>
+                  editingId === entry._id ? (
+                    <TableRow key={entry._id}>
+                      <TableCell colSpan={4}>{renderEditForm()}</TableCell>
+                    </TableRow>
+                  ) : (
+                    <TableRow key={entry._id}>
+                      <TableCell className="font-mono font-semibold">{entry.weightKg} kg</TableCell>
+                      <TableCell className="text-muted-foreground">{entry.note ?? '—'}</TableCell>
+                      <TableCell>{formatDate(entry.measuredAt)}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-2">
+                          <Button variant="outline" size="sm" onClick={() => startEdit(entry)}>
+                            Modifier
+                          </Button>
+                          <NexusDeleteDialog
+                            title="Supprimer cette pesée ?"
+                            description="Cette action est irréversible."
+                            onConfirm={() => deleteMut.mutate(entry._id)}
+                          >
+                            <Button variant="destructive" size="sm" disabled={deleteMut.isPending}>
+                              Supprimer
+                            </Button>
+                          </NexusDeleteDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ),
+                )
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4 md:hidden">
+        {entries.length === 0 ? (
+          <NexusEmptyState message="Aucune pesée enregistrée." />
+        ) : (
+          entries.map((entry) => (
+            <Card key={entry._id}>
+              <CardContent className="space-y-3 p-4">
+                {editingId === entry._id ? (
+                  renderEditForm()
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-lg font-bold">{entry.weightKg} kg</span>
+                      <span className="text-sm text-muted-foreground">{formatDate(entry.measuredAt)}</span>
+                    </div>
+                    {entry.note ? <p className="text-sm text-muted-foreground">{entry.note}</p> : null}
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => startEdit(entry)}>
+                        Modifier
+                      </Button>
+                      <NexusDeleteDialog
+                        title="Supprimer cette pesée ?"
+                        description="Cette action est irréversible."
+                        onConfirm={() => deleteMut.mutate(entry._id)}
+                      >
+                        <Button variant="destructive" size="sm" disabled={deleteMut.isPending}>
+                          Supprimer
+                        </Button>
+                      </NexusDeleteDialog>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </>
   );
 }
