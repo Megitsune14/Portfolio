@@ -124,7 +124,7 @@ export function WeightChart({ entries, targetWeightKg, className }: Props) {
           <g key={point.entry._id}>
             <circle cx={point.x} cy={point.y} r={4} fill="var(--primary)" />
             <title>
-              {`${point.entry.weightKg} kg — ${new Date(point.entry.measuredAt).toLocaleString('fr-FR')}`}
+              {`${point.entry.weightKg} kg - ${new Date(point.entry.measuredAt).toLocaleString('fr-FR')}`}
             </title>
           </g>
         ))}

@@ -125,7 +125,7 @@ const Stats = () => {
             <div className="rounded-xl border border-theme bg-card/70 px-4 py-3 backdrop-blur-md">
               <dt className="text-muted">Server tag</dt>
               <dd className="font-semibold text-foreground">
-                {d.primaryGuildTag ?? '—'}
+                {d.primaryGuildTag ?? '-'}
               </dd>
             </div>
           </dl>

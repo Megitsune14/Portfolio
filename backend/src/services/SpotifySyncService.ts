@@ -198,13 +198,13 @@ async function fetchAndStoreTopItems(
 
 export async function runSpotifySync(options: { backfill?: boolean } = {}): Promise<void> {
   if (syncInProgress) {
-    logAnalytics('Spotify sync — déjà en cours, ignoré');
+    logAnalytics('Spotify sync - déjà en cours, ignoré');
     return;
   }
 
   const token = await getSyncToken();
   if (!token?.refreshToken) {
-    logAnalytics('Spotify sync — aucun token sync, ignoré');
+    logAnalytics('Spotify sync - aucun token sync, ignoré');
     return;
   }
 
@@ -222,7 +222,7 @@ export async function runSpotifySync(options: { backfill?: boolean } = {}): Prom
     api.setAccessToken(accessToken);
 
     const playsInserted = await fetchAndStoreRecentlyPlayed(api, { backfill: options.backfill });
-    logAnalytics('Spotify sync — recently played', { playsInserted });
+    logAnalytics('Spotify sync - recently played', { playsInserted });
 
     const timeRanges: SpotifyTimeRange[] = ['short_term', 'medium_term', 'long_term'];
     for (const timeRange of timeRanges) {
@@ -231,12 +231,12 @@ export async function runSpotifySync(options: { backfill?: boolean } = {}): Prom
     }
 
     await setSyncSuccess();
-    logAnalytics('Spotify sync — terminé', { durationMs: Date.now() - start, playsInserted });
+    logAnalytics('Spotify sync - terminé', { durationMs: Date.now() - start, playsInserted });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Spotify sync error:', message);
     await setSyncError(message);
-    logAnalytics('Spotify sync — erreur', { message, durationMs: Date.now() - start });
+    logAnalytics('Spotify sync - erreur', { message, durationMs: Date.now() - start });
   } finally {
     syncInProgress = false;
   }

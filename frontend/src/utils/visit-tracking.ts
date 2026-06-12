@@ -12,14 +12,14 @@ const API_BASE = resolveApiBase();
 
 export async function trackVisit(path: string): Promise<void> {
   if (!API_BASE) {
-    logAnalytics('Enregistrement visite — échec: VITE_API_BASE_URL non défini', { path });
+    logAnalytics('Enregistrement visite - échec: VITE_API_BASE_URL non défini', { path });
     return;
   }
 
   const url = `${API_BASE}/nexus/visit?path=${encodeURIComponent(path)}`;
   const payload = JSON.stringify({ path });
 
-  logAnalytics('Enregistrement visite — envoi', { path, url });
+  logAnalytics('Enregistrement visite - envoi', { path, url });
 
   try {
     const response = await fetch(url, {
@@ -37,7 +37,7 @@ export async function trackVisit(path: string): Promise<void> {
     } | null;
 
     if (!response.ok || !data?.success) {
-      logAnalytics('Enregistrement visite — erreur serveur', {
+      logAnalytics('Enregistrement visite - erreur serveur', {
         path,
         status: response.status,
         message: data?.message ?? data?.error ?? 'Réponse invalide',
@@ -45,13 +45,13 @@ export async function trackVisit(path: string): Promise<void> {
       return;
     }
 
-    logAnalytics('Enregistrement visite — confirmé', {
+    logAnalytics('Enregistrement visite - confirmé', {
       path,
       id: data.data?.id,
       status: response.status,
     });
   } catch (error) {
-    logAnalytics('Enregistrement visite — échec réseau', {
+    logAnalytics('Enregistrement visite - échec réseau', {
       path,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
@@ -59,7 +59,7 @@ export async function trackVisit(path: string): Promise<void> {
     if (navigator.sendBeacon) {
       const blob = new Blob([payload], { type: 'application/json' });
       const sent = navigator.sendBeacon(url, blob);
-      logAnalytics('Enregistrement visite — fallback sendBeacon', { path, sent });
+      logAnalytics('Enregistrement visite - fallback sendBeacon', { path, sent });
     }
   }
 }

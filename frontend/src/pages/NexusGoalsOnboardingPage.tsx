@@ -129,7 +129,7 @@ export default function NexusGoalsOnboardingPage() {
               <Label className={labelClass} htmlFor="targetWeightKg">
                 Poids cible global (kg, optionnel)
               </Label>
-              <Input id="targetWeightKg" {...form.register('targetWeightKg')} placeholder="—" />
+              <Input id="targetWeightKg" {...form.register('targetWeightKg')} placeholder="-" />
               {form.formState.errors.targetWeightKg ? (
                 <p className={errorClass}>{form.formState.errors.targetWeightKg.message}</p>
               ) : null}

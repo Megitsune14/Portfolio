@@ -92,7 +92,7 @@ export default function NexusSpotifyPage() {
       <>
         <NexusPageHeader
           title="Spotify"
-          description="Statistiques d'écoute — wrapped, tops et historique synchronisés."
+          description="Statistiques d'écoute - wrapped, tops et historique synchronisés."
         />
         <Card className="mx-auto max-w-lg text-center">
           <CardContent className="space-y-4 p-8">

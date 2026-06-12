@@ -51,7 +51,7 @@ export default function NexusLogin() {
       <Card className="relative z-10 w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="font-jp text-3xl">Nexus</CardTitle>
-          <CardDescription>Dashboard privé — authentification requise</CardDescription>
+          <CardDescription>Dashboard privé - authentification requise</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

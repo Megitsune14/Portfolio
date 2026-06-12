@@ -25,7 +25,7 @@ export async function getRiotStats(): Promise<RiotResponse | null> {
   return doc?.data ?? null;
 }
 
-/** Écrase les stats courantes — pas d'historique */
+/** Écrase les stats courantes - pas d'historique */
 export async function saveRiotStats(data: RiotResponse): Promise<void> {
   const collection = await getCollection();
   await collection.updateOne(

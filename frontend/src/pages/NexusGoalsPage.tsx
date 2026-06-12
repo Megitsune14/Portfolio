@@ -305,12 +305,12 @@ export default function NexusGoalsPage() {
               </div>
               <div>
                 <label className={`${labelClass} lg:sr-only`}>Poids cible (kg)</label>
-                <input {...createForm.register('targetWeightKg')} className={inputClass} placeholder="—" />
+                <input {...createForm.register('targetWeightKg')} className={inputClass} placeholder="-" />
                 {createForm.formState.errors.targetWeightKg ? (
                   <p className={errorClass}>{createForm.formState.errors.targetWeightKg.message}</p>
                 ) : null}
               </div>
-              <div className="text-xs text-muted lg:flex lg:items-center">—</div>
+              <div className="text-xs text-muted lg:flex lg:items-center">-</div>
               <div className="hidden lg:block" />
               <div className="flex lg:justify-end">
                 <Button type="submit" className="w-full lg:w-auto" disabled={createGoalMut.isPending}>
@@ -320,7 +320,7 @@ export default function NexusGoalsPage() {
             </form>
 
             {goals.length === 0 ? (
-              <NexusEmptyState message="Aucun objectif — remplis la ligne « Créer » ci-dessus." />
+              <NexusEmptyState message="Aucun objectif - remplis la ligne « Créer » ci-dessus." />
             ) : (
               goals.map((g) => {
                 const isEdit = editingGoalId === g._id;
@@ -402,9 +402,9 @@ export default function NexusGoalsPage() {
                     ) : (
                       <div className={goalGrid}>
                         <div className="font-semibold text-foreground">{g.title}</div>
-                        <div className="text-sm text-muted">{g.description ?? '—'}</div>
+                        <div className="text-sm text-muted">{g.description ?? '-'}</div>
                         <div className="tabular-nums text-foreground">
-                          {g.targetWeightKg != null ? `${g.targetWeightKg} kg` : '—'}
+                          {g.targetWeightKg != null ? `${g.targetWeightKg} kg` : '-'}
                         </div>
                         <div>
                           <Badge variant={g.status === 'active' ? 'default' : 'outline'}>
@@ -526,7 +526,7 @@ export default function NexusGoalsPage() {
                               return (
                                 <div key={s._id} className={subGrid}>
                                   <span className="text-sm font-medium text-foreground">{s.title}</span>
-                                  <span className="text-xs text-muted">{s.description ?? '—'}</span>
+                                  <span className="text-xs text-muted">{s.description ?? '-'}</span>
                                   <span className="text-[10px] font-bold uppercase text-muted">
                                     {s.status === 'active' ? 'À faire' : 'Fait'}
                                   </span>

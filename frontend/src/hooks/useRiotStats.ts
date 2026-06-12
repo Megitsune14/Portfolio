@@ -55,7 +55,7 @@ export const useRiotStats = () => {
     try {
       setError(null);
 
-      // Cache sessionStorage (3 h) — topMastery inclut totalLevel, totalPoints et le top 3
+      // Cache sessionStorage (3 h) - topMastery inclut totalLevel, totalPoints et le top 3
       const cachedData = riotCache.get();
       if (cachedData) {
         console.log('Using cached Riot data');

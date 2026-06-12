@@ -32,7 +32,7 @@ function deviceLabel(deviceType: string | null): string {
   if (deviceType === 'mobile') return 'Mobile';
   if (deviceType === 'tablet') return 'Tablette';
   if (deviceType === 'desktop') return 'Desktop';
-  return '—';
+  return '-';
 }
 
 export default function NexusAnalyticsPage() {
@@ -56,7 +56,7 @@ export default function NexusAnalyticsPage() {
       <>
         <NexusPageHeader
           title="Analytics"
-          description="Statistiques de visites du portfolio — géolocalisation, appareils et navigateurs."
+          description="Statistiques de visites du portfolio - géolocalisation, appareils et navigateurs."
         />
         <NexusLoadingState />
       </>
@@ -76,7 +76,7 @@ export default function NexusAnalyticsPage() {
     <>
       <NexusPageHeader
         title="Analytics"
-        description="Statistiques de visites du portfolio — géolocalisation, appareils et navigateurs."
+        description="Statistiques de visites du portfolio - géolocalisation, appareils et navigateurs."
       />
 
       {statsQuery.data ? (
@@ -132,7 +132,7 @@ export default function NexusAnalyticsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="hidden text-muted-foreground md:table-cell">
-                      {visitor.browser ?? '—'}
+                      {visitor.browser ?? '-'}
                     </TableCell>
                   </TableRow>
                 ))

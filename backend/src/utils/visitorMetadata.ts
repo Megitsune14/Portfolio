@@ -127,7 +127,7 @@ export async function lookupGeoFromIp(
 export function formatLocation(geo: Pick<VisitorGeo, 'city' | 'country' | 'countryCode'>): string {
   const country = geo.country ?? countryCodeToName(geo.countryCode);
   const parts = [geo.city, country].filter(Boolean);
-  if (parts.length === 0) return '—';
+  if (parts.length === 0) return '-';
   return parts.join(', ');
 }
 

@@ -19,7 +19,7 @@ export function SpotifyTopDetailSheet({ bubble, open, onOpenChange }: Props) {
       <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
         <SheetHeader>
           <SheetTitle>
-            {TYPE_LABELS[bubble.type]} — {TIME_RANGE_LABELS[bubble.timeRange]}
+            {TYPE_LABELS[bubble.type]} - {TIME_RANGE_LABELS[bubble.timeRange]}
           </SheetTitle>
         </SheetHeader>
 

@@ -103,7 +103,7 @@ export const projects: Project[] = [
   },
   {
     title: 'MyDNS',
-    description: 'Local alternative to Pi-hole / AdGuard Home — self-hosted DNS filtering server for homelab.',
+    description: 'Local alternative to Pi-hole / AdGuard Home, self-hosted DNS filtering server for homelab.',
     tags: [],
     techStack: {
       backend: ['Node.js', 'Hono', 'TypeScript'],

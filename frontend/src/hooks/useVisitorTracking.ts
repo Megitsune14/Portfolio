@@ -12,7 +12,7 @@ export function useVisitorTracking() {
     }
 
     const path = location.pathname + location.search;
-    logAnalytics('Navigation détectée — enregistrement visite', { path });
+    logAnalytics('Navigation détectée - enregistrement visite', { path });
     void trackVisit(path);
   }, [location.pathname, location.search]);
 }

@@ -43,12 +43,12 @@ export default function NexusGoalsDashboardPage() {
       <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <NexusStatCard
           label="Poids actuel"
-          value={summary.currentWeight != null ? `${summary.currentWeight} kg` : '—'}
+          value={summary.currentWeight != null ? `${summary.currentWeight} kg` : '-'}
         />
-        <NexusStatCard label="IMC" value={summary.bmi != null ? String(summary.bmi) : '—'} />
+        <NexusStatCard label="IMC" value={summary.bmi != null ? String(summary.bmi) : '-'} />
         <NexusStatCard
           label="Taille"
-          value={summary.heightCm != null ? `${summary.heightCm} cm` : '—'}
+          value={summary.heightCm != null ? `${summary.heightCm} cm` : '-'}
         />
         <NexusStatCard label="Objectifs actifs" value={summary.activeGoalsCount} />
       </section>

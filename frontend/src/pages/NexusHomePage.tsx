@@ -72,7 +72,7 @@ export default function NexusHomePage() {
     <>
       <NexusPageHeader
         title="Accueil"
-        description="Vue d'ensemble de ton back-office Nexus — visites, objectifs et écoute Spotify."
+        description="Vue d'ensemble de ton back-office Nexus - visites, objectifs et écoute Spotify."
       />
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -125,7 +125,7 @@ export default function NexusHomePage() {
           <CardContent className="grid gap-4 sm:grid-cols-2">
             {goalsQuery.isError || !goalsSummary ? (
               <p className="text-sm text-muted-foreground sm:col-span-2">
-                Profil non configuré —{' '}
+                Profil non configuré -{' '}
                 <Link to="/nexus/goals/onboarding" className="text-primary underline-offset-4 hover:underline">
                   commencer l&apos;onboarding
                 </Link>
@@ -135,7 +135,7 @@ export default function NexusHomePage() {
                 <NexusStatCard
                   label="Poids actuel"
                   value={
-                    goalsSummary.currentWeight != null ? `${goalsSummary.currentWeight} kg` : '—'
+                    goalsSummary.currentWeight != null ? `${goalsSummary.currentWeight} kg` : '-'
                   }
                   className="shadow-none"
                 />
@@ -168,7 +168,7 @@ export default function NexusHomePage() {
           <CardContent className="space-y-4">
             {!spotifyStatus?.connected ? (
               <p className="text-sm text-muted-foreground">
-                Spotify non connecté — connecte ton compte depuis la section Stats du portfolio.
+                Spotify non connecté - connecte ton compte depuis la section Stats du portfolio.
               </p>
             ) : (
               <>

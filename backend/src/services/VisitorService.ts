@@ -67,7 +67,7 @@ function formatDevice(client: VisitorClient): string {
         : 'Desktop',
     client.os,
   ].filter(Boolean);
-  return parts.length > 0 ? parts.join(' · ') : '—';
+  return parts.length > 0 ? parts.join(' · ') : '-';
 }
 
 export function serializeVisitor(visitor: VisitorDocument): SerializedVisitor {
@@ -126,7 +126,7 @@ export async function recordVisit(data: {
   countryCode?: string | null;
 }): Promise<VisitorDocument> {
   const start = Date.now();
-  logAnalytics('Enregistrement visite — début', { ip: data.ip, path: data.path });
+  logAnalytics('Enregistrement visite - début', { ip: data.ip, path: data.path });
 
   const collection = await getCollection();
   const client = parseUserAgent(data.userAgent);
@@ -142,7 +142,7 @@ export async function recordVisit(data: {
   const result = await collection.insertOne(document);
   const visit = { ...document, _id: result.insertedId };
 
-  logAnalytics('Enregistrement visite — terminé', {
+  logAnalytics('Enregistrement visite - terminé', {
     id: visit._id?.toString(),
     ip: data.ip,
     path: data.path,

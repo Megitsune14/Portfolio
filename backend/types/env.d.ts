@@ -16,7 +16,7 @@ declare global {
             SPOTIFY_SYNC_INTERVAL_MS?: string;
             BACKEND_URL: string;
 
-            // Discord Bot API (profile via GET /users/:id — bot must share a server with the user)
+            // Discord Bot API (profile via GET /users/:id - bot must share a server with the user)
             DISCORD_BOT_TOKEN: string;
             DISCORD_USER_ID: string;
 

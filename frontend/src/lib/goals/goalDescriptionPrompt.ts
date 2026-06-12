@@ -38,7 +38,7 @@ export function buildGoalDescriptionPromptText(opts: {
   goalTargetKg?: number | null;
   subGoalTitles?: string[];
 }): string {
-  const title = opts.goalTitle.trim() || '(titre non encore saisi — complète-le si besoin)';
+  const title = opts.goalTitle.trim() || '(titre non encore saisi - complète-le si besoin)';
   const targetFromStr = parseOptionalKg(opts.goalTargetKgStr);
   const targetKg = opts.goalTargetKg ?? targetFromStr;
 

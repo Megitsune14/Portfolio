@@ -70,7 +70,7 @@ export interface RiotResponse {
   };
 }
 
-// Discord (Bot API — GET /users/:id)
+// Discord (Bot API - GET /users/:id)
 export interface DiscordProfileBadge {
   id: string;
   label: string;

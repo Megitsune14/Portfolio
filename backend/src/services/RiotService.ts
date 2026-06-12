@@ -244,7 +244,7 @@ export async function fetchSummonerInfoFromApi(
       console.log('No rank data found');
     }
     
-    // 5. Maîtrises champion — un seul appel (liste complète) :
+    // 5. Maîtrises champion - un seul appel (liste complète) :
     //    - totaux (Total Mastery / Total Points) = somme sur tous les champions
     //    - top 3 = les 3 premiers triés par championPoints (évite un 2e appel API / rate limit)
     const allMasteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`;

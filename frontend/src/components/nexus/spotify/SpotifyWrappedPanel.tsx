@@ -30,9 +30,9 @@ export function SpotifyWrappedPanel({ data, showMostActiveMonth }: Props) {
 
       <div className={`grid gap-4 ${showMostActiveMonth ? 'sm:grid-cols-2' : 'sm:grid-cols-1'}`}>
         {showMostActiveMonth ? (
-          <NexusStatCard label="Mois le plus actif" value={data.mostActiveMonth?.label ?? '—'} />
+          <NexusStatCard label="Mois le plus actif" value={data.mostActiveMonth?.label ?? '-'} />
         ) : null}
-        <NexusStatCard label="Jour le plus actif" value={data.mostActiveDay?.label ?? '—'} />
+        <NexusStatCard label="Jour le plus actif" value={data.mostActiveDay?.label ?? '-'} />
       </div>
     </div>
   );

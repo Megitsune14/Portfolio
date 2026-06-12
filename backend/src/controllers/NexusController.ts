@@ -103,7 +103,7 @@ export async function trackVisit(c: Context): Promise<Response> {
       }
     } catch {
       if (!queryPath) {
-        logAnalytics('Corps requête track illisible — path par défaut', {
+        logAnalytics('Corps requête track illisible - path par défaut', {
           contentType: c.req.header('content-type') ?? null,
         });
       }
@@ -132,7 +132,7 @@ export async function trackVisit(c: Context): Promise<Response> {
       data: { id: visit._id?.toString() },
     } as ApiResponse);
   } catch (error) {
-    logAnalytics('Track visit — échec', {
+    logAnalytics('Track visit - échec', {
       message: error instanceof Error ? error.message : 'Unknown error',
     });
     console.error('Track visit error:', error);

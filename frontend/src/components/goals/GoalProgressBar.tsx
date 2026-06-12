@@ -11,7 +11,7 @@ export function GoalProgressBar({ percent, detail, emptyLabel = 'Non estimé' }:
     <div className="w-full min-w-0">
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-[11px] font-bold tabular-nums tracking-tight text-foreground">
-          {p == null ? '—' : `${p} %`}
+          {p == null ? '-' : `${p} %`}
         </span>
         {p == null ? (
           <span className="max-w-32 truncate text-right text-[9px] font-medium uppercase tracking-wider text-muted">

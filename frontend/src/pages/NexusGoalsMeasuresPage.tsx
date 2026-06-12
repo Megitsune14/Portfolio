@@ -219,7 +219,7 @@ export default function NexusGoalsMeasuresPage() {
                   ) : (
                     <TableRow key={entry._id}>
                       <TableCell className="font-mono font-semibold">{entry.weightKg} kg</TableCell>
-                      <TableCell className="text-muted-foreground">{entry.note ?? '—'}</TableCell>
+                      <TableCell className="text-muted-foreground">{entry.note ?? '-'}</TableCell>
                       <TableCell>{formatDate(entry.measuredAt)}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-2">
