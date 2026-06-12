@@ -26,6 +26,12 @@ export interface WrappedTopTrack {
   count: number;
 }
 
+export interface WrappedDayStats {
+  count: number;
+  estimatedListeningTime: string;
+  estimatedListeningMs: number;
+}
+
 export interface WrappedSummary {
   period: 'all-time' | 'year' | 'month';
   year: number | null;
@@ -39,7 +45,8 @@ export interface WrappedSummary {
   topArtists: WrappedTopArtist[];
   topTracks: WrappedTopTrack[];
   mostActiveMonth: { label: string; count: number } | null;
-  mostActiveDay: { label: string; count: number } | null;
+  mostActiveDay: (WrappedDayStats & { label: string }) | null;
+  todayPlays: WrappedDayStats;
 }
 
 export interface WrappedAllTime extends WrappedSummary {

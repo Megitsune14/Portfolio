@@ -6,6 +6,11 @@ type Props = {
   showMostActiveMonth: boolean;
 };
 
+function formatDayStats(stats: { count: number; estimatedListeningTime: string }): string {
+  const listens = `${stats.count.toLocaleString('fr-FR')} écoute${stats.count > 1 ? 's' : ''}`;
+  return `${listens} · ${stats.estimatedListeningTime}`;
+}
+
 export function SpotifyWrappedPanel({ data, showMostActiveMonth }: Props) {
   const allTime = 'firstPlayAt' in data ? data : null;
 
@@ -28,11 +33,24 @@ export function SpotifyWrappedPanel({ data, showMostActiveMonth }: Props) {
         <NexusStatCard label="Temps estimé" value={data.estimatedListeningTime} />
       </div>
 
-      <div className={`grid gap-4 ${showMostActiveMonth ? 'sm:grid-cols-2' : 'sm:grid-cols-1'}`}>
+      <div
+        className={`grid gap-4 ${
+          showMostActiveMonth ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2'
+        }`}
+      >
         {showMostActiveMonth ? (
           <NexusStatCard label="Mois le plus actif" value={data.mostActiveMonth?.label ?? '-'} />
         ) : null}
-        <NexusStatCard label="Jour le plus actif" value={data.mostActiveDay?.label ?? '-'} />
+        <NexusStatCard
+          label="Jour le plus actif"
+          value={data.mostActiveDay?.label ?? '-'}
+          detail={data.mostActiveDay ? formatDayStats(data.mostActiveDay) : undefined}
+        />
+        <NexusStatCard
+          label="Écoutes d'aujourd'hui"
+          value={data.todayPlays.count.toLocaleString('fr-FR')}
+          detail={data.todayPlays.estimatedListeningTime}
+        />
       </div>
     </div>
   );

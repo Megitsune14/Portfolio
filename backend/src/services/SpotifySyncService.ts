@@ -1,5 +1,6 @@
 import SpotifyWebApi from 'spotify-web-api-node';
 import { logAnalytics } from '../utils/analyticsLogger.js';
+import { enrichIncompleteArtists } from './SpotifyArtistEnrichmentService.js';
 import { upsertArtists, type SpotifyArtistInput } from './SpotifyArtistService.js';
 import { insertPlays, type SpotifyPlayInput } from './SpotifyPlayService.js';
 import {
@@ -230,8 +231,14 @@ export async function runSpotifySync(options: { backfill?: boolean } = {}): Prom
       await fetchAndStoreTopItems(api, 'top_artists', timeRange);
     }
 
+    const enrichResult = await enrichIncompleteArtists(api);
+    logAnalytics('Spotify sync - terminé', {
+      durationMs: Date.now() - start,
+      playsInserted,
+      ...enrichResult,
+    });
+
     await setSyncSuccess();
-    logAnalytics('Spotify sync - terminé', { durationMs: Date.now() - start, playsInserted });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Spotify sync error:', message);

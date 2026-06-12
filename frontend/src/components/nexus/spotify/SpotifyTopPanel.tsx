@@ -41,12 +41,12 @@ export function SpotifyTopPanel({ bubbles }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {artistBubbles.map((bubble) => (
+            {trackBubbles.map((bubble) => (
               <SpotifyTopBubble key={bubble.id} bubble={bubble} onClick={() => openBubble(bubble)} />
             ))}
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {trackBubbles.map((bubble) => (
+            {artistBubbles.map((bubble) => (
               <SpotifyTopBubble key={bubble.id} bubble={bubble} onClick={() => openBubble(bubble)} />
             ))}
           </div>

@@ -48,6 +48,13 @@ export function currentMonthBounds(): { from: Date; to: Date } {
   return monthBounds(now.getUTCFullYear(), now.getUTCMonth() + 1);
 }
 
+export function todayBounds(): { from: Date; to: Date } {
+  const now = new Date();
+  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  return { from, to };
+}
+
 let playsCollection: Collection<SpotifyPlayDocument> | null = null;
 
 async function getCollection(): Promise<Collection<SpotifyPlayDocument>> {
@@ -349,7 +356,7 @@ export async function aggregateMostActiveMonth(options: {
 export async function aggregateMostActiveDayOfWeek(options: {
   from?: Date;
   to?: Date;
-}): Promise<{ dayOfWeek: number; count: number } | null> {
+}): Promise<{ dayOfWeek: number; count: number; estimatedListeningMs: number } | null> {
   const collection = await getCollection();
   const match: Record<string, unknown> = {};
   if (options.from || options.to) {
@@ -364,6 +371,7 @@ export async function aggregateMostActiveDayOfWeek(options: {
       $group: {
         _id: { $dayOfWeek: '$playedAt' },
         count: { $sum: 1 },
+        estimatedListeningMs: { $sum: '$durationMs' },
       },
     },
     { $sort: { count: -1 as const } },
@@ -371,9 +379,13 @@ export async function aggregateMostActiveDayOfWeek(options: {
   ];
 
   const [result] = await collection
-    .aggregate<{ _id: number; count: number }>(pipeline)
+    .aggregate<{ _id: number; count: number; estimatedListeningMs: number }>(pipeline)
     .toArray();
 
   if (!result) return null;
-  return { dayOfWeek: result._id, count: result.count };
+  return {
+    dayOfWeek: result._id,
+    count: result.count,
+    estimatedListeningMs: result.estimatedListeningMs,
+  };
 }

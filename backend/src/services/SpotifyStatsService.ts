@@ -2,6 +2,7 @@ import {
   aggregateMostActiveDayOfWeek,
   aggregateMostActiveMonth,
   aggregateSummary,
+  todayBounds,
   aggregateTopArtists,
   aggregateTopTracks,
   countPlays,
@@ -88,12 +89,14 @@ async function buildWrappedSummary(query: WrappedPeriodQuery) {
   const bounds = resolveWrappedBounds(query);
   const limit = DEFAULT_TOP_LIMIT;
 
-  const [summary, topArtists, topTracks, activeMonth, activeDay] = await Promise.all([
+  const today = todayBounds();
+  const [summary, topArtists, topTracks, activeMonth, activeDay, todaySummary] = await Promise.all([
     aggregateSummary({ from: bounds.from, to: bounds.to }),
     aggregateTopArtists({ from: bounds.from, to: bounds.to, limit }),
     aggregateTopTracks({ from: bounds.from, to: bounds.to, limit }),
     aggregateMostActiveMonth({ from: bounds.from, to: bounds.to }),
     aggregateMostActiveDayOfWeek({ from: bounds.from, to: bounds.to }),
+    aggregateSummary({ from: today.from, to: today.to }),
   ]);
 
   return {
@@ -112,8 +115,18 @@ async function buildWrappedSummary(query: WrappedPeriodQuery) {
       ? { label: `${MONTH_NAMES[activeMonth.month - 1]} ${activeMonth.year}`, count: activeMonth.count }
       : null,
     mostActiveDay: activeDay
-      ? { label: DAY_NAMES[activeDay.dayOfWeek - 1] ?? `Jour ${activeDay.dayOfWeek}`, count: activeDay.count }
+      ? {
+          label: DAY_NAMES[activeDay.dayOfWeek - 1] ?? `Jour ${activeDay.dayOfWeek}`,
+          count: activeDay.count,
+          estimatedListeningTime: formatListeningTime(activeDay.estimatedListeningMs),
+          estimatedListeningMs: activeDay.estimatedListeningMs,
+        }
       : null,
+    todayPlays: {
+      count: todaySummary.totalPlays,
+      estimatedListeningTime: formatListeningTime(todaySummary.estimatedListeningMs),
+      estimatedListeningMs: todaySummary.estimatedListeningMs,
+    },
   };
 }
 
@@ -209,20 +222,20 @@ export async function getTopsPanel() {
 
   bubbles.push(
     {
-      id: 'artists-current_month',
-      type: 'top_artists',
-      timeRange: 'current_month',
-      source: 'local',
-      fetchedAt: new Date().toISOString(),
-      items: mapLocalItemsToSnapshotItems(monthArtists),
-    },
-    {
       id: 'tracks-current_month',
       type: 'top_tracks',
       timeRange: 'current_month',
       source: 'local',
       fetchedAt: new Date().toISOString(),
       items: mapLocalTracksToSnapshotItems(monthTracks),
+    },
+    {
+      id: 'artists-current_month',
+      type: 'top_artists',
+      timeRange: 'current_month',
+      source: 'local',
+      fetchedAt: new Date().toISOString(),
+      items: mapLocalItemsToSnapshotItems(monthArtists),
     },
   );
 
@@ -237,20 +250,20 @@ export async function getTopsPanel() {
 
     bubbles.push(
       {
-        id: `artists-${timeRange}`,
-        type: 'top_artists',
-        timeRange,
-        source: 'spotify',
-        fetchedAt: artistSnapshot?.fetchedAt.toISOString() ?? null,
-        items: artistSnapshot?.items ?? [],
-      },
-      {
         id: `tracks-${timeRange}`,
         type: 'top_tracks',
         timeRange,
         source: 'spotify',
         fetchedAt: trackSnapshot?.fetchedAt.toISOString() ?? null,
         items: trackSnapshot?.items ?? [],
+      },
+      {
+        id: `artists-${timeRange}`,
+        type: 'top_artists',
+        timeRange,
+        source: 'spotify',
+        fetchedAt: artistSnapshot?.fetchedAt.toISOString() ?? null,
+        items: artistSnapshot?.items ?? [],
       },
     );
   }
