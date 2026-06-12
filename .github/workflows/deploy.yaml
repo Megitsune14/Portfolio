@@ -20,7 +20,7 @@ jobs:
           config: ${{ secrets.SSH_CONFIG }}
       - name: Sync the application with the server
         run: |
-          rsync -avz ./compose.yaml ${{ secrets.REMOTE_HOST }}:./portfolio
+          rsync -avz ./compose.yaml ./mongo-init.js ${{ secrets.REMOTE_HOST }}:./portfolio
           rsync -avz ./backend/ ${{ secrets.REMOTE_HOST }}:./portfolio/backend
         shell: bash
 

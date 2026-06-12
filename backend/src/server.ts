@@ -68,7 +68,7 @@ try {
     });
 
     // Start server
-    const port = process.env.PORT;
+    const port = parseInt(process.env.PORT ?? '3000', 10);
 
     console.log('🚀 Starting API...');
     console.log(`🎮 Riot API: ${process.env.RIOT_API_KEY ? `Configured (${process.env.RIOT_API_KEY.substring(0, 8)}...)` : 'Not configured'}`);
@@ -80,7 +80,7 @@ try {
 
     serve({
         fetch: app.fetch,
-        port: parseInt(port)
+        port,
     }, (info) => {
         console.log(`🚀 Server running on http://${info.address}:${info.port}`);
     });
