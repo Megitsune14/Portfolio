@@ -16,17 +16,18 @@ export function SpotifyTopDetailSheet({ bubble, open, onOpenChange }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md">
+      <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
         <SheetHeader>
           <SheetTitle>
             {TYPE_LABELS[bubble.type]} — {TIME_RANGE_LABELS[bubble.timeRange]}
           </SheetTitle>
         </SheetHeader>
 
-        <div className="mt-4 flex items-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <Badge variant={bubble.source === 'spotify' ? 'secondary' : 'outline'}>
             {bubble.source === 'spotify' ? 'Spotify' : 'Écoutes locales'}
           </Badge>
+          <Badge variant="outline">{bubble.items.length} éléments</Badge>
           {bubble.fetchedAt ? (
             <span className="text-xs text-muted-foreground">
               {new Date(bubble.fetchedAt).toLocaleString('fr-FR')}
@@ -37,7 +38,7 @@ export function SpotifyTopDetailSheet({ bubble, open, onOpenChange }: Props) {
         {bubble.items.length === 0 ? (
           <p className="mt-6 text-sm text-muted-foreground">Aucune donnée pour le moment.</p>
         ) : (
-          <ol className="mt-6 space-y-4 overflow-y-auto pr-1">
+          <ol className="mt-6 max-h-[calc(100vh-12rem)] space-y-4 overflow-y-auto pr-1">
             {bubble.items.map((item, index) => (
               <li key={`${item.id}-${index}`} className="flex items-start gap-3">
                 <span className="w-6 pt-1 text-sm font-semibold text-primary">{index + 1}</span>
@@ -64,6 +65,9 @@ export function SpotifyTopDetailSheet({ bubble, open, onOpenChange }: Props) {
                     <p className="mt-1 text-xs text-muted-foreground">Popularité {item.popularity}</p>
                   ) : null}
                 </div>
+                {item.count != null ? (
+                  <span className="shrink-0 text-xs text-muted-foreground">{item.count} écoutes</span>
+                ) : null}
               </li>
             ))}
           </ol>

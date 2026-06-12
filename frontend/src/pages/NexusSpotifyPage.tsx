@@ -158,7 +158,10 @@ export default function NexusSpotifyPage() {
             </CardContent>
           </Card>
         ) : (
-          <SpotifyWrappedPanel data={wrappedQuery.data} />
+          <SpotifyWrappedPanel
+            data={wrappedQuery.data}
+            showMostActiveMonth={periodSelection.kind === 'year'}
+          />
         )}
       </section>
 

@@ -4,7 +4,7 @@ import type { SpotifyTopBubble as SpotifyTopBubbleType } from '@/types/spotify-w
 import { SpotifyTopBubble } from './SpotifyTopBubble';
 import { SpotifyTopDetailSheet } from './SpotifyTopDetailSheet';
 
-const COLUMN_ORDER = ['short_term', 'medium_term', 'long_term', 'current_month'] as const;
+const COLUMN_ORDER = ['current_month', 'short_term', 'medium_term', 'long_term'] as const;
 
 type Props = {
   bubbles: SpotifyTopBubbleType[];

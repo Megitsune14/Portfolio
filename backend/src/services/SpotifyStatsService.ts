@@ -167,6 +167,7 @@ function mapLocalItemsToSnapshotItems(
     name: artist.name,
     image: artist.image,
     genres: artist.genres,
+    count: artist.count,
     popularity: undefined as number | undefined,
     externalUrl: undefined as string | undefined,
   }));
@@ -180,6 +181,7 @@ function mapLocalTracksToSnapshotItems(
     name: track.name,
     artist: track.artist,
     image: track.image,
+    count: track.count,
     externalUrl: undefined as string | undefined,
   }));
 }
@@ -194,53 +196,64 @@ export async function getTopsPanel() {
     aggregateTopTracks({ from, to, limit }),
   ]);
 
-  const spotifyRanges: SpotifyTimeRange[] = ['short_term', 'medium_term', 'long_term'];
+  type TopBubble = {
+    id: string;
+    type: SpotifySnapshotType;
+    timeRange: SpotifyTimeRange | 'current_month';
+    source: 'spotify' | 'local';
+    fetchedAt: string | null;
+    items: SpotifySnapshotItem[];
+  };
 
-  const bubbles = [
-    ...spotifyRanges.flatMap((timeRange) => {
-      const artistSnapshot = snapshots.find(
-        (s) => s.type === 'top_artists' && s.timeRange === timeRange,
-      );
-      const trackSnapshot = snapshots.find(
-        (s) => s.type === 'top_tracks' && s.timeRange === timeRange,
-      );
+  const bubbles: TopBubble[] = [];
 
-      return [
-        {
-          id: `artists-${timeRange}`,
-          type: 'top_artists' as SpotifySnapshotType,
-          timeRange,
-          source: 'spotify' as const,
-          fetchedAt: artistSnapshot?.fetchedAt.toISOString() ?? null,
-          items: artistSnapshot?.items ?? [],
-        },
-        {
-          id: `tracks-${timeRange}`,
-          type: 'top_tracks' as SpotifySnapshotType,
-          timeRange,
-          source: 'spotify' as const,
-          fetchedAt: trackSnapshot?.fetchedAt.toISOString() ?? null,
-          items: trackSnapshot?.items ?? [],
-        },
-      ];
-    }),
+  bubbles.push(
     {
       id: 'artists-current_month',
-      type: 'top_artists' as SpotifySnapshotType,
-      timeRange: 'current_month' as const,
-      source: 'local' as const,
+      type: 'top_artists',
+      timeRange: 'current_month',
+      source: 'local',
       fetchedAt: new Date().toISOString(),
       items: mapLocalItemsToSnapshotItems(monthArtists),
     },
     {
       id: 'tracks-current_month',
-      type: 'top_tracks' as SpotifySnapshotType,
-      timeRange: 'current_month' as const,
-      source: 'local' as const,
+      type: 'top_tracks',
+      timeRange: 'current_month',
+      source: 'local',
       fetchedAt: new Date().toISOString(),
       items: mapLocalTracksToSnapshotItems(monthTracks),
     },
-  ];
+  );
+
+  const spotifyRanges: SpotifyTimeRange[] = ['short_term', 'medium_term', 'long_term'];
+  for (const timeRange of spotifyRanges) {
+    const artistSnapshot = snapshots.find(
+      (s) => s.type === 'top_artists' && s.timeRange === timeRange,
+    );
+    const trackSnapshot = snapshots.find(
+      (s) => s.type === 'top_tracks' && s.timeRange === timeRange,
+    );
+
+    bubbles.push(
+      {
+        id: `artists-${timeRange}`,
+        type: 'top_artists',
+        timeRange,
+        source: 'spotify',
+        fetchedAt: artistSnapshot?.fetchedAt.toISOString() ?? null,
+        items: artistSnapshot?.items ?? [],
+      },
+      {
+        id: `tracks-${timeRange}`,
+        type: 'top_tracks',
+        timeRange,
+        source: 'spotify',
+        fetchedAt: trackSnapshot?.fetchedAt.toISOString() ?? null,
+        items: trackSnapshot?.items ?? [],
+      },
+    );
+  }
 
   return { bubbles };
 }

@@ -63,6 +63,7 @@ export interface SpotifySnapshotItem {
   artistIds?: string[];
   album?: string;
   durationMs?: number;
+  count?: number;
 }
 
 export type SpotifyTimeRange = 'short_term' | 'medium_term' | 'long_term' | 'current_month';

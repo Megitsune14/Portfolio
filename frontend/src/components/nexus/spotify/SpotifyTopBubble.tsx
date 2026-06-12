@@ -11,7 +11,6 @@ type Props = {
 
 export function SpotifyTopBubble({ bubble, onClick }: Props) {
   const preview = bubble.items.slice(0, PREVIEW_COUNT);
-  const isArtists = bubble.type === 'top_artists';
 
   return (
     <button
@@ -59,11 +58,9 @@ export function SpotifyTopBubble({ bubble, onClick }: Props) {
         </div>
       )}
 
-      <p className="mt-2 truncate text-xs text-muted-foreground">
-        {preview.length > 0
-          ? isArtists
-            ? preview.map((item) => item.name).join(' · ')
-            : preview.map((item) => item.name).join(' · ')
+      <p className="mt-2 text-xs text-muted-foreground">
+        {bubble.items.length > 0
+          ? `${bubble.items.length} élément${bubble.items.length > 1 ? 's' : ''}`
           : 'Synchronise pour remplir'}
       </p>
     </button>

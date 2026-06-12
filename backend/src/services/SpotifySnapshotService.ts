@@ -15,6 +15,7 @@ export interface SpotifySnapshotItem {
   artistIds?: string[];
   album?: string;
   durationMs?: number;
+  count?: number;
 }
 
 export interface SpotifySnapshotDocument {
