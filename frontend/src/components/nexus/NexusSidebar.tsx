@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, ChevronDown, LayoutDashboard, Music2, Target } from 'lucide-react';
+import { BarChart3, ChevronDown, ExternalLink, LayoutDashboard, LogOut, Music2, Target } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -21,6 +22,7 @@ import {
   mainNavItems,
   spotifyNavItem,
 } from '@/lib/nexus/navigation';
+import { useNexusAuth } from '@/components/nexus/NexusAuthProvider';
 import { goalsApiRequest } from '@/utils/nexus-goals-api';
 import type { Profile } from '@/types/goals';
 
@@ -31,6 +33,7 @@ const iconMap = {
 
 export function NexusSidebar() {
   const location = useLocation();
+  const { logout } = useNexusAuth();
 
   const profileQuery = useQuery({
     queryKey: ['nexus-goals-profile'],
@@ -130,6 +133,25 @@ export function NexusSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/">
+                <ExternalLink />
+                <span>Retour au portfolio</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={logout} className="text-primary hover:text-primary">
+              <LogOut />
+              <span>Déconnexion</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

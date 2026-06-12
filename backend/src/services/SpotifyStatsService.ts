@@ -5,18 +5,37 @@ import {
   aggregateTopArtists,
   aggregateTopTracks,
   countPlays,
+  currentMonthBounds,
+  getAvailablePeriods,
   getPlayDateRange,
+  monthBounds,
+  yearBounds,
+  DEFAULT_TOP_LIMIT,
 } from './SpotifyPlayService.js';
-import { getLatestSnapshot, getLatestSnapshots, serializeSnapshot } from './SpotifySnapshotService.js';
+import {
+  getLatestSnapshot,
+  getLatestSnapshots,
+  serializeSnapshot,
+  type SpotifySnapshotItem,
+  type SpotifySnapshotType,
+  type SpotifyTimeRange,
+} from './SpotifySnapshotService.js';
 import { getSyncMeta, serializeSyncMeta } from './SpotifySyncMetaService.js';
 import { getSyncToken, hasSyncToken, serializeSyncToken } from './SpotifySyncTokenService.js';
-import type { SpotifySnapshotType, SpotifyTimeRange } from './SpotifySnapshotService.js';
 
 const DAY_NAMES = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const MONTH_NAMES = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
 ];
+
+export type WrappedPeriodType = 'all-time' | 'year' | 'month';
+
+export interface WrappedPeriodQuery {
+  period: WrappedPeriodType;
+  year?: number;
+  month?: number | 'current';
+}
 
 function formatListeningTime(ms: number): string {
   const hours = Math.floor(ms / (1000 * 60 * 60));
@@ -25,24 +44,63 @@ function formatListeningTime(ms: number): string {
   return `${minutes} min`;
 }
 
-function yearBounds(year: number): { from: Date; to: Date } {
-  return {
-    from: new Date(`${year}-01-01T00:00:00.000Z`),
-    to: new Date(`${year + 1}-01-01T00:00:00.000Z`),
-  };
+function resolveWrappedBounds(query: WrappedPeriodQuery): {
+  from?: Date;
+  to?: Date;
+  periodLabel: string;
+} {
+  if (query.period === 'all-time') {
+    return { periodLabel: 'Depuis le début' };
+  }
+
+  if (query.period === 'year' && query.year) {
+    const { from, to } = yearBounds(query.year);
+    return { from, to, periodLabel: String(query.year) };
+  }
+
+  if (query.period === 'month' && query.year) {
+    const month =
+      query.month === 'current'
+        ? new Date().getUTCMonth() + 1
+        : typeof query.month === 'number'
+          ? query.month
+          : null;
+
+    if (!month) {
+      const { from, to } = yearBounds(query.year);
+      return { from, to, periodLabel: String(query.year) };
+    }
+
+    const { from, to } = monthBounds(query.year, month);
+    return {
+      from,
+      to,
+      periodLabel: `${MONTH_NAMES[month - 1]} ${query.year}`,
+    };
+  }
+
+  const currentYear = new Date().getFullYear();
+  const { from, to } = yearBounds(currentYear);
+  return { from, to, periodLabel: String(currentYear) };
 }
 
-async function buildWrappedSummary(options: { from?: Date; to?: Date; periodLabel: string }) {
+async function buildWrappedSummary(query: WrappedPeriodQuery) {
+  const bounds = resolveWrappedBounds(query);
+  const limit = DEFAULT_TOP_LIMIT;
+
   const [summary, topArtists, topTracks, activeMonth, activeDay] = await Promise.all([
-    aggregateSummary({ from: options.from, to: options.to }),
-    aggregateTopArtists({ from: options.from, to: options.to, limit: 10 }),
-    aggregateTopTracks({ from: options.from, to: options.to, limit: 10 }),
-    aggregateMostActiveMonth({ from: options.from, to: options.to }),
-    aggregateMostActiveDayOfWeek({ from: options.from, to: options.to }),
+    aggregateSummary({ from: bounds.from, to: bounds.to }),
+    aggregateTopArtists({ from: bounds.from, to: bounds.to, limit }),
+    aggregateTopTracks({ from: bounds.from, to: bounds.to, limit }),
+    aggregateMostActiveMonth({ from: bounds.from, to: bounds.to }),
+    aggregateMostActiveDayOfWeek({ from: bounds.from, to: bounds.to }),
   ]);
 
   return {
-    periodLabel: options.periodLabel,
+    period: query.period,
+    year: query.year ?? null,
+    month: query.month ?? null,
+    periodLabel: bounds.periodLabel,
     totalPlays: summary.totalPlays,
     uniqueTracks: summary.uniqueTracks,
     uniqueArtists: summary.uniqueArtists,
@@ -76,22 +134,115 @@ export async function getNexusSpotifyStatus() {
   };
 }
 
+export async function getWrappedForPeriod(query: WrappedPeriodQuery) {
+  if (query.period === 'all-time') {
+    const dateRange = await getPlayDateRange();
+    return {
+      ...(await buildWrappedSummary(query)),
+      firstPlayAt: dateRange.first?.toISOString() ?? null,
+      lastPlayAt: dateRange.last?.toISOString() ?? null,
+    };
+  }
+
+  return buildWrappedSummary(query);
+}
+
 export async function getWrappedForYear(year: number) {
-  const { from, to } = yearBounds(year);
-  return buildWrappedSummary({
-    from,
-    to,
-    periodLabel: String(year),
-  });
+  return getWrappedForPeriod({ period: 'year', year });
 }
 
 export async function getWrappedAllTime() {
-  const dateRange = await getPlayDateRange();
-  return {
-    ...(await buildWrappedSummary({ periodLabel: 'Tout l\'historique' })),
-    firstPlayAt: dateRange.first?.toISOString() ?? null,
-    lastPlayAt: dateRange.last?.toISOString() ?? null,
-  };
+  return getWrappedForPeriod({ period: 'all-time' });
+}
+
+export async function getSpotifyPeriods() {
+  return getAvailablePeriods();
+}
+
+function mapLocalItemsToSnapshotItems(
+  artists: Awaited<ReturnType<typeof aggregateTopArtists>>,
+): SpotifySnapshotItem[] {
+  return artists.map((artist) => ({
+    id: artist.artistId ?? artist.name,
+    name: artist.name,
+    image: artist.image,
+    genres: artist.genres,
+    popularity: undefined as number | undefined,
+    externalUrl: undefined as string | undefined,
+  }));
+}
+
+function mapLocalTracksToSnapshotItems(
+  tracks: Awaited<ReturnType<typeof aggregateTopTracks>>,
+): SpotifySnapshotItem[] {
+  return tracks.map((track) => ({
+    id: track.trackId,
+    name: track.name,
+    artist: track.artist,
+    image: track.image,
+    externalUrl: undefined as string | undefined,
+  }));
+}
+
+export async function getTopsPanel() {
+  const { from, to } = currentMonthBounds();
+  const limit = DEFAULT_TOP_LIMIT;
+
+  const [snapshots, monthArtists, monthTracks] = await Promise.all([
+    getLatestSnapshots(),
+    aggregateTopArtists({ from, to, limit }),
+    aggregateTopTracks({ from, to, limit }),
+  ]);
+
+  const spotifyRanges: SpotifyTimeRange[] = ['short_term', 'medium_term', 'long_term'];
+
+  const bubbles = [
+    ...spotifyRanges.flatMap((timeRange) => {
+      const artistSnapshot = snapshots.find(
+        (s) => s.type === 'top_artists' && s.timeRange === timeRange,
+      );
+      const trackSnapshot = snapshots.find(
+        (s) => s.type === 'top_tracks' && s.timeRange === timeRange,
+      );
+
+      return [
+        {
+          id: `artists-${timeRange}`,
+          type: 'top_artists' as SpotifySnapshotType,
+          timeRange,
+          source: 'spotify' as const,
+          fetchedAt: artistSnapshot?.fetchedAt.toISOString() ?? null,
+          items: artistSnapshot?.items ?? [],
+        },
+        {
+          id: `tracks-${timeRange}`,
+          type: 'top_tracks' as SpotifySnapshotType,
+          timeRange,
+          source: 'spotify' as const,
+          fetchedAt: trackSnapshot?.fetchedAt.toISOString() ?? null,
+          items: trackSnapshot?.items ?? [],
+        },
+      ];
+    }),
+    {
+      id: 'artists-current_month',
+      type: 'top_artists' as SpotifySnapshotType,
+      timeRange: 'current_month' as const,
+      source: 'local' as const,
+      fetchedAt: new Date().toISOString(),
+      items: mapLocalItemsToSnapshotItems(monthArtists),
+    },
+    {
+      id: 'tracks-current_month',
+      type: 'top_tracks' as SpotifySnapshotType,
+      timeRange: 'current_month' as const,
+      source: 'local' as const,
+      fetchedAt: new Date().toISOString(),
+      items: mapLocalTracksToSnapshotItems(monthTracks),
+    },
+  ];
+
+  return { bubbles };
 }
 
 export async function getTopSnapshot(type: SpotifySnapshotType, timeRange: SpotifyTimeRange) {

@@ -1,3 +1,10 @@
+import type {
+  SpotifyPeriods,
+  SpotifyTopsPanel,
+  WrappedAllTime,
+  WrappedPeriodSelection,
+  WrappedSummary,
+} from '@/types/spotify-wrapped';
 import { getNexusToken } from './nexus-api';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
@@ -35,6 +42,34 @@ export async function spotifyApiRequest<T = unknown>(
   }
 
   return data.data as T;
+}
+
+export function buildWrappedPath(selection: WrappedPeriodSelection): string {
+  if (selection.kind === 'all-time') {
+    return '/wrapped?period=all-time';
+  }
+
+  if (selection.kind === 'year') {
+    return `/wrapped?period=year&year=${selection.year}`;
+  }
+
+  const month =
+    selection.month === 'current' ? 'current' : String(selection.month);
+  return `/wrapped?period=month&year=${selection.year}&month=${month}`;
+}
+
+export async function fetchSpotifyPeriods(): Promise<SpotifyPeriods> {
+  return spotifyApiRequest<SpotifyPeriods>('/periods');
+}
+
+export async function fetchSpotifyWrapped(
+  selection: WrappedPeriodSelection,
+): Promise<WrappedSummary | WrappedAllTime> {
+  return spotifyApiRequest<WrappedSummary | WrappedAllTime>(buildWrappedPath(selection));
+}
+
+export async function fetchSpotifyTops(): Promise<SpotifyTopsPanel> {
+  return spotifyApiRequest<SpotifyTopsPanel>('/tops');
 }
 
 export async function triggerSpotifySync(backfill = false): Promise<void> {

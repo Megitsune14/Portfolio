@@ -41,8 +41,9 @@ export default function NexusHomePage() {
   });
 
   const spotifyWrappedQuery = useQuery({
-    queryKey: ['nexus-spotify-wrapped', currentYear],
-    queryFn: () => spotifyApiRequest<WrappedSummary>(`/wrapped?year=${currentYear}`),
+    queryKey: ['nexus-spotify-wrapped', 'year', currentYear],
+    queryFn: () =>
+      spotifyApiRequest<WrappedSummary>(`/wrapped?period=year&year=${currentYear}`),
     enabled: spotifyStatusQuery.data?.connected === true,
   });
 

@@ -11,6 +11,10 @@ export interface SpotifySnapshotItem {
   image?: string;
   popularity?: number;
   externalUrl?: string;
+  genres?: string[];
+  artistIds?: string[];
+  album?: string;
+  durationMs?: number;
 }
 
 export interface SpotifySnapshotDocument {

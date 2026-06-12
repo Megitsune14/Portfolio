@@ -1,5 +1,6 @@
 import SpotifyWebApi from 'spotify-web-api-node';
 import { logAnalytics } from '../utils/analyticsLogger.js';
+import { upsertArtists, type SpotifyArtistInput } from './SpotifyArtistService.js';
 import { insertPlays, type SpotifyPlayInput } from './SpotifyPlayService.js';
 import {
   insertSnapshot,
@@ -17,6 +18,12 @@ import {
 
 let syncApi: SpotifyWebApi | null = null;
 let syncInProgress = false;
+
+function getTopLimit(): number {
+  const parsed = parseInt(process.env.SPOTIFY_TOP_LIMIT ?? '50', 10);
+  if (Number.isNaN(parsed)) return 50;
+  return Math.min(Math.max(parsed, 1), 50);
+}
 
 function getRedirectUri(): string {
   return `${process.env.BACKEND_URL}${process.env.REDIRECT_ENDPOINT}`;
@@ -63,7 +70,7 @@ function mapRecentlyPlayedItem(item: {
     id: string;
     name: string;
     duration_ms: number;
-    artists: { name: string }[];
+    artists: { id: string; name: string }[];
     album: { name: string; images: { url: string }[] };
     external_urls: { spotify: string };
   };
@@ -71,15 +78,19 @@ function mapRecentlyPlayedItem(item: {
   const track = item.track;
   if (!isTrack(track) || !track.artists.length) return null;
 
+  const artistIds = track.artists.map((artist) => artist.id);
+
   return {
     trackId: track.id,
     name: track.name,
-    artist: track.artists[0]!.name,
+    artist: track.artists.map((a) => a.name).join(', '),
     album: track.album.name,
     durationMs: track.duration_ms,
     playedAt: new Date(item.played_at),
     image: track.album.images[0]?.url,
     externalUrl: track.external_urls.spotify,
+    artistIds,
+    primaryArtistId: track.artists[0]!.id,
   };
 }
 
@@ -103,6 +114,15 @@ async function fetchAndStoreRecentlyPlayed(
       .map(mapRecentlyPlayedItem)
       .filter((p): p is SpotifyPlayInput => p !== null);
 
+    const artistsFromPlays: SpotifyArtistInput[] = [];
+    for (const item of items) {
+      if (!isTrack(item.track)) continue;
+      for (const artist of item.track.artists) {
+        artistsFromPlays.push({ id: artist.id, name: artist.name });
+      }
+    }
+    await upsertArtists(artistsFromPlays);
+
     totalInserted += await insertPlays(plays);
 
     const lastPlayedAt = items[items.length - 1]?.played_at;
@@ -123,29 +143,56 @@ async function fetchAndStoreTopItems(
   const shouldRefresh = await shouldRefreshSnapshot(type, timeRange);
   if (!shouldRefresh) return;
 
+  const limit = getTopLimit();
   let items: SpotifySnapshotItem[] = [];
+  const artistsToCache: SpotifyArtistInput[] = [];
 
   if (type === 'top_tracks') {
-    const response = await api.getMyTopTracks({ limit: 10, time_range: timeRange });
-    items = (response.body.items ?? []).map((track) => ({
-      id: track.id,
-      name: track.name,
-      artist: track.artists[0]?.name,
-      image: track.album.images[0]?.url,
-      popularity: track.popularity,
-      externalUrl: track.external_urls.spotify,
-    }));
+    const response = await api.getMyTopTracks({ limit, time_range: timeRange });
+    items = (response.body.items ?? []).map((track) => {
+      const artistIds = track.artists.map((artist) => artist.id);
+      for (const artist of track.artists) {
+        artistsToCache.push({
+          id: artist.id,
+          name: artist.name,
+          externalUrl: artist.external_urls?.spotify,
+        });
+      }
+      return {
+        id: track.id,
+        name: track.name,
+        artist: track.artists.map((a) => a.name).join(', '),
+        artistIds,
+        album: track.album.name,
+        durationMs: track.duration_ms,
+        image: track.album.images[0]?.url,
+        popularity: track.popularity,
+        externalUrl: track.external_urls.spotify,
+      };
+    });
   } else {
-    const response = await api.getMyTopArtists({ limit: 10, time_range: timeRange });
-    items = (response.body.items ?? []).map((artist) => ({
-      id: artist.id,
-      name: artist.name,
-      image: artist.images[0]?.url,
-      popularity: artist.popularity,
-      externalUrl: artist.external_urls.spotify,
-    }));
+    const response = await api.getMyTopArtists({ limit, time_range: timeRange });
+    items = (response.body.items ?? []).map((artist) => {
+      artistsToCache.push({
+        id: artist.id,
+        name: artist.name,
+        image: artist.images[0]?.url,
+        genres: artist.genres,
+        popularity: artist.popularity,
+        externalUrl: artist.external_urls.spotify,
+      });
+      return {
+        id: artist.id,
+        name: artist.name,
+        image: artist.images[0]?.url,
+        genres: artist.genres,
+        popularity: artist.popularity,
+        externalUrl: artist.external_urls.spotify,
+      };
+    });
   }
 
+  await upsertArtists(artistsToCache);
   await insertSnapshot({ type, timeRange, items });
 }
 

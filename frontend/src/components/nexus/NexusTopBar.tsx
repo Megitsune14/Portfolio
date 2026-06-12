@@ -1,5 +1,5 @@
-import { ExternalLink, LogOut, Moon, Sun } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Moon, Sun } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,22 +9,13 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useTheme } from '@/hooks/use-theme';
-import { useNexusAuth } from '@/components/nexus/NexusAuthProvider';
 import { getPageTitle } from '@/lib/nexus/navigation';
 
 export function NexusTopBar() {
   const location = useLocation();
-  const { logout } = useNexusAuth();
   const { theme, setTheme } = useTheme();
   const pageTitle = getPageTitle(location.pathname);
   const isHome = location.pathname === '/nexus';
@@ -59,27 +50,6 @@ export function NexusTopBar() {
         >
           {theme === 'dark' ? <Sun /> : <Moon />}
         </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              Menu
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link to="/" className="flex items-center gap-2">
-                <ExternalLink />
-                Retour au portfolio
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="text-primary">
-              <LogOut />
-              Déconnexion
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </header>
   );
