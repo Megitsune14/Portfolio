@@ -55,30 +55,13 @@ export const useRiotStats = () => {
     try {
       setError(null);
 
-      // Vérifier d'abord le cache
+      // Cache sessionStorage (3 h) — topMastery inclut totalLevel, totalPoints et le top 3
       const cachedData = riotCache.get();
       if (cachedData) {
         console.log('Using cached Riot data');
-        setData(prevData => {
-          // Éviter les re-renders inutiles si les données sont identiques
-          if (JSON.stringify(prevData) === JSON.stringify(cachedData)) {
-            return prevData;
-          }
-          return cachedData;
-        });
+        setData(cachedData);
         setIsLoading(false);
-        
-        // Récupérer les données fraîches en arrière-plan
-        const freshData = await fetchRiotStats();
-        if (freshData) {
-          setData(prevData => {
-            // Éviter les re-renders inutiles si les données sont identiques
-            if (JSON.stringify(prevData) === JSON.stringify(freshData)) {
-              return prevData;
-            }
-            return freshData;
-          });
-        }
+        // Pas de re-fetch en arrière-plan : évite le rate limit Riot à chaque visite
         return;
       }
       

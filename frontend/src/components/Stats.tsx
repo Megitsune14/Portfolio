@@ -369,6 +369,17 @@ const Stats = () => {
               <span className="animate-pulse text-(--primary)">Loading...</span>
             </div>
           ))}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
+              <div className="h-3 bg-gray-700 rounded animate-pulse mb-2 w-24"></div>
+              <div className="h-5 bg-gray-700 rounded animate-pulse w-12"></div>
+            </div>
+            <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
+              <div className="h-3 bg-gray-700 rounded animate-pulse mb-2 w-24"></div>
+              <div className="h-5 bg-gray-700 rounded animate-pulse w-16"></div>
+            </div>
+          </div>
+
           {/* Loading for Top 3 Champions */}
           <div className="space-y-3">
             <div className="flex items-center gap-3 mb-4">
@@ -376,18 +387,6 @@ const Stats = () => {
                 <i className="fas fa-trophy text-red-400 text-sm"></i>
               </div>
               <h4 className="text-lg font-semibold text-foreground">Top 3 Champions</h4>
-            </div>
-            
-            {/* Loading for totals */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
-                <div className="h-3 bg-gray-700 rounded animate-pulse mb-2 w-16"></div>
-                <div className="h-5 bg-gray-700 rounded animate-pulse w-12"></div>
-              </div>
-              <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
-                <div className="h-3 bg-gray-700 rounded animate-pulse mb-2 w-20"></div>
-                <div className="h-5 bg-gray-700 rounded animate-pulse w-16"></div>
-              </div>
             </div>
             {[1, 2, 3].map((index) => (
               <div key={index} className="flex items-center justify-between rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
@@ -447,8 +446,20 @@ const Stats = () => {
             </div>
           </>
         ) : null}
-        
-        {/* Top 3 Champions */}
+
+        {/* Totaux sur tous les champions (somme des niveaux et points de maîtrise) */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
+            <div className="text-xs text-gray mb-1">Total Mastery</div>
+            <div className="text-lg font-semibold text-foreground">{riotData.topMastery?.totalLevel?.toLocaleString() ?? 'N/A'}</div>
+          </div>
+          <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
+            <div className="text-xs text-gray mb-1">Total Points</div>
+            <div className="text-lg font-semibold text-foreground">{riotData.topMastery?.totalPoints?.toLocaleString() ?? 'N/A'}</div>
+          </div>
+        </div>
+
+        {/* Top 3 champions les plus maîtrisés (données séparées des totaux globaux) */}
         <div className="space-y-3">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
@@ -456,19 +467,7 @@ const Stats = () => {
             </div>
             <h4 className="text-lg font-semibold text-foreground">Top 3 Champions</h4>
           </div>
-          
-          {/* Totaux des Top 3 */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
-              <div className="text-xs text-gray mb-1">Total Level</div>
-              <div className="text-lg font-semibold text-foreground">{riotData.topMastery?.totalLevel?.toLocaleString() || 'N/A'}</div>
-            </div>
-            <div className="rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md">
-              <div className="text-xs text-gray mb-1">Total Points</div>
-              <div className="text-lg font-semibold text-foreground">{riotData.topMastery?.totalPoints?.toLocaleString() || 'N/A'}</div>
-            </div>
-          </div>
-          
+
           {riotData.topMastery?.champions?.map((champion, index) => (
             <div key={champion.championId} className="flex items-center justify-between rounded-xl border border-theme bg-card/70 p-3 backdrop-blur-md transition-colors duration-200 hover:bg-white/10">
               <div className="flex items-center gap-3">

@@ -75,6 +75,19 @@ export const socialLinks: SocialLink[] = [
 
 export const projects: Project[] = [
   {
+    title: 'Portfolio',
+    description: 'My personal portfolio with live Spotify, Riot and Discord stats, plus a private Nexus back-office dashboard.',
+    tags: [],
+    techStack: {
+      backend: ['Node.js', 'Hono', 'TypeScript'],
+      frontend: ['React', 'TypeScript', 'Vite', 'Tailwind'],
+    },
+    links: {
+      repository: 'https://github.com/Megitsune14/Portfolio',
+    },
+    icon: 'fas fa-id-card',
+  },
+  {
     title: 'Zone-Debrid',
     description: 'Web application that optimizes downloads through intelligent webscraping of Zone Téléchargement with integration of the Alldebrid API to automatically debrid all protected links.',
     tags: [],
@@ -87,6 +100,19 @@ export const projects: Project[] = [
       app: 'https://zone-debrid.megitsune.xyz'
     },
     icon: 'fas fa-download'
+  },
+  {
+    title: 'MyDNS',
+    description: 'Local alternative to Pi-hole / AdGuard Home — self-hosted DNS filtering server for homelab.',
+    tags: [],
+    techStack: {
+      backend: ['Node.js', 'Hono', 'TypeScript'],
+      frontend: ['React', 'TypeScript', 'Vite', 'Tailwind'],
+    },
+    links: {
+      repository: 'https://github.com/Megitsune14/MyDNS',
+    },
+    icon: 'fas fa-shield-alt',
   },
   {
     title: 'Jinx',

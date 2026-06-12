@@ -1,4 +1,5 @@
 import type { RiotResponse } from '../../types/index.js';
+import { getRiotStats, saveRiotStats } from './RiotStatsService.js';
 
 // Types pour les réponses API Riot
 interface RiotAccount {
@@ -200,8 +201,11 @@ async function getChampionData(): Promise<{ [key: string]: string }> {
   }
 }
 
-// Fonction principale pour récupérer les informations du summoner
-export async function getSummonerInfo(gameName: string, tag: string, apiKey: string): Promise<RiotResponse> {
+// Appel direct à l'API Riot (utilisé uniquement par le job de sync)
+export async function fetchSummonerInfoFromApi(
+  gameName: string,
+  tag: string,
+): Promise<RiotResponse> {
   try {
     // 1. Récupérer le PUUID
     const { puuid, region: accountRegion } = await getPuuidByRiotId(gameName, tag);
@@ -240,17 +244,22 @@ export async function getSummonerInfo(gameName: string, tag: string, apiKey: str
       console.log('No rank data found');
     }
     
-    // 5. Récupérer le top champion mastery
-    const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=3`;
-    const masteryEntries: RiotChampionMastery[] = await makeRiotRequest(masteryUrl);
-    const topMastery = masteryEntries[0];
-      
+    // 5. Maîtrises champion — un seul appel (liste complète) :
+    //    - totaux (Total Mastery / Total Points) = somme sur tous les champions
+    //    - top 3 = les 3 premiers triés par championPoints (évite un 2e appel API / rate limit)
+    const allMasteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`;
+    const allMasteryEntries = (await makeRiotRequest(allMasteryUrl).catch(
+      () => [] as RiotChampionMastery[],
+    )) as RiotChampionMastery[];
+    const topMasteryEntries = [...allMasteryEntries]
+      .sort((a, b) => b.championPoints - a.championPoints)
+      .slice(0, 3);
+
     // 6. Récupérer le nom du champion et la version Data Dragon
     const [championData, version] = await Promise.all([
       getChampionData(),
       getDataDragonVersion()
     ]);
-    const championName = championData[topMastery.championId.toString()] || `Champion ${topMastery.championId}`;
     
     // 7. Générer l'URL de l'icône
     const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${summoner.profileIconId}.png`;
@@ -264,14 +273,16 @@ export async function getSummonerInfo(gameName: string, tag: string, apiKey: str
       rank: rankData,
       icon: iconUrl,
       topMastery: {
-        champions: masteryEntries.map(entry => ({
+        // Top 3 champions (points de maîtrise les plus élevés)
+        champions: topMasteryEntries.map(entry => ({
           championId: entry.championId.toString(),
           championName: championData[entry.championId.toString()] || `Champion ${entry.championId}`,
           masteryLevel: entry.championLevel,
           masteryPoints: entry.championPoints,
         })),
-        totalLevel: masteryEntries.reduce((acc, entry) => acc + entry.championLevel, 0),
-        totalPoints: masteryEntries.reduce((acc, entry) => acc + entry.championPoints, 0),
+        // Somme sur TOUS les champions du joueur (pas seulement le top 3)
+        totalLevel: allMasteryEntries.reduce((acc, entry) => acc + entry.championLevel, 0),
+        totalPoints: allMasteryEntries.reduce((acc, entry) => acc + entry.championPoints, 0),
       }
     };
   } catch (error) {
@@ -282,6 +293,23 @@ export async function getSummonerInfo(gameName: string, tag: string, apiKey: str
       message: (error as any)?.message ?? 'Une erreur est survenue lors de la récupération des données Riot.',
     };
   }
+}
+
+/**
+ * Lit les stats depuis MongoDB.
+ * Si aucune donnée n'existe encore, fetch Riot à la volée puis enregistre.
+ * Les mises à jour régulières restent gérées par le scheduler.
+ */
+export async function getSummonerInfo(gameName: string, tag: string): Promise<RiotResponse> {
+  const stats = await getRiotStats();
+  if (stats) {
+    return stats;
+  }
+
+  console.log(`Riot stats absentes en base, fetch API (${gameName}#${tag})`);
+  const data = await fetchSummonerInfoFromApi(gameName, tag);
+  await saveRiotStats(data);
+  return data;
 }
 
 // Fonction pour tester la clé API Riot

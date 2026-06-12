@@ -16,7 +16,7 @@ export async function getRiotSummonerInfo(c: Context): Promise<Response> {
       } as ApiResponse, 400);
     }
 
-    const result = await getSummonerInfo(gameName, tag, process.env.RIOT_API_KEY!);
+    const result = await getSummonerInfo(gameName, tag);
     
     return c.json({
       success: true,

@@ -15,11 +15,13 @@ import healthRouter from './routes/health.js';
 import nexusRouter from './routes/nexus.js';
 import { connectMongo } from './db/mongodb.js';
 import { startSpotifyScheduler } from './jobs/spotifyScheduler.js';
+import { startRiotScheduler } from './jobs/riotScheduler.js';
 
 try {
 
     await connectMongo();
     startSpotifyScheduler();
+    startRiotScheduler();
 
     // Create Hono app
     const app = new Hono();

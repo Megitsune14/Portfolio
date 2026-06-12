@@ -1,8 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useNexusAuth } from '../hooks/useNexusAuth';
 import { useTheme } from '../hooks/use-theme';
+
+const navLinkClass =
+  'focus-ring rounded-full px-4 py-2 text-sm font-semibold text-foreground/85 transition hover:bg-[color-mix(in_oklch,var(--primary)_16%,transparent)] hover:text-foreground';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, isLoading } = useNexusAuth();
   const { theme, toggleTheme } = useTheme();
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -69,12 +75,21 @@ const Navbar = () => {
           </div>
 
           <ul className="hidden list-none items-center gap-1 md:flex">
+            {isAuthenticated && !isLoading ? (
+              <>
+                <li>
+                  <Link to="/nexus" className={navLinkClass}>
+                    Nexus
+                  </Link>
+                </li>
+                <li aria-hidden className="px-1 text-sm text-muted-foreground/60">
+                  |
+                </li>
+              </>
+            ) : null}
             {navItems.map((item) => (
               <li key={item.id}>
-                <button
-                  onClick={() => scrollToSection(item.id)}
-                  className="focus-ring rounded-full px-4 py-2 text-sm font-semibold text-foreground/85 transition hover:bg-[color-mix(in_oklch,var(--primary)_16%,transparent)] hover:text-foreground"
-                >
+                <button onClick={() => scrollToSection(item.id)} className={navLinkClass}>
                   {item.label}
                 </button>
               </li>
@@ -132,6 +147,17 @@ const Navbar = () => {
           }`}
         >
           <ul className="flex flex-col px-4 py-4">
+            {isAuthenticated && !isLoading ? (
+              <li>
+                <Link
+                  to="/nexus"
+                  onClick={closeMenu}
+                  className="focus-ring block w-full rounded-2xl px-4 py-3 text-left text-base font-semibold text-foreground/90 transition hover:bg-[color-mix(in_oklch,var(--primary)_14%,transparent)] hover:text-foreground"
+                >
+                  Nexus
+                </Link>
+              </li>
+            ) : null}
             {navItems.map((item) => (
               <li key={item.id}>
                 <button
