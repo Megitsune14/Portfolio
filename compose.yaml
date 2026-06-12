@@ -6,8 +6,6 @@ services:
       - .env
     environment:
       PORT: "3000"
-      # Dans Docker, MongoDB est joignable via le nom du service — pas localhost
-      MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@database:27017/${MONGO_INITDB_DATABASE}?authSource=${MONGO_INITDB_DATABASE}
     expose:
       - "3000"
     networks:
