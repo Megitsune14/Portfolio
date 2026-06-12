@@ -65,10 +65,17 @@ export async function checkNexusAuth(): Promise<boolean> {
 export interface VisitorRecord {
   id: string;
   ip: string;
-  userAgent: string;
-  referrer: string | null;
   path: string;
   createdAt: string;
+  country: string | null;
+  countryCode: string | null;
+  city: string | null;
+  region: string | null;
+  browser: string | null;
+  os: string | null;
+  deviceType: string | null;
+  location: string;
+  device: string;
 }
 
 export interface VisitorStats {

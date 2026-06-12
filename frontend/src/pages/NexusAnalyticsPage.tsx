@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { NexusPageHeader } from '@/components/nexus/NexusPageHeader';
 import { NexusStatCard } from '@/components/nexus/NexusStatCard';
 import { NexusEmptyState, NexusErrorState, NexusLoadingState } from '@/components/nexus/NexusStates';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -27,8 +28,11 @@ function formatDate(iso: string): string {
   });
 }
 
-function truncate(value: string, max = 60): string {
-  return value.length > max ? `${value.slice(0, max)}…` : value;
+function deviceLabel(deviceType: string | null): string {
+  if (deviceType === 'mobile') return 'Mobile';
+  if (deviceType === 'tablet') return 'Tablette';
+  if (deviceType === 'desktop') return 'Desktop';
+  return '—';
 }
 
 export default function NexusAnalyticsPage() {
@@ -52,7 +56,7 @@ export default function NexusAnalyticsPage() {
       <>
         <NexusPageHeader
           title="Analytics"
-          description="Statistiques de visites du portfolio — pages vues, IPs uniques et provenance."
+          description="Statistiques de visites du portfolio — géolocalisation, appareils et navigateurs."
         />
         <NexusLoadingState />
       </>
@@ -72,7 +76,7 @@ export default function NexusAnalyticsPage() {
     <>
       <NexusPageHeader
         title="Analytics"
-        description="Statistiques de visites du portfolio — pages vues, IPs uniques et provenance."
+        description="Statistiques de visites du portfolio — géolocalisation, appareils et navigateurs."
       />
 
       {statsQuery.data ? (
@@ -92,9 +96,9 @@ export default function NexusAnalyticsPage() {
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>IP</TableHead>
-                <TableHead>Page</TableHead>
-                <TableHead>Provenance</TableHead>
-                <TableHead className="hidden lg:table-cell">User-Agent</TableHead>
+                <TableHead>Localisation</TableHead>
+                <TableHead>Appareil</TableHead>
+                <TableHead className="hidden md:table-cell">Navigateur</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -108,13 +112,27 @@ export default function NexusAnalyticsPage() {
                 visitors.map((visitor) => (
                   <TableRow key={visitor.id}>
                     <TableCell className="whitespace-nowrap">{formatDate(visitor.createdAt)}</TableCell>
-                    <TableCell className="font-mono">{visitor.ip}</TableCell>
-                    <TableCell className="font-mono">{visitor.path}</TableCell>
+                    <TableCell className="font-mono text-xs">{visitor.ip}</TableCell>
                     <TableCell>
-                      {visitor.referrer ? truncate(visitor.referrer, 40) : '—'}
+                      <div className="flex flex-col gap-0.5">
+                        <span>{visitor.location}</span>
+                        {visitor.region ? (
+                          <span className="text-xs text-muted-foreground">{visitor.region}</span>
+                        ) : null}
+                      </div>
                     </TableCell>
-                    <TableCell className="hidden text-muted-foreground lg:table-cell" title={visitor.userAgent}>
-                      {truncate(visitor.userAgent, 50)}
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <Badge variant="outline" className="w-fit text-[10px]">
+                          {deviceLabel(visitor.deviceType)}
+                        </Badge>
+                        {visitor.os ? (
+                          <span className="text-xs text-muted-foreground">{visitor.os}</span>
+                        ) : null}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden text-muted-foreground md:table-cell">
+                      {visitor.browser ?? '—'}
                     </TableCell>
                   </TableRow>
                 ))

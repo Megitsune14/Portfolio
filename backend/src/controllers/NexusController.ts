@@ -6,8 +6,14 @@ import {
   verifySessionToken,
   extractBearerToken,
 } from '../services/NexusAuthService.js';
-import { getVisitors, getVisitorStats, recordVisit } from '../services/VisitorService.js';
+import {
+  enrichVisitorForDisplay,
+  getVisitors,
+  getVisitorStats,
+  recordVisit,
+} from '../services/VisitorService.js';
 import { logAnalytics } from '../utils/analyticsLogger.js';
+import { getCountryCodeFromHeaders } from '../utils/visitorMetadata.js';
 
 function getClientIp(c: Context): string {
   const forwarded = c.req.header('x-forwarded-for');
@@ -106,11 +112,17 @@ export async function trackVisit(c: Context): Promise<Response> {
     const ip = getClientIp(c);
     logAnalytics('Requête track visit reçue', { ip, path, bodyParsed, queryPath: queryPath ?? null });
 
+    const countryCode = getCountryCodeFromHeaders({
+      cfIpCountry: c.req.header('cf-ipcountry'),
+      xCountry: c.req.header('x-country') ?? c.req.header('x-vercel-ip-country'),
+    });
+
     const visit = await recordVisit({
       ip,
       userAgent: c.req.header('user-agent') || 'unknown',
       referrer: c.req.header('referer') || c.req.header('referrer') || null,
       path,
+      countryCode,
     });
 
     logAnalytics('Track visit enregistré', { id: visit._id?.toString(), ip, path });
@@ -141,18 +153,12 @@ export async function listVisitors(c: Context): Promise<Response> {
     const limit = Math.min(100, Math.max(1, parseInt(c.req.query('limit') || '25', 10)));
 
     const result = await getVisitors({ page, limit });
+    const visitors = await Promise.all(result.visitors.map((visitor) => enrichVisitorForDisplay(visitor)));
 
     return c.json({
       success: true,
       data: {
-        visitors: result.visitors.map((visitor) => ({
-          id: visitor._id?.toString(),
-          ip: visitor.ip,
-          userAgent: visitor.userAgent,
-          referrer: visitor.referrer,
-          path: visitor.path,
-          createdAt: visitor.createdAt.toISOString(),
-        })),
+        visitors,
         pagination: {
           page,
           limit,
