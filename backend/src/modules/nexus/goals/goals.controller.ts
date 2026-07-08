@@ -228,7 +228,13 @@ export async function putProfile(c: Context): Promise<Response> {
       );
     }
 
+    const existingProfile = await getProfile();
     const profile = await upsertProfile(parsed.data);
+
+    if (!existingProfile || existingProfile.weightKg !== parsed.data.weightKg) {
+      await createWeight({ weightKg: parsed.data.weightKg });
+    }
+
     return c.json({ success: true, data: { profile } } as ApiResponse);
   } catch (error) {
     Logger.error('Upsert profile error:', error);

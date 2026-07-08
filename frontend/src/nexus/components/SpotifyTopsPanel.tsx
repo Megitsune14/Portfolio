@@ -14,12 +14,6 @@ import type {
   SpotifyPeriodSelection,
 } from '../types/nexus'
 
-const VISIBLE_TOP_ITEMS = 8
-const TOP_ITEM_ROW_PX = 52
-const TOP_ITEM_GAP_PX = 8
-const TOP_LIST_MAX_HEIGHT =
-  VISIBLE_TOP_ITEMS * TOP_ITEM_ROW_PX + (VISIBLE_TOP_ITEMS - 1) * TOP_ITEM_GAP_PX
-
 type TopKind = 'tracks' | 'artists'
 type SpotifyRange = 'short_term' | 'medium_term' | 'long_term'
 
@@ -137,10 +131,7 @@ function TopRankList({ items, kind }: { items: RankItem[]; kind: TopKind }) {
   }
 
   return (
-    <div
-      className="overflow-y-auto pr-1"
-      style={{ maxHeight: TOP_LIST_MAX_HEIGHT }}
-    >
+    <div className="flex-1 min-h-0 overflow-y-auto pr-1">
       <ol className="space-y-2">
         {items.map((item, index) => (
           <li
@@ -369,12 +360,12 @@ export function SpotifyTopsPanel({
           </CardContent>
         </Card>
 
-        <Card className="glass">
+        <Card className="glass flex h-full min-h-0 flex-col">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="font-heading text-lg">{detailMeta.title}</CardTitle>
             <p className="text-sm text-muted-foreground">{detailMeta.subtitle}</p>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="flex flex-1 flex-col min-h-0 pt-4">
             <TopRankList items={activeItems} kind={activeKind} />
           </CardContent>
         </Card>

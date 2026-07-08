@@ -62,11 +62,11 @@ export function NexusSpotifyPage() {
               Connexion :{' '}
               <span className={s?.connected ? 'font-medium text-primary' : 'text-muted-foreground'}>
                 {s?.connected
-                  ? `Connecté · [ ${displayName ?? 'Compte'} ]`
+                  ? `Connecté · ${displayName ?? 'Compte'}`
                   : 'Non connecté'}
               </span>
             </span>
-            <span className="text-muted-foreground/50">/</span>
+            <span className="text-muted-foreground/50">|</span>
             <span className="text-muted-foreground">
               Dernière sync :{' '}
               {s?.sync.lastSyncAt

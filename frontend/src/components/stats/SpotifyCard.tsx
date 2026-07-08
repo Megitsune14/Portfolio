@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Music } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -20,9 +20,24 @@ import { cn } from '@/lib/utils'
 export function SpotifyCard() {
   const { t } = useTranslation()
   const brandIcons = useFetch(getPortfolioBrandIcons)
-  const nowPlaying = useSpotifyNowPlaying()
   const recent = useFetch(() => getSpotifyRecent(3), { refetchInterval: 30000, deps: [] })
+  const recentRefreshRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const scheduleRecentRefresh = useCallback(() => {
+    if (recentRefreshRef.current) clearTimeout(recentRefreshRef.current)
+    recentRefreshRef.current = setTimeout(() => {
+      void recent.refetch()
+    }, 3000)
+  }, [recent.refetch])
+
+  const nowPlaying = useSpotifyNowPlaying({ onTrackChange: scheduleRecentRefresh })
   const [brandIconFailed, setBrandIconFailed] = useState(false)
+
+  useEffect(() => {
+    return () => {
+      if (recentRefreshRef.current) clearTimeout(recentRefreshRef.current)
+    }
+  }, [])
 
   const loading = nowPlaying.loading || recent.loading
   const spotifyBrandIcon = !brandIconFailed ? brandIcons.data?.spotify : undefined

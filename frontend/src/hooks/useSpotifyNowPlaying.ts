@@ -10,7 +10,11 @@ function trackKey(track: SpotifyNowPlaying | null): string | null {
   return `${track.name}::${track.artist ?? ''}`
 }
 
-export function useSpotifyNowPlaying() {
+type UseSpotifyNowPlayingOptions = {
+  onTrackChange?: () => void
+}
+
+export function useSpotifyNowPlaying(options: UseSpotifyNowPlayingOptions = {}) {
   const [snapshot, setSnapshot] = useState<SpotifyNowPlaying | null>(null)
   const [displayProgress, setDisplayProgress] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -20,8 +24,14 @@ export function useSpotifyNowPlaying() {
   const syncRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const endTrackRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastTrackKeyRef = useRef<string | null>(null)
+  const hasInitializedRef = useRef(false)
+  const onTrackChangeRef = useRef(options.onTrackChange)
   const syncFnRef = useRef<(isInitial?: boolean) => Promise<void>>(async () => {})
   const snapshotRef = useRef<SpotifyNowPlaying | null>(null)
+
+  useEffect(() => {
+    onTrackChangeRef.current = options.onTrackChange
+  }, [options.onTrackChange])
 
   const stopTick = useCallback(() => {
     if (tickRef.current) {
@@ -83,7 +93,14 @@ export function useSpotifyNowPlaying() {
       const key = trackKey(data)
       const trackChanged = key !== null && key !== lastTrackKeyRef.current
       if (trackChanged) {
+        if (hasInitializedRef.current) {
+          onTrackChangeRef.current?.()
+        }
         lastTrackKeyRef.current = key
+      }
+
+      if (key !== null) {
+        hasInitializedRef.current = true
       }
 
       snapshotRef.current = data
