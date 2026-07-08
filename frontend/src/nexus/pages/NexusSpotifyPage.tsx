@@ -24,12 +24,14 @@ export function NexusSpotifyPage() {
   const [selection, setSelection] = useState<SpotifyPeriodSelection>(defaultSpotifyPeriodSelection)
   const wrapped = useFetch(() => getSpotifyWrapped(selection), { deps: [selection] })
   const [syncing, setSyncing] = useState(false)
+  const [topsRefreshKey, setTopsRefreshKey] = useState(0)
 
   async function handleSync() {
     setSyncing(true)
     try {
       await postSpotifySync(false)
       await Promise.all([status.refetch(), periods.refetch(), wrapped.refetch()])
+      setTopsRefreshKey((k) => k + 1)
     } finally {
       setSyncing(false)
     }
@@ -104,6 +106,7 @@ export function NexusSpotifyPage() {
           selection={selection}
           wrapped={wrapped.data}
           wrappedLoading={wrapped.loading}
+          refreshKey={topsRefreshKey}
         />
       </div>
     </div>

@@ -41,7 +41,6 @@ export function SpotifyStatsCard({
               label="Total écoutes"
               value={totalPlays.toLocaleString('fr-FR')}
               tone="accent"
-              highlight
             />
             <StatItem
               label={periodPlaysLabel(selection, periodLabel)}
