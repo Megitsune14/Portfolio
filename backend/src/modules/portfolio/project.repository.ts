@@ -61,16 +61,20 @@ export function serializeProject(doc: ProjectDocument) {
   const title = normalizeLocalizedString(doc.title);
   const { description, techStack } = resolveProjectText(doc);
 
+  const links = (doc.links ?? [])
+    .filter((link) => link.url?.trim())
+    .map((link) => ({
+      label: normalizeLocalizedString(link.label),
+      url: link.url.trim(),
+    }));
+
   return {
     id: doc._id!.toString(),
     title,
     description,
     techStack,
-    url: doc.url || doc.links?.[0]?.url || undefined,
-    links: (doc.links ?? []).map((link) => ({
-      label: normalizeLocalizedString(link.label),
-      url: link.url,
-    })),
+    url: links[0]?.url,
+    links,
     imageUrl: doc.imageUrl || undefined,
     order: doc.order,
     createdAt: doc.createdAt.toISOString(),
@@ -135,11 +139,21 @@ export async function updateProject(
   if (data.title !== undefined) $set.title = data.title;
   if (data.description !== undefined) $set.description = data.description;
   if (data.techStack !== undefined) $set.techStack = data.techStack;
-  if (data.url !== undefined) $set.url = data.url || undefined;
+  if (data.url !== undefined) {
+    if (data.url.trim()) {
+      $set.url = data.url.trim();
+    } else {
+      $unset.url = '';
+    }
+  }
   if (data.links !== undefined) {
     $set.links = data.links;
-    if (data.url === undefined && data.links[0]) {
-      $set.url = data.links[0].url;
+    if (data.url === undefined) {
+      if (data.links[0]?.url?.trim()) {
+        $set.url = data.links[0].url.trim();
+      } else {
+        $unset.url = '';
+      }
     }
   }
   if (data.imageUrl !== undefined) {

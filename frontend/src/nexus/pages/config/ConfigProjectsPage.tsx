@@ -93,11 +93,12 @@ export function ConfigProjectsPage() {
     setError(null)
     try {
       const links = parseLinks(form.links)
+      const primaryUrl = form.url.trim() || links[0]?.url || ''
       const payload = {
         title: form.title,
         description: form.description,
         techStack: form.techStack,
-        url: form.url || links[0]?.url || undefined,
+        url: primaryUrl,
         links,
         imageUrl: editing ? form.imageUrl : form.imageUrl || undefined,
         order: form.order ? Number(form.order) : undefined,

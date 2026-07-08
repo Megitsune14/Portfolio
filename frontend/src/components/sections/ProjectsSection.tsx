@@ -30,15 +30,12 @@ export function ProjectsSection() {
         ) : (
           <div className="mt-14 grid gap-5 lg:grid-cols-2">
             {list.map((project) => {
-              const links =
-                project.links && project.links.length > 0
-                  ? project.links.map((link) => ({
-                      label: pickLocalized(link.label, locale),
-                      url: link.url,
-                    }))
-                  : project.url
-                    ? [{ label: t('projects.linkFallback'), url: project.url }]
-                    : []
+              const links = (project.links ?? [])
+                .filter((link) => link.url?.trim())
+                .map((link) => ({
+                  label: pickLocalized(link.label, locale) || t('projects.linkFallback'),
+                  url: link.url.trim(),
+                }))
 
               return (
                 <ProjectCard
