@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@/types/api'
+import { getApiBaseUrl } from '@/lib/apiBase'
 
-const BASE = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000'
+const BASE = getApiBaseUrl()
 const TOKEN_KEY = 'nexus_token'
 
 export function getNexusToken(): string | null {

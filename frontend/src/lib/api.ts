@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@/types/api'
+import { getApiBaseUrl } from '@/lib/apiBase'
 
-const BASE = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000'
+const BASE = getApiBaseUrl()
 
 async function fetchApi<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`)

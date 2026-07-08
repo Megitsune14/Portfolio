@@ -1,4 +1,5 @@
 import { nexusFetch, getNexusToken } from './nexusClient'
+import { getApiBaseUrl } from '@/lib/apiBase'
 import type { ApiResponse } from '@/types/api'
 import type {
   NexusGender,
@@ -179,7 +180,7 @@ export async function uploadAsset(file: File, folder: AssetFolder) {
     headers.set('Authorization', `Bearer ${token}`)
   }
 
-  const BASE = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000'
+  const BASE = getApiBaseUrl()
   const res = await fetch(`${BASE}/nexus/assets?folder=${folder}`, {
     method: 'POST',
     headers,
@@ -201,7 +202,7 @@ export async function deleteAsset(folder: AssetFolder, assetPath: string) {
     headers.set('Authorization', `Bearer ${token}`)
   }
 
-  const BASE = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3000'
+  const BASE = getApiBaseUrl()
   const params = new URLSearchParams({ folder, path: assetPath })
   const res = await fetch(`${BASE}/nexus/assets?${params}`, {
     method: 'DELETE',
