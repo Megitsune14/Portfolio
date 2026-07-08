@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronRight, Disc3, Mic2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,6 +13,8 @@ import type {
   NexusSpotifyWrappedItem,
   SpotifyPeriodSelection,
 } from '../types/nexus'
+
+const DEFAULT_LIST_MAX_HEIGHT = 472
 
 type TopKind = 'tracks' | 'artists'
 type SpotifyRange = 'short_term' | 'medium_term' | 'long_term'
@@ -119,7 +121,15 @@ function RecentPlaysList({ items }: { items: NexusSpotifyRecentPlay[] }) {
   )
 }
 
-function TopRankList({ items, kind }: { items: RankItem[]; kind: TopKind }) {
+function TopRankList({
+  items,
+  kind,
+  maxHeight,
+}: {
+  items: RankItem[]
+  kind: TopKind
+  maxHeight: number
+}) {
   const isTracks = kind === 'tracks'
 
   if (items.length === 0) {
@@ -131,7 +141,7 @@ function TopRankList({ items, kind }: { items: RankItem[]; kind: TopKind }) {
   }
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+    <div className="overflow-y-auto pr-1" style={{ maxHeight }}>
       <ol className="space-y-2">
         {items.map((item, index) => (
           <li
@@ -256,6 +266,9 @@ export function SpotifyTopsPanel({
 }) {
   const tops = useFetch(getSpotifyTops)
   const [selectedView, setSelectedView] = useState<ViewId>('local-tracks')
+  const leftCardRef = useRef<HTMLDivElement>(null)
+  const rightHeaderRef = useRef<HTMLDivElement>(null)
+  const [listMaxHeight, setListMaxHeight] = useState(DEFAULT_LIST_MAX_HEIGHT)
 
   useEffect(() => {
     if (refreshKey > 0) {
@@ -311,6 +324,31 @@ export function SpotifyTopsPanel({
 
   const loading = wrappedLoading || tops.loading
 
+  useEffect(() => {
+    if (loading) return
+
+    const leftCard = leftCardRef.current
+    if (!leftCard) return
+
+    const updateHeight = () => {
+      const leftHeight = leftCard.getBoundingClientRect().height
+      const headerHeight = rightHeaderRef.current?.getBoundingClientRect().height ?? 0
+      const contentPadding = 40
+      const next = Math.round(leftHeight - headerHeight - contentPadding)
+      if (next > 0) setListMaxHeight(next)
+    }
+
+    updateHeight()
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(leftCard)
+    window.addEventListener('resize', updateHeight)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', updateHeight)
+    }
+  }, [loading, selectedView])
+
   const isCurrentMonth =
     selection.mode === 'year' &&
     selection.year === SPOTIFY_CURRENT_YEAR &&
@@ -333,7 +371,8 @@ export function SpotifyTopsPanel({
   return (
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-[minmax(260px,300px)_1fr] lg:items-stretch">
-        <Card className="glass flex h-full flex-col lg:sticky lg:top-6">
+        <div ref={leftCardRef} className="lg:sticky lg:top-6">
+          <Card className="glass flex h-full flex-col">
           <CardHeader className="pb-2">
             <CardTitle className="font-heading text-base">Classements</CardTitle>
             <p className="text-xs text-muted-foreground">
@@ -359,14 +398,17 @@ export function SpotifyTopsPanel({
             />
           </CardContent>
         </Card>
+        </div>
 
-        <Card className="glass flex h-full min-h-0 flex-col">
-          <CardHeader className="border-b border-border/40 pb-4">
-            <CardTitle className="font-heading text-lg">{detailMeta.title}</CardTitle>
-            <p className="text-sm text-muted-foreground">{detailMeta.subtitle}</p>
-          </CardHeader>
-          <CardContent className="flex flex-1 flex-col min-h-0 pt-4">
-            <TopRankList items={activeItems} kind={activeKind} />
+        <Card className="glass">
+          <div ref={rightHeaderRef}>
+            <CardHeader className="border-b border-border/40 pb-4">
+              <CardTitle className="font-heading text-lg">{detailMeta.title}</CardTitle>
+              <p className="text-sm text-muted-foreground">{detailMeta.subtitle}</p>
+            </CardHeader>
+          </div>
+          <CardContent className="pt-4">
+            <TopRankList items={activeItems} kind={activeKind} maxHeight={listMaxHeight} />
           </CardContent>
         </Card>
       </div>
