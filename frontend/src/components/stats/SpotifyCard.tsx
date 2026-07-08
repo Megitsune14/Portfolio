@@ -14,6 +14,7 @@ import { useFetch } from '@/hooks/useFetch'
 import { useSpotifyNowPlaying } from '@/hooks/useSpotifyNowPlaying'
 import { useTranslation } from '@/i18n/I18nProvider'
 import { getPortfolioBrandIcons, getSpotifyRecent } from '@/lib/api'
+import { formatPlayedAgo } from '@/lib/formatPlayedAgo'
 import { formatTime } from '@/lib/formatTime'
 import { cn } from '@/lib/utils'
 
@@ -190,6 +191,11 @@ export function SpotifyCard() {
                       <p className="truncate text-sm font-medium">{track.name}</p>
                       <p className="truncate text-xs text-muted-foreground">{track.artist}</p>
                     </div>
+                    {track.playedAt ? (
+                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                        {formatPlayedAgo(track.playedAt, t)}
+                      </span>
+                    ) : null}
                   </li>
                 ))}
               </ul>
