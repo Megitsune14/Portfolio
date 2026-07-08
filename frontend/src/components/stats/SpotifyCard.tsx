@@ -10,20 +10,16 @@ import {
   statCardClass,
 } from '@/components/stats/StatCardUi'
 import { useFetch } from '@/hooks/useFetch'
+import { useSpotifyNowPlaying } from '@/hooks/useSpotifyNowPlaying'
 import { useTranslation } from '@/i18n/I18nProvider'
-import { getPortfolioBrandIcons, getSpotifyNowPlaying, getSpotifyRecent } from '@/lib/api'
-import type { SpotifyNowPlaying } from '@/types/api'
+import { getPortfolioBrandIcons, getSpotifyRecent } from '@/lib/api'
+import { formatTime } from '@/lib/formatTime'
 import { cn } from '@/lib/utils'
-
-function spotifyPollInterval(data: unknown) {
-  const track = data as SpotifyNowPlaying | null
-  return track?.isPlaying ? 5000 : undefined
-}
 
 export function SpotifyCard() {
   const { t } = useTranslation()
   const brandIcons = useFetch(getPortfolioBrandIcons)
-  const nowPlaying = useFetch(getSpotifyNowPlaying, { refetchInterval: spotifyPollInterval })
+  const nowPlaying = useSpotifyNowPlaying()
   const recent = useFetch(() => getSpotifyRecent(3), { refetchInterval: 30000, deps: [] })
 
   const loading = nowPlaying.loading || recent.loading || brandIcons.loading
@@ -48,7 +44,7 @@ export function SpotifyCard() {
     )
   }
 
-  const now = nowPlaying.data
+  const now = nowPlaying.snapshot
   const tracks = recent.data?.tracks ?? []
   const fetchError = nowPlaying.error ?? recent.error
 
@@ -91,10 +87,7 @@ export function SpotifyCard() {
   }
 
   const hasTrack = Boolean(now?.name)
-  const progress =
-    now?.duration && now.progress !== undefined
-      ? Math.min(100, (now.progress / now.duration) * 100)
-      : 0
+  const showProgress = hasTrack && now?.duration !== undefined
 
   return (
     <Card className={statCardClass}>
@@ -132,8 +125,14 @@ export function SpotifyCard() {
                       ? t('stats.spotify.nowPlaying')
                       : t('stats.spotify.paused')}
                   </p>
-                  {now?.duration ? (
-                    <Progress value={progress} className="mt-3 h-1.5" />
+                  {showProgress ? (
+                    <div className="mt-3 space-y-1.5">
+                      <Progress value={nowPlaying.progressPercent} className="h-1.5" />
+                      <div className="flex justify-between text-[0.65rem] tabular-nums text-muted-foreground">
+                        <span>{formatTime(nowPlaying.displayProgress)}</span>
+                        <span>{formatTime(now.duration!)}</span>
+                      </div>
+                    </div>
                   ) : null}
                 </div>
               </div>
