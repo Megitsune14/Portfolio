@@ -1,5 +1,6 @@
-import { Collection } from 'mongodb';
+import { Collection, ObjectId } from 'mongodb';
 import { getDb } from '../../../shared/db/mongodb.js';
+import Logger from '../../../shared/utils/logger.js';
 
 export interface SpotifyPlayDocument {
   trackId: string;
@@ -55,14 +56,85 @@ export function todayBounds(): { from: Date; to: Date } {
 }
 
 let playsCollection: Collection<SpotifyPlayDocument> | null = null;
+let indexesEnsured = false;
+
+const UNIQUE_PLAY_INDEX = 'playedAt_1_trackId_1';
+const PLAYED_AT_INDEX = 'playedAt_-1';
+
+function isMongoError(error: unknown, code: number): boolean {
+  return error instanceof Error && 'code' in error && (error as { code: number }).code === code;
+}
+
+async function deduplicatePlays(collection: Collection<SpotifyPlayDocument>): Promise<number> {
+  const duplicates = await collection
+    .aggregate<{ ids: ObjectId[] }>([
+      {
+        $group: {
+          _id: { playedAt: '$playedAt', trackId: '$trackId' },
+          ids: { $push: '$_id' },
+          count: { $sum: 1 },
+        },
+      },
+      { $match: { count: { $gt: 1 } } },
+    ])
+    .toArray();
+
+  let removed = 0;
+  for (const group of duplicates) {
+    const toDelete = group.ids.slice(1);
+    if (toDelete.length === 0) continue;
+    const result = await collection.deleteMany({ _id: { $in: toDelete } });
+    removed += result.deletedCount;
+  }
+
+  return removed;
+}
+
+async function dropPlayIndexIfExists(
+  collection: Collection<SpotifyPlayDocument>,
+  name: string,
+): Promise<void> {
+  try {
+    await collection.dropIndex(name);
+  } catch {
+    // Index may not exist (e.g. failed build).
+  }
+}
+
+async function ensurePlaysIndexes(collection: Collection<SpotifyPlayDocument>): Promise<void> {
+  try {
+    await collection.createIndex(
+      { playedAt: 1, trackId: 1 },
+      { unique: true, name: UNIQUE_PLAY_INDEX },
+    );
+  } catch (error) {
+    if (!isMongoError(error, 11000)) throw error;
+
+    Logger.info('Duplicate spotify_plays detected, deduplicating before unique index...');
+    const removed = await deduplicatePlays(collection);
+    Logger.info(`Removed ${removed} duplicate spotify_plays document(s)`);
+
+    await dropPlayIndexIfExists(collection, UNIQUE_PLAY_INDEX);
+    await collection.createIndex(
+      { playedAt: 1, trackId: 1 },
+      { unique: true, name: UNIQUE_PLAY_INDEX },
+    );
+  }
+
+  await collection.createIndex({ playedAt: -1 }, { name: PLAYED_AT_INDEX });
+}
 
 export async function getPlaysCollection(): Promise<Collection<SpotifyPlayDocument>> {
   if (!playsCollection) {
     const db = getDb();
     playsCollection = db.collection<SpotifyPlayDocument>('spotify_plays');
-    await playsCollection.createIndex({ playedAt: 1, trackId: 1 }, { unique: true });
-    await playsCollection.createIndex({ playedAt: -1 });
   }
+
+  if (!indexesEnsured) {
+    await ensurePlaysIndexes(playsCollection);
+    indexesEnsured = true;
+  }
+
   return playsCollection;
 }
 
