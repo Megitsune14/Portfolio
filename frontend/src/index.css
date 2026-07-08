@@ -1,0 +1,268 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@import "@fontsource/shippori-mincho/latin-500.css";
+@import "@fontsource/shippori-mincho/latin-600.css";
+@import "@fontsource/shippori-mincho/latin-700.css";
+@import "@fontsource/shippori-mincho/latin-ext-500.css";
+@import "@fontsource/shippori-mincho/latin-ext-600.css";
+@import "@fontsource/shippori-mincho/latin-ext-700.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Geist Variable", "Geist", system-ui, sans-serif;
+  --font-heading: "Shippori Mincho", "Georgia", serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #faf6f0;
+  --foreground: #1c1525;
+  --card: rgba(255, 252, 248, 0.85);
+  --card-foreground: #1c1525;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(232, 93, 76, 0.1);
+  --secondary-foreground: #5c1f18;
+  --muted: rgba(124, 58, 237, 0.06);
+  --muted-foreground: #6b5f7a;
+  --accent: #e85d4c;
+  --accent-foreground: #ffffff;
+  --gold: #c9a227;
+  --destructive: #dc2626;
+  --border: rgba(124, 58, 237, 0.14);
+  --input: rgba(124, 58, 237, 0.12);
+  --ring: #7c3aed;
+  --popover: rgba(255, 252, 248, 0.95);
+  --popover-foreground: #1c1525;
+  --sidebar: #f5f0e8;
+  --sidebar-foreground: #1c1525;
+  --sidebar-primary: #7c3aed;
+  --sidebar-border: rgba(124, 58, 237, 0.14);
+  --section-alt: color-mix(in srgb, var(--primary) 9%, var(--sidebar));
+}
+
+.dark {
+  --background: #07070f;
+  --foreground: #f5f0eb;
+  --card: rgba(15, 15, 26, 0.75);
+  --card-foreground: #f5f0eb;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(240, 113, 103, 0.12);
+  --secondary-foreground: #fde8e6;
+  --muted: rgba(139, 92, 246, 0.08);
+  --muted-foreground: #a89ec4;
+  --accent: #f07167;
+  --accent-foreground: #ffffff;
+  --gold: #e8b84a;
+  --destructive: #ef4444;
+  --border: rgba(139, 92, 246, 0.2);
+  --input: rgba(139, 92, 246, 0.15);
+  --ring: #8b5cf6;
+  --popover: rgba(15, 15, 26, 0.95);
+  --popover-foreground: #f5f0eb;
+  --sidebar: #0f0f1a;
+  --sidebar-foreground: #f5f0eb;
+  --sidebar-primary: #8b5cf6;
+  --sidebar-border: rgba(139, 92, 246, 0.2);
+  --section-alt: color-mix(in srgb, var(--primary) 7%, var(--background));
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    @apply font-sans;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    min-height: 100svh;
+  }
+  #root {
+    min-height: 100svh;
+  }
+}
+
+@layer utilities {
+  .site-container {
+    @apply mx-auto w-full;
+    padding-inline: clamp(1rem, 4vw, 4rem);
+  }
+
+  .site-container-narrow {
+    @apply mx-auto w-full;
+    padding-inline: clamp(1rem, 4vw, 4rem);
+    max-width: 48rem;
+  }
+
+  .glass {
+    @apply border border-border/60 bg-card/80 backdrop-blur-xl;
+  }
+
+  .section-alt {
+    background-color: var(--section-alt);
+  }
+
+  .navbar-shell {
+    @apply border border-primary/30 bg-card/95 backdrop-blur-2xl;
+    box-shadow:
+      0 8px 32px color-mix(in srgb, var(--foreground) 6%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--primary) 12%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--foreground) 4%, transparent);
+  }
+
+  .dark .navbar-shell {
+    @apply border-primary/40 bg-[#0a0a14]/95;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(139, 92, 246, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .glow-primary {
+    box-shadow:
+      0 0 20px color-mix(in srgb, var(--primary) 35%, transparent),
+      0 0 50px color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .glow-primary-hover:hover {
+    box-shadow:
+      0 0 25px color-mix(in srgb, var(--primary) 50%, transparent),
+      0 0 70px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  .glow-gold {
+    box-shadow:
+      0 0 20px color-mix(in srgb, var(--gold) 30%, transparent),
+      0 0 50px color-mix(in srgb, var(--primary) 12%, transparent);
+  }
+
+  .text-gradient {
+    @apply bg-linear-to-r from-rose-500 via-amber-400 to-violet-500 bg-clip-text text-transparent;
+  }
+
+  .dark .text-gradient {
+    @apply from-rose-400 via-amber-300 to-violet-400;
+  }
+
+  .text-gradient-subtle {
+    @apply bg-linear-to-r from-amber-500 to-violet-500 bg-clip-text text-transparent;
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--primary) 7%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 70%);
+  }
+
+  .stat-card {
+    @apply relative overflow-hidden border-primary/35;
+    box-shadow:
+      0 0 28px color-mix(in srgb, var(--primary) 12%, transparent),
+      0 0 60px color-mix(in srgb, var(--accent) 6%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--foreground) 5%, transparent);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 1;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      var(--accent),
+      var(--gold),
+      var(--primary)
+    );
+  }
+
+  .stat-divider {
+    height: 1px;
+    border: none;
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in srgb, var(--accent) 40%, transparent),
+      color-mix(in srgb, var(--gold) 50%, transparent),
+      color-mix(in srgb, var(--primary) 40%, transparent),
+      transparent
+    );
+  }
+
+  .avatar-triad {
+    @apply relative shrink-0 rounded-full p-[2px];
+    background: linear-gradient(
+      135deg,
+      var(--accent),
+      var(--gold),
+      var(--primary)
+    );
+    box-shadow:
+      0 0 16px color-mix(in srgb, var(--primary) 18%, transparent),
+      0 0 32px color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  .avatar-triad-inner {
+    @apply size-full overflow-hidden rounded-full ring-2 ring-background/90;
+  }
+
+  .hero-avatar {
+    @apply p-[3px];
+    box-shadow:
+      0 0 28px color-mix(in srgb, var(--primary) 22%, transparent),
+      0 0 56px color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}

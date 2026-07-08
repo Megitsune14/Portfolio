@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"strict": true,
+		"noImplicitAny": true,
+		"declaration": false,
+		"skipLibCheck": true,
+		"strictNullChecks": false,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"outDir": "dist",
+		"rootDir": "src",
+		"typeRoots": ["types", "node_modules/@types"]
+	},
+	"tsc-alias": {
+		"resolveFullPaths": true
+	},
+	"include": ["src", "types"],
+	"exclude": ["node_modules"]
+}
