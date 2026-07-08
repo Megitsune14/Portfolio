@@ -20,6 +20,8 @@ export function SpotifyStatsCard({
   const activeDay = wrapped?.mostActiveDay
   const listeningMs = wrapped?.estimatedListeningMs ?? 0
 
+  const activeDayListeningMs = activeDay?.estimatedListeningMs ?? 0
+
   return (
     <Card className="glass">
       <CardHeader className="pb-2">
@@ -48,11 +50,24 @@ export function SpotifyStatsCard({
             />
             <StatItem
               label="Jour le plus actif"
-              value={activeDay?.label ?? '—'}
+              value={
+                activeDay ? (
+                  <span className="block space-y-1">
+                    <span className="block">{activeDay.label}</span>
+                    {activeDayListeningMs > 0 ? (
+                      <span className="block text-base font-medium text-muted-foreground">
+                        {formatListeningHoursMinutes(activeDayListeningMs)}
+                      </span>
+                    ) : null}
+                  </span>
+                ) : (
+                  '—'
+                )
+              }
               tone="gold"
             />
             <StatItem
-              label="Temps d'écoute (h · min)"
+              label="Temps d'écoute"
               value={listeningMs > 0 ? formatListeningHoursMinutes(listeningMs) : '—'}
               tone="accent"
             />

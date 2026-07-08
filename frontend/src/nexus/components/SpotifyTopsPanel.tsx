@@ -1,14 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ChevronRight, Disc3, Mic2 } from 'lucide-react'
+import { Disc3, Mic2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { useFetch } from '@/hooks/useFetch'
-import { getSpotifyTops } from '../api/nexusApi'
 import { SPOTIFY_CURRENT_YEAR } from '../lib/spotifyPeriod'
 import type {
   NexusSpotifyRecentPlay,
-  NexusSpotifyTopItem,
   NexusSpotifyWrapped,
   NexusSpotifyWrappedItem,
   SpotifyPeriodSelection,
@@ -21,13 +17,6 @@ const TOP_LIST_MAX_HEIGHT =
   VISIBLE_TOP_ITEMS * TOP_ITEM_ROW_PX + (VISIBLE_TOP_ITEMS - 1) * TOP_ITEM_GAP_PX
 
 type TopKind = 'tracks' | 'artists'
-type SpotifyRange = 'short_term' | 'medium_term' | 'long_term'
-
-type ViewId =
-  | 'local-tracks'
-  | 'local-artists'
-  | `spotify-tracks-${SpotifyRange}`
-  | `spotify-artists-${SpotifyRange}`
 
 type RankItem = {
   id: string
@@ -37,42 +26,12 @@ type RankItem = {
   count?: number
 }
 
-const SPOTIFY_RANGE_LABELS: Record<SpotifyRange, string> = {
-  short_term: '4 semaines',
-  medium_term: '6 mois',
-  long_term: 'Toujours',
-}
-
-const TRACK_VIEWS: { id: ViewId; label: string }[] = [
-  { id: 'local-tracks', label: 'Actuellement' },
-  { id: 'spotify-tracks-short_term', label: '4 semaines' },
-  { id: 'spotify-tracks-medium_term', label: '6 mois' },
-  { id: 'spotify-tracks-long_term', label: 'Toujours' },
-]
-
-const ARTIST_VIEWS: { id: ViewId; label: string }[] = [
-  { id: 'local-artists', label: 'Actuellement' },
-  { id: 'spotify-artists-short_term', label: '4 semaines' },
-  { id: 'spotify-artists-medium_term', label: '6 mois' },
-  { id: 'spotify-artists-long_term', label: 'Toujours' },
-]
-
 function normalizeWrappedItems(
   items: NexusSpotifyWrappedItem[],
   kind: TopKind,
 ): RankItem[] {
   return items.map((item, index) => ({
     id: item.trackId ?? item.artistId ?? item.id ?? `${kind}-${index}`,
-    name: item.name,
-    subtitle: kind === 'tracks' ? item.artist : undefined,
-    image: item.image,
-    count: item.count,
-  }))
-}
-
-function normalizeSpotifyItems(items: NexusSpotifyTopItem[], kind: TopKind): RankItem[] {
-  return items.map((item, index) => ({
-    id: item.id ?? `spotify-${index}`,
     name: item.name,
     subtitle: kind === 'tracks' ? item.artist : undefined,
     image: item.image,
@@ -92,14 +51,14 @@ function formatPlayedAt(iso: string): string {
 function RecentPlaysList({ items }: { items: NexusSpotifyRecentPlay[] }) {
   if (items.length === 0) {
     return (
-      <p className="py-4 text-center text-sm text-muted-foreground">
+      <p className="py-8 text-center text-sm text-muted-foreground">
         Aucune écoute récente ce mois-ci.
       </p>
     )
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="grid gap-2 sm:grid-cols-2">
       {items.map((item) => (
         <li
           key={`${item.trackId}-${item.playedAt}`}
@@ -190,135 +149,18 @@ function TopRankList({ items, kind }: { items: RankItem[]; kind: TopKind }) {
   )
 }
 
-function ViewGroup({
-  title,
-  views,
-  itemsByView,
-  selectedId,
-  onSelect,
-  kind,
-}: {
-  title: string
-  views: { id: ViewId; label: string }[]
-  itemsByView: Record<string, RankItem[]>
-  selectedId: ViewId
-  onSelect: (id: ViewId) => void
-  kind: TopKind
-}) {
-  const isTracks = kind === 'tracks'
-
-  return (
-    <div className="space-y-1">
-      <p className="px-3 pt-2 text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase">
-        {title}
-      </p>
-      {views.map((view) => {
-        const active = selectedId === view.id
-        const count = itemsByView[view.id]?.length ?? 0
-
-        return (
-          <button
-            key={view.id}
-            type="button"
-            onClick={() => onSelect(view.id)}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors',
-              active
-                ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
-                : 'text-foreground hover:bg-muted',
-            )}
-          >
-            <span
-              className={cn(
-                'flex size-8 shrink-0 items-center justify-center rounded-lg',
-                isTracks ? 'bg-accent/15 text-accent' : 'bg-primary/15 text-primary',
-              )}
-            >
-              {isTracks ? <Disc3 className="size-4" /> : <Mic2 className="size-4" />}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium">{view.label}</span>
-              <span className="block text-xs text-muted-foreground">
-                {count} entrée{count > 1 ? 's' : ''}
-              </span>
-            </span>
-            <ChevronRight
-              className={cn('size-4 shrink-0 transition-transform', active && 'translate-x-0.5')}
-            />
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
 export function SpotifyTopsPanel({
   selection,
   wrapped,
   wrappedLoading,
-  refreshKey = 0,
 }: {
   selection: SpotifyPeriodSelection
   wrapped: NexusSpotifyWrapped | null
   wrappedLoading: boolean
-  refreshKey?: number
 }) {
-  const tops = useFetch(getSpotifyTops)
-  const [selectedView, setSelectedView] = useState<ViewId>('local-tracks')
-
-  useEffect(() => {
-    if (refreshKey > 0) {
-      void tops.refetch()
-    }
-  }, [refreshKey])
-
-  const itemsByView = useMemo(() => {
-    const map: Record<string, RankItem[]> = {
-      'local-tracks': normalizeWrappedItems(wrapped?.topTracks ?? [], 'tracks'),
-      'local-artists': normalizeWrappedItems(wrapped?.topArtists ?? [], 'artists'),
-    }
-
-    const ranges: SpotifyRange[] = ['short_term', 'medium_term', 'long_term']
-    for (const range of ranges) {
-      const trackBubble = tops.data?.bubbles.find(
-        (b) => b.type === 'top_tracks' && b.timeRange === range && b.source === 'spotify',
-      )
-      const artistBubble = tops.data?.bubbles.find(
-        (b) => b.type === 'top_artists' && b.timeRange === range && b.source === 'spotify',
-      )
-      map[`spotify-tracks-${range}`] = normalizeSpotifyItems(trackBubble?.items ?? [], 'tracks')
-      map[`spotify-artists-${range}`] = normalizeSpotifyItems(artistBubble?.items ?? [], 'artists')
-    }
-
-    return map
-  }, [wrapped, tops.data?.bubbles])
-
-  const activeItems = itemsByView[selectedView] ?? []
-  const activeKind: TopKind = selectedView.includes('artists') ? 'artists' : 'tracks'
-
-  const detailMeta = useMemo(() => {
-    if (selectedView.startsWith('local-')) {
-      return {
-        title: `${activeKind === 'tracks' ? 'Morceaux' : 'Artistes'} · Actuellement`,
-        subtitle: `${wrapped?.periodLabel ?? '-'} · Historique local${wrapped != null ? ` · ${wrapped.totalPlays} écoutes` : ''}`,
-      }
-    }
-
-    const range = selectedView.split('-').pop() as SpotifyRange
-    const bubble = tops.data?.bubbles.find(
-      (b) =>
-        b.type === (activeKind === 'tracks' ? 'top_tracks' : 'top_artists') &&
-        b.timeRange === range &&
-        b.source === 'spotify',
-    )
-
-    return {
-      title: `${activeKind === 'tracks' ? 'Morceaux' : 'Artistes'} · ${SPOTIFY_RANGE_LABELS[range]}`,
-      subtitle: `Compte Spotify${bubble?.fetchedAt ? ` · ${new Date(bubble.fetchedAt).toLocaleDateString('fr-FR')}` : ''}`,
-    }
-  }, [selectedView, activeKind, wrapped, tops.data?.bubbles])
-
-  const loading = wrappedLoading || tops.loading
+  const periodLabel = wrapped?.periodLabel ?? '—'
+  const trackItems = normalizeWrappedItems(wrapped?.topTracks ?? [], 'tracks')
+  const artistItems = normalizeWrappedItems(wrapped?.topArtists ?? [], 'artists')
 
   const isCurrentMonth =
     selection.mode === 'year' &&
@@ -327,61 +169,53 @@ export function SpotifyTopsPanel({
 
   const recentPlays = isCurrentMonth ? (wrapped?.recentPlays ?? []) : []
 
-  return (
-    <>
-      {loading ? (
-        <div className="grid gap-4 lg:grid-cols-[minmax(260px,300px)_1fr]">
-          <Skeleton className="h-72 rounded-xl" />
+  if (wrappedLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Skeleton className="h-80 rounded-xl" />
           <Skeleton className="h-80 rounded-xl" />
         </div>
-      ) : (
-        <div className="grid gap-4 lg:grid-cols-[minmax(260px,300px)_1fr] lg:items-stretch">
-          <Card className="glass flex h-full flex-col lg:sticky lg:top-6">
-            <CardHeader className="pb-2">
-              <CardTitle className="font-heading text-base">Classements</CardTitle>
-              <p className="text-xs text-muted-foreground">
-                Actuellement = période sélectionnée · autres = tops Spotify
-              </p>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col space-y-2 p-2 pt-0 pb-6">
-              <ViewGroup
-                title="Morceaux"
-                views={TRACK_VIEWS}
-                itemsByView={itemsByView}
-                selectedId={selectedView}
-                onSelect={setSelectedView}
-                kind="tracks"
-              />
-              <ViewGroup
-                title="Artistes"
-                views={ARTIST_VIEWS}
-                itemsByView={itemsByView}
-                selectedId={selectedView}
-                onSelect={setSelectedView}
-                kind="artists"
-              />
-            </CardContent>
-          </Card>
+        <Skeleton className="h-48 rounded-xl" />
+      </div>
+    )
+  }
 
-          <Card className="glass">
-            <CardHeader className="border-b border-border/40 pb-4">
-              <CardTitle className="font-heading text-lg">{detailMeta.title}</CardTitle>
-              <p className="text-sm text-muted-foreground">{detailMeta.subtitle}</p>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <TopRankList items={activeItems} kind={activeKind} />
-              {isCurrentMonth && (
-                <div className="mt-6 border-t border-border/40 pt-5">
-                  <p className="mb-3 text-sm font-medium tracking-wide text-gradient-subtle uppercase">
-                    10 dernières écoutes
-                  </p>
-                  <RecentPlaysList items={recentPlays} />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+        <Card className="glass flex h-full flex-col">
+          <CardHeader className="border-b border-border/40 pb-4">
+            <CardTitle className="font-heading text-lg">Morceaux · {periodLabel}</CardTitle>
+            <p className="text-sm text-muted-foreground">Historique local</p>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <TopRankList items={trackItems} kind="tracks" />
+          </CardContent>
+        </Card>
+
+        <Card className="glass flex h-full flex-col">
+          <CardHeader className="border-b border-border/40 pb-4">
+            <CardTitle className="font-heading text-lg">Artistes · {periodLabel}</CardTitle>
+            <p className="text-sm text-muted-foreground">Historique local</p>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <TopRankList items={artistItems} kind="artists" />
+          </CardContent>
+        </Card>
+      </div>
+
+      {isCurrentMonth && (
+        <Card className="glass">
+          <CardHeader className="border-b border-border/40 pb-4">
+            <CardTitle className="font-heading text-lg">10 dernières écoutes</CardTitle>
+            <p className="text-sm text-muted-foreground">Ce mois-ci · historique local</p>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <RecentPlaysList items={recentPlays} />
+          </CardContent>
+        </Card>
       )}
-    </>
+    </div>
   )
 }

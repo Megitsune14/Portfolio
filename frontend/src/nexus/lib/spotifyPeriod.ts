@@ -37,10 +37,17 @@ export function periodPlaysLabel(
   return 'Écoutes · Période'
 }
 
-/** Hours with total minutes in parentheses, e.g. "2 (120)". */
+/** Compact duration with total minutes, e.g. "6h52 (412 minutes)". */
 export function formatListeningHoursMinutes(ms: number): string {
   const totalMinutes = Math.floor(Math.max(0, ms) / 60000)
   const hours = Math.floor(totalMinutes / 60)
-  if (hours > 0) return `${hours} (${totalMinutes})`
-  return String(totalMinutes)
+  const minutes = totalMinutes % 60
+  const minuteLabel = totalMinutes === 1 ? 'minute' : 'minutes'
+
+  if (hours > 0) {
+    const timePart = minutes > 0 ? `${hours}h${String(minutes).padStart(2, '0')}` : `${hours}h`
+    return `${timePart} (${totalMinutes} ${minuteLabel})`
+  }
+
+  return `${totalMinutes} ${minuteLabel}`
 }
