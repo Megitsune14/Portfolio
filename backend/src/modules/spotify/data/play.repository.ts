@@ -189,6 +189,29 @@ export async function getPlayDateRange(): Promise<{ first: Date | null; last: Da
   };
 }
 
+export async function getRecentPlays(options: {
+  from?: Date;
+  to?: Date;
+  limit?: number;
+}): Promise<ReturnType<typeof serializePlay>[]> {
+  const collection = await getPlaysCollection();
+  const filter: Record<string, unknown> = {};
+
+  if (options.from || options.to) {
+    filter.playedAt = {};
+    if (options.from) (filter.playedAt as Record<string, Date>).$gte = options.from;
+    if (options.to) (filter.playedAt as Record<string, Date>).$lt = options.to;
+  }
+
+  const docs = await collection
+    .find(filter)
+    .sort({ playedAt: -1 })
+    .limit(options.limit ?? 10)
+    .toArray();
+
+  return docs.map(serializePlay);
+}
+
 export async function getAvailablePeriods(): Promise<{
   years: number[];
   monthsByYear: Record<string, number[]>;

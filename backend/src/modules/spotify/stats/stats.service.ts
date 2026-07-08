@@ -10,6 +10,7 @@ import {
   currentMonthBounds,
   getAvailablePeriods,
   getPlayDateRange,
+  getRecentPlays,
   monthBounds,
   todayBounds,
   yearBounds,
@@ -85,14 +86,21 @@ async function buildWrappedSummary(query: WrappedPeriodQuery) {
   const limit = DEFAULT_TOP_LIMIT;
 
   const today = todayBounds();
-  const [summary, topArtists, topTracks, activeMonth, activeDay, todaySummary] = await Promise.all([
-    aggregateSummary({ from: bounds.from, to: bounds.to }),
-    aggregateTopArtists({ from: bounds.from, to: bounds.to, limit }),
-    aggregateTopTracks({ from: bounds.from, to: bounds.to, limit }),
-    aggregateMostActiveMonth({ from: bounds.from, to: bounds.to }),
-    aggregateMostActiveDayOfWeek({ from: bounds.from, to: bounds.to }),
-    aggregateSummary({ from: today.from, to: today.to }),
-  ]);
+  const isCurrentMonth =
+    query.period === 'month' && 'month' in query && query.month === 'current';
+
+  const [summary, topArtists, topTracks, activeMonth, activeDay, todaySummary, recentPlays] =
+    await Promise.all([
+      aggregateSummary({ from: bounds.from, to: bounds.to }),
+      aggregateTopArtists({ from: bounds.from, to: bounds.to, limit }),
+      aggregateTopTracks({ from: bounds.from, to: bounds.to, limit }),
+      aggregateMostActiveMonth({ from: bounds.from, to: bounds.to }),
+      aggregateMostActiveDayOfWeek({ from: bounds.from, to: bounds.to }),
+      aggregateSummary({ from: today.from, to: today.to }),
+      isCurrentMonth
+        ? getRecentPlays({ from: bounds.from, to: bounds.to, limit: 10 })
+        : Promise.resolve([]),
+    ]);
 
   return {
     period: query.period,
@@ -106,6 +114,7 @@ async function buildWrappedSummary(query: WrappedPeriodQuery) {
     estimatedListeningMs: summary.estimatedListeningMs,
     topArtists,
     topTracks,
+    recentPlays: isCurrentMonth ? recentPlays : undefined,
     mostActiveMonth: activeMonth
       ? { label: `${MONTH_NAMES[activeMonth.month - 1]} ${activeMonth.year}`, count: activeMonth.count }
       : null,

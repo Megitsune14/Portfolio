@@ -138,14 +138,42 @@ export interface NexusSpotifyWrappedItem {
   count: number
 }
 
+export interface NexusSpotifyRecentPlay {
+  trackId: string
+  name: string
+  artist: string
+  album?: string
+  durationMs?: number
+  playedAt: string
+  image?: string
+  externalUrl?: string
+}
+
 export interface NexusSpotifyWrapped {
   period: string
   year: number | null
   month: number | string | null
   periodLabel: string
   totalPlays: number
+  uniqueTracks?: number
+  uniqueArtists?: number
+  estimatedListeningTime?: string
+  estimatedListeningMs?: number
   topTracks: NexusSpotifyWrappedItem[]
   topArtists: NexusSpotifyWrappedItem[]
+  recentPlays?: NexusSpotifyRecentPlay[]
+  mostActiveMonth?: { label: string; count: number } | null
+  mostActiveDay?: {
+    label: string
+    count: number
+    estimatedListeningTime: string
+    estimatedListeningMs: number
+  } | null
+  todayPlays?: {
+    count: number
+    estimatedListeningTime: string
+    estimatedListeningMs: number
+  }
   firstPlayAt?: string | null
   lastPlayAt?: string | null
 }

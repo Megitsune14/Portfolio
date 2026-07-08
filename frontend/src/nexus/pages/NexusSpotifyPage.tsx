@@ -1,16 +1,28 @@
 import { useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetch } from '@/hooks/useFetch'
-import { getSpotifyStatus, postSpotifySync } from '../api/nexusApi'
+import {
+  getSpotifyPeriods,
+  getSpotifyStatus,
+  getSpotifyWrapped,
+  postSpotifySync,
+} from '../api/nexusApi'
+import { SpotifyPeriodFilters } from '../components/SpotifyPeriodFilters'
+import { SpotifyStatsCard } from '../components/SpotifyStatsCard'
 import { SpotifyTopsPanel } from '../components/SpotifyTopsPanel'
+import { defaultSpotifyPeriodSelection } from '../lib/spotifyPeriod'
 import { useNexusPageTitle } from '../layout/useNexusPageTitle'
+import type { SpotifyPeriodSelection } from '../types/nexus'
 
 export function NexusSpotifyPage() {
   useNexusPageTitle('Spotify')
   const status = useFetch(getSpotifyStatus)
+  const periods = useFetch(getSpotifyPeriods)
+  const [selection, setSelection] = useState<SpotifyPeriodSelection>(defaultSpotifyPeriodSelection)
+  const wrapped = useFetch(() => getSpotifyWrapped(selection), { deps: [selection] })
   const [syncing, setSyncing] = useState(false)
   const [topsRefreshKey, setTopsRefreshKey] = useState(0)
 
@@ -18,7 +30,7 @@ export function NexusSpotifyPage() {
     setSyncing(true)
     try {
       await postSpotifySync(false)
-      status.refetch()
+      await Promise.all([status.refetch(), periods.refetch(), wrapped.refetch()])
       setTopsRefreshKey((k) => k + 1)
     } finally {
       setSyncing(false)
@@ -26,6 +38,7 @@ export function NexusSpotifyPage() {
   }
 
   const s = status.data
+  const displayName = s?.displayName ?? s?.token?.displayName
 
   return (
     <div className="space-y-6">
@@ -40,54 +53,31 @@ export function NexusSpotifyPage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="glass">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Connexion</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {status.loading ? (
-              <Skeleton className="h-6 w-24" />
-            ) : (
-              <p className={`font-semibold ${s?.connected ? 'text-primary' : 'text-muted-foreground'}`}>
-                {s?.connected ? `Connecté · ${s.displayName ?? 'Compte'}` : 'Non connecté'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="glass">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total écoutes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {status.loading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <p className="text-3xl font-bold font-heading text-accent">
-                {s?.totalPlays?.toLocaleString() ?? 0}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="glass">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Dernière sync</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {status.loading ? (
-              <Skeleton className="h-6 w-32" />
-            ) : (
-              <p className="text-sm">
-                {s?.sync.lastSyncAt
-                  ? new Date(s.sync.lastSyncAt).toLocaleString('fr-FR')
-                  : 'Jamais'}
-                {s?.sync.lastSyncStatus && (
-                  <span className="ml-2 text-muted-foreground">({s.sync.lastSyncStatus})</span>
-                )}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        {status.loading ? (
+          <Skeleton className="h-5 w-80 max-w-full" />
+        ) : (
+          <>
+            <span className="text-muted-foreground">
+              Connexion :{' '}
+              <span className={s?.connected ? 'font-medium text-primary' : 'text-muted-foreground'}>
+                {s?.connected
+                  ? `Connecté · [ ${displayName ?? 'Compte'} ]`
+                  : 'Non connecté'}
+              </span>
+            </span>
+            <span className="text-muted-foreground/50">/</span>
+            <span className="text-muted-foreground">
+              Dernière sync :{' '}
+              {s?.sync.lastSyncAt
+                ? new Date(s.sync.lastSyncAt).toLocaleString('fr-FR')
+                : 'Jamais'}
+              {s?.sync.lastSyncStatus ? (
+                <span className="ml-1">({s.sync.lastSyncStatus})</span>
+              ) : null}
+            </span>
+          </>
+        )}
       </div>
 
       {s?.sync.lastSyncError && (
@@ -96,9 +86,28 @@ export function NexusSpotifyPage() {
         </Card>
       )}
 
+      <div className="space-y-4">
+        <SpotifyPeriodFilters
+          selection={selection}
+          onSelectionChange={setSelection}
+          periods={periods.data}
+        />
+        <SpotifyStatsCard
+          selection={selection}
+          wrapped={wrapped.data}
+          totalPlays={s?.totalPlays ?? 0}
+          loading={status.loading || wrapped.loading}
+        />
+      </div>
+
       <div className="space-y-3">
         <h3 className="font-heading text-lg font-semibold">Tops</h3>
-        <SpotifyTopsPanel refreshKey={topsRefreshKey} />
+        <SpotifyTopsPanel
+          selection={selection}
+          wrapped={wrapped.data}
+          wrappedLoading={wrapped.loading}
+          refreshKey={topsRefreshKey}
+        />
       </div>
     </div>
   )

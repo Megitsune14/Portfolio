@@ -1,36 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronRight, Disc3, Mic2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { useFetch } from '@/hooks/useFetch'
-import { getSpotifyPeriods, getSpotifyTops, getSpotifyWrapped } from '../api/nexusApi'
+import { getSpotifyTops } from '../api/nexusApi'
+import { SPOTIFY_CURRENT_YEAR } from '../lib/spotifyPeriod'
 import type {
+  NexusSpotifyRecentPlay,
   NexusSpotifyTopItem,
   NexusSpotifyWrapped,
   NexusSpotifyWrappedItem,
   SpotifyPeriodSelection,
 } from '../types/nexus'
 
-const MONTH_LABELS = [
-  'Janvier',
-  'Février',
-  'Mars',
-  'Avril',
-  'Mai',
-  'Juin',
-  'Juillet',
-  'Août',
-  'Septembre',
-  'Octobre',
-  'Novembre',
-  'Décembre',
-]
-
-const CURRENT_YEAR = new Date().getFullYear()
-const SELECT_CLASS =
-  'flex h-9 w-full min-w-[10rem] rounded-lg border border-input bg-background px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50'
+const VISIBLE_TOP_ITEMS = 8
+const TOP_ITEM_ROW_PX = 52
+const TOP_ITEM_GAP_PX = 8
+const TOP_LIST_MAX_HEIGHT =
+  VISIBLE_TOP_ITEMS * TOP_ITEM_ROW_PX + (VISIBLE_TOP_ITEMS - 1) * TOP_ITEM_GAP_PX
 
 type TopKind = 'tracks' | 'artists'
 type SpotifyRange = 'short_term' | 'medium_term' | 'long_term'
@@ -69,10 +57,6 @@ const ARTIST_VIEWS: { id: ViewId; label: string }[] = [
   { id: 'spotify-artists-long_term', label: 'Toujours' },
 ]
 
-function defaultSelection(): SpotifyPeriodSelection {
-  return { mode: 'year', year: CURRENT_YEAR, month: 'current' }
-}
-
 function normalizeWrappedItems(
   items: NexusSpotifyWrappedItem[],
   kind: TopKind,
@@ -96,6 +80,51 @@ function normalizeSpotifyItems(items: NexusSpotifyTopItem[], kind: TopKind): Ran
   }))
 }
 
+function formatPlayedAt(iso: string): string {
+  return new Date(iso).toLocaleString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function RecentPlaysList({ items }: { items: NexusSpotifyRecentPlay[] }) {
+  if (items.length === 0) {
+    return (
+      <p className="py-4 text-center text-sm text-muted-foreground">
+        Aucune écoute récente ce mois-ci.
+      </p>
+    )
+  }
+
+  return (
+    <ul className="space-y-2">
+      {items.map((item) => (
+        <li
+          key={`${item.trackId}-${item.playedAt}`}
+          className="flex items-center gap-3 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2.5"
+        >
+          {item.image ? (
+            <img src={item.image} alt="" className="size-10 shrink-0 rounded-md object-cover" />
+          ) : (
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-accent/15 text-accent">
+              <Disc3 className="size-4" />
+            </div>
+          )}
+          <span className="min-w-0 flex-1">
+            <span className="block truncate font-medium">{item.name}</span>
+            <span className="block truncate text-xs text-muted-foreground">{item.artist}</span>
+          </span>
+          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+            {formatPlayedAt(item.playedAt)}
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 function TopRankList({ items, kind }: { items: RankItem[]; kind: TopKind }) {
   const isTracks = kind === 'tracks'
 
@@ -108,51 +137,56 @@ function TopRankList({ items, kind }: { items: RankItem[]; kind: TopKind }) {
   }
 
   return (
-    <ol className="space-y-2">
-      {items.map((item, index) => (
-        <li
-          key={item.id}
-          className={cn(
-            'flex items-center gap-3 rounded-xl border px-3 py-2.5',
-            isTracks ? 'border-accent/30 bg-accent/5' : 'border-primary/30 bg-primary/5',
-          )}
-        >
-          <span
+    <div
+      className="overflow-y-auto pr-1"
+      style={{ maxHeight: TOP_LIST_MAX_HEIGHT }}
+    >
+      <ol className="space-y-2">
+        {items.map((item, index) => (
+          <li
+            key={item.id}
             className={cn(
-              'flex size-8 shrink-0 items-center justify-center rounded-lg font-heading text-sm font-bold',
-              index === 0
-                ? 'bg-[color-mix(in_srgb,var(--gold)_18%,transparent)] text-(--gold)'
-                : 'bg-muted text-muted-foreground',
+              'flex items-center gap-3 rounded-xl border px-3 py-2.5',
+              isTracks ? 'border-accent/30 bg-accent/5' : 'border-primary/30 bg-primary/5',
             )}
           >
-            {index + 1}
-          </span>
-          {item.image ? (
-            <img src={item.image} alt="" className="size-10 shrink-0 rounded-md object-cover" />
-          ) : (
-            <div
+            <span
               className={cn(
-                'flex size-10 shrink-0 items-center justify-center rounded-md',
-                isTracks ? 'bg-accent/15 text-accent' : 'bg-primary/15 text-primary',
+                'flex size-8 shrink-0 items-center justify-center rounded-lg font-heading text-sm font-bold',
+                index === 0
+                  ? 'bg-[color-mix(in_srgb,var(--gold)_18%,transparent)] text-(--gold)'
+                  : 'bg-muted text-muted-foreground',
               )}
             >
-              {isTracks ? <Disc3 className="size-4" /> : <Mic2 className="size-4" />}
-            </div>
-          )}
-          <span className="min-w-0 flex-1">
-            <span className="block truncate font-medium">{item.name}</span>
-            {item.subtitle && (
-              <span className="block truncate text-xs text-muted-foreground">{item.subtitle}</span>
-            )}
-          </span>
-          {item.count != null && (
-            <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-              {item.count} écoute{item.count > 1 ? 's' : ''}
+              {index + 1}
             </span>
-          )}
-        </li>
-      ))}
-    </ol>
+            {item.image ? (
+              <img src={item.image} alt="" className="size-10 shrink-0 rounded-md object-cover" />
+            ) : (
+              <div
+                className={cn(
+                  'flex size-10 shrink-0 items-center justify-center rounded-md',
+                  isTracks ? 'bg-accent/15 text-accent' : 'bg-primary/15 text-primary',
+                )}
+              >
+                {isTracks ? <Disc3 className="size-4" /> : <Mic2 className="size-4" />}
+              </div>
+            )}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-medium">{item.name}</span>
+              {item.subtitle && (
+                <span className="block truncate text-xs text-muted-foreground">{item.subtitle}</span>
+              )}
+            </span>
+            {item.count != null && (
+              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                {item.count} écoute{item.count > 1 ? 's' : ''}
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </div>
   )
 }
 
@@ -218,89 +252,30 @@ function ViewGroup({
   )
 }
 
-export function SpotifyTopsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
-  const periods = useFetch(getSpotifyPeriods)
+export function SpotifyTopsPanel({
+  selection,
+  wrapped,
+  wrappedLoading,
+  refreshKey = 0,
+}: {
+  selection: SpotifyPeriodSelection
+  wrapped: NexusSpotifyWrapped | null
+  wrappedLoading: boolean
+  refreshKey?: number
+}) {
   const tops = useFetch(getSpotifyTops)
-  const [selection, setSelection] = useState<SpotifyPeriodSelection>(defaultSelection)
   const [selectedView, setSelectedView] = useState<ViewId>('local-tracks')
-
-  const wrapped = useFetch(() => getSpotifyWrapped(selection), { deps: [selection] })
 
   useEffect(() => {
     if (refreshKey > 0) {
-      void wrapped.refetch()
       void tops.refetch()
     }
   }, [refreshKey])
 
-  const years = useMemo(() => {
-    const fromApi = periods.data?.years ?? []
-    const merged = new Set([CURRENT_YEAR, ...fromApi])
-    return [...merged].sort((a, b) => b - a)
-  }, [periods.data?.years])
-
-  const monthOptions = useMemo(() => {
-    if (selection.mode !== 'year') return []
-
-    const options: { value: string; label: string }[] = []
-
-    if (selection.year === CURRENT_YEAR) {
-      options.push({ value: 'current', label: 'Ce mois-ci' })
-    }
-
-    options.push({ value: 'full-year', label: 'Toute l\'année' })
-
-    const months = periods.data?.monthsByYear[String(selection.year)] ?? []
-    for (const month of months) {
-      if (selection.year === CURRENT_YEAR && month === new Date().getUTCMonth() + 1) {
-        continue
-      }
-      options.push({
-        value: String(month),
-        label: MONTH_LABELS[month - 1] ?? `Mois ${month}`,
-      })
-    }
-
-    return options
-  }, [selection, periods.data?.monthsByYear])
-
-  const yearSelectValue = selection.mode === 'all-time' ? 'all-time' : String(selection.year)
-
-  const monthSelectValue =
-    selection.mode === 'year'
-      ? selection.month === 'current'
-        ? 'current'
-        : selection.month === 'full-year'
-          ? 'full-year'
-          : String(selection.month)
-      : 'full-year'
-
-  function onYearChange(value: string) {
-    if (value === 'all-time') {
-      setSelection({ mode: 'all-time' })
-      return
-    }
-    const year = Number(value)
-    setSelection({
-      mode: 'year',
-      year,
-      month: year === CURRENT_YEAR ? 'current' : 'full-year',
-    })
-  }
-
-  function onMonthChange(value: string) {
-    if (selection.mode !== 'year') return
-    const month =
-      value === 'current' ? 'current' : value === 'full-year' ? 'full-year' : Number(value)
-    setSelection({ mode: 'year', year: selection.year, month })
-  }
-
-  const wrappedData: NexusSpotifyWrapped | null = wrapped.data
-
   const itemsByView = useMemo(() => {
     const map: Record<string, RankItem[]> = {
-      'local-tracks': normalizeWrappedItems(wrappedData?.topTracks ?? [], 'tracks'),
-      'local-artists': normalizeWrappedItems(wrappedData?.topArtists ?? [], 'artists'),
+      'local-tracks': normalizeWrappedItems(wrapped?.topTracks ?? [], 'tracks'),
+      'local-artists': normalizeWrappedItems(wrapped?.topArtists ?? [], 'artists'),
     }
 
     const ranges: SpotifyRange[] = ['short_term', 'medium_term', 'long_term']
@@ -316,7 +291,7 @@ export function SpotifyTopsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
     }
 
     return map
-  }, [wrappedData, tops.data?.bubbles])
+  }, [wrapped, tops.data?.bubbles])
 
   const activeItems = itemsByView[selectedView] ?? []
   const activeKind: TopKind = selectedView.includes('artists') ? 'artists' : 'tracks'
@@ -325,7 +300,7 @@ export function SpotifyTopsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
     if (selectedView.startsWith('local-')) {
       return {
         title: `${activeKind === 'tracks' ? 'Morceaux' : 'Artistes'} · Actuellement`,
-        subtitle: `${wrappedData?.periodLabel ?? '-'} · Historique local${wrappedData != null ? ` · ${wrappedData.totalPlays} écoutes` : ''}`,
+        subtitle: `${wrapped?.periodLabel ?? '-'} · Historique local${wrapped != null ? ` · ${wrapped.totalPlays} écoutes` : ''}`,
       }
     }
 
@@ -341,64 +316,34 @@ export function SpotifyTopsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
       title: `${activeKind === 'tracks' ? 'Morceaux' : 'Artistes'} · ${SPOTIFY_RANGE_LABELS[range]}`,
       subtitle: `Compte Spotify${bubble?.fetchedAt ? ` · ${new Date(bubble.fetchedAt).toLocaleDateString('fr-FR')}` : ''}`,
     }
-  }, [selectedView, activeKind, wrappedData, tops.data?.bubbles])
+  }, [selectedView, activeKind, wrapped, tops.data?.bubbles])
 
-  const loading = periods.loading || wrapped.loading || tops.loading
+  const loading = wrappedLoading || tops.loading
+
+  const isCurrentMonth =
+    selection.mode === 'year' &&
+    selection.year === SPOTIFY_CURRENT_YEAR &&
+    selection.month === 'current'
+
+  const recentPlays = isCurrentMonth ? (wrapped?.recentPlays ?? []) : []
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="spotify-year">Période</Label>
-          <select
-            id="spotify-year"
-            className={SELECT_CLASS}
-            value={yearSelectValue}
-            onChange={(e) => onYearChange(e.target.value)}
-          >
-            <option value="all-time">Depuis le début</option>
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {selection.mode === 'year' && (
-          <div className="space-y-2">
-            <Label htmlFor="spotify-month">Mois</Label>
-            <select
-              id="spotify-month"
-              className={SELECT_CLASS}
-              value={monthSelectValue}
-              onChange={(e) => onMonthChange(e.target.value)}
-            >
-              {monthOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-      </div>
-
+    <>
       {loading ? (
         <div className="grid gap-4 lg:grid-cols-[minmax(260px,300px)_1fr]">
           <Skeleton className="h-72 rounded-xl" />
           <Skeleton className="h-80 rounded-xl" />
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[minmax(260px,300px)_1fr]">
-          <Card className="glass h-fit lg:sticky lg:top-6">
+        <div className="grid gap-4 lg:grid-cols-[minmax(260px,300px)_1fr] lg:items-stretch">
+          <Card className="glass flex h-full flex-col lg:sticky lg:top-6">
             <CardHeader className="pb-2">
               <CardTitle className="font-heading text-base">Classements</CardTitle>
               <p className="text-xs text-muted-foreground">
                 Actuellement = période sélectionnée · autres = tops Spotify
               </p>
             </CardHeader>
-            <CardContent className="space-y-2 p-2 pt-0">
+            <CardContent className="flex flex-1 flex-col space-y-2 p-2 pt-0 pb-6">
               <ViewGroup
                 title="Morceaux"
                 views={TRACK_VIEWS}
@@ -418,17 +363,25 @@ export function SpotifyTopsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
             </CardContent>
           </Card>
 
-          <Card className="glass min-h-[320px]">
+          <Card className="glass">
             <CardHeader className="border-b border-border/40 pb-4">
               <CardTitle className="font-heading text-lg">{detailMeta.title}</CardTitle>
               <p className="text-sm text-muted-foreground">{detailMeta.subtitle}</p>
             </CardHeader>
             <CardContent className="pt-4">
               <TopRankList items={activeItems} kind={activeKind} />
+              {isCurrentMonth && (
+                <div className="mt-6 border-t border-border/40 pt-5">
+                  <p className="mb-3 text-sm font-medium tracking-wide text-gradient-subtle uppercase">
+                    10 dernières écoutes
+                  </p>
+                  <RecentPlaysList items={recentPlays} />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
       )}
-    </div>
+    </>
   )
 }
