@@ -31,7 +31,10 @@ export function SpotifyCard() {
     }, 3000)
   }, [recent.refetch])
 
-  const nowPlaying = useSpotifyNowPlaying({ onTrackChange: scheduleRecentRefresh })
+  const nowPlaying = useSpotifyNowPlaying({
+    onTrackChange: scheduleRecentRefresh,
+    onTrackEnd: scheduleRecentRefresh,
+  })
   const [brandIconFailed, setBrandIconFailed] = useState(false)
 
   useEffect(() => {

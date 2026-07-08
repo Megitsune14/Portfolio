@@ -12,6 +12,7 @@ function trackKey(track: SpotifyNowPlaying | null): string | null {
 
 type UseSpotifyNowPlayingOptions = {
   onTrackChange?: () => void
+  onTrackEnd?: () => void
 }
 
 export function useSpotifyNowPlaying(options: UseSpotifyNowPlayingOptions = {}) {
@@ -26,12 +27,22 @@ export function useSpotifyNowPlaying(options: UseSpotifyNowPlayingOptions = {}) 
   const lastTrackKeyRef = useRef<string | null>(null)
   const hasInitializedRef = useRef(false)
   const onTrackChangeRef = useRef(options.onTrackChange)
+  const onTrackEndRef = useRef(options.onTrackEnd)
   const syncFnRef = useRef<(isInitial?: boolean) => Promise<void>>(async () => {})
   const snapshotRef = useRef<SpotifyNowPlaying | null>(null)
 
   useEffect(() => {
     onTrackChangeRef.current = options.onTrackChange
   }, [options.onTrackChange])
+
+  useEffect(() => {
+    onTrackEndRef.current = options.onTrackEnd
+  }, [options.onTrackEnd])
+
+  const triggerEndTrackSync = useCallback(() => {
+    onTrackEndRef.current?.()
+    void syncFnRef.current(false)
+  }, [])
 
   const stopTick = useCallback(() => {
     if (tickRef.current) {
@@ -59,12 +70,17 @@ export function useSpotifyNowPlaying(options: UseSpotifyNowPlayingOptions = {}) 
     }
 
     const remaining = track.duration - track.progress
-    if (remaining <= 0) return
+    if (remaining <= 0) {
+      endTrackRef.current = setTimeout(() => {
+        triggerEndTrackSync()
+      }, 500)
+      return
+    }
 
     endTrackRef.current = setTimeout(() => {
-      void syncFnRef.current(false)
+      triggerEndTrackSync()
     }, remaining)
-  }, [])
+  }, [triggerEndTrackSync])
 
   const startTick = useCallback(() => {
     if (tickRef.current) return
@@ -80,13 +96,13 @@ export function useSpotifyNowPlaying(options: UseSpotifyNowPlayingOptions = {}) 
         if (next >= current.duration) {
           stopTick()
           endTrackRef.current = setTimeout(() => {
-            void syncFnRef.current(false)
+            triggerEndTrackSync()
           }, 500)
         }
         return next
       })
     }, TICK_INTERVAL_MS)
-  }, [stopTick])
+  }, [stopTick, triggerEndTrackSync])
 
   const applySnapshot = useCallback(
     (data: SpotifyNowPlaying) => {
