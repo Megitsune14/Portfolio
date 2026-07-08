@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react'
 import { Music } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -21,11 +22,18 @@ export function SpotifyCard() {
   const brandIcons = useFetch(getPortfolioBrandIcons)
   const nowPlaying = useSpotifyNowPlaying()
   const recent = useFetch(() => getSpotifyRecent(3), { refetchInterval: 30000, deps: [] })
+  const [brandIconFailed, setBrandIconFailed] = useState(false)
 
-  const loading = nowPlaying.loading || recent.loading || brandIcons.loading
-  const spotifyBrandIcon = brandIcons.data?.spotify
+  const loading = nowPlaying.loading || recent.loading
+  const spotifyBrandIcon = !brandIconFailed ? brandIcons.data?.spotify : undefined
+  const onBrandIconError = useCallback(() => setBrandIconFailed(true), [])
   const headerIcon = spotifyBrandIcon ? (
-    <img src={spotifyBrandIcon} alt="" className="size-7 object-contain" />
+    <img
+      src={spotifyBrandIcon}
+      alt=""
+      className="size-7 object-contain"
+      onError={onBrandIconError}
+    />
   ) : (
     <Music className="size-5 text-accent" />
   )

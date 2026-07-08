@@ -1,4 +1,5 @@
 import type { ApiResponse } from '@/types/api'
+import { mergeBrandIcons } from '@/lib/brandIcons'
 import { getApiBaseUrl } from '@/lib/apiBase'
 
 const BASE = getApiBaseUrl()
@@ -46,10 +47,17 @@ export function getPortfolioSocial() {
   )
 }
 
-export function getPortfolioBrandIcons() {
-  return fetchApi<{ icons: Partial<Record<'spotify' | 'discord' | 'riot' | 'lol', string>> }>(
-    '/portfolio/brand-icons',
-  ).then((data) => data.icons)
+export async function getPortfolioBrandIcons() {
+  const [apiIcons, socialLinks] = await Promise.all([
+    fetchApi<{ icons: Partial<Record<'spotify' | 'discord' | 'riot' | 'lol', string>> }>(
+      '/portfolio/brand-icons',
+    )
+      .then((data) => data.icons)
+      .catch(() => ({})),
+    getPortfolioSocial().catch(() => []),
+  ])
+
+  return mergeBrandIcons(apiIcons, socialLinks)
 }
 
 export async function trackVisit(path: string) {

@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { listSocialLinks } from './social.repository.js';
 
 const ALLOWED_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif']);
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -158,13 +159,53 @@ export async function findSocialBrandAsset(basename: string): Promise<string | n
 
 const STAT_BRAND_ICON_NAMES = ['spotify', 'discord', 'riot', 'lol'] as const;
 
+const STAT_BRAND_ASSET_BASENAMES: Record<(typeof STAT_BRAND_ICON_NAMES)[number], string[]> = {
+  spotify: ['spotify'],
+  discord: ['discord'],
+  riot: ['riot'],
+  lol: ['lol', 'league-of-legends'],
+};
+
+const STAT_BRAND_SOCIAL_MATCHERS: Record<(typeof STAT_BRAND_ICON_NAMES)[number], string[]> = {
+  spotify: ['spotify'],
+  discord: ['discord'],
+  riot: ['riot'],
+  lol: ['lol', 'league of legends', 'league-of-legends'],
+};
+
+function matchesBrandName(name: string, keys: string[]) {
+  const normalized = name.toLowerCase();
+  return keys.some((key) => normalized.includes(key) || normalized === key);
+}
+
 export async function getSocialBrandIcons() {
   const icons: Partial<Record<(typeof STAT_BRAND_ICON_NAMES)[number], string>> = {};
 
   for (const name of STAT_BRAND_ICON_NAMES) {
-    const assetPath = await findSocialBrandAsset(name);
-    if (assetPath) {
-      icons[name] = assetPath;
+    for (const basename of STAT_BRAND_ASSET_BASENAMES[name]) {
+      const assetPath = await findSocialBrandAsset(basename);
+      if (assetPath) {
+        icons[name] = assetPath;
+        break;
+      }
+    }
+  }
+
+  const socialLinks = await listSocialLinks();
+  for (const name of STAT_BRAND_ICON_NAMES) {
+    if (icons[name]) continue;
+
+    const link = socialLinks.find((entry) => {
+      const en = entry.name.en ?? '';
+      const fr = entry.name.fr ?? '';
+      return (
+        matchesBrandName(en, STAT_BRAND_SOCIAL_MATCHERS[name]) ||
+        matchesBrandName(fr, STAT_BRAND_SOCIAL_MATCHERS[name])
+      );
+    });
+
+    if (link?.icon) {
+      icons[name] = link.icon;
     }
   }
 
