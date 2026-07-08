@@ -11,12 +11,6 @@ export interface SpotifyTrack {
   playedAt?: string; // For recently played tracks
 }
 
-export interface SpotifyUserToken {
-  accessToken: string;
-  refreshToken?: string | undefined;
-  expiresAt: number;
-}
-
 export interface SpotifyAuthResponse {
   isPlaying: boolean;
   message?: string;

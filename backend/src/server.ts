@@ -1,91 +1,97 @@
-// Import
-import { errorHandler } from './middleware/errorHandler.js';
-import { loggerMiddleware } from './middleware/logger.js';
-import { corsMiddleware } from './middleware/cors.js';
+import { errorHandler } from './shared/middleware/errorHandler.js';
+import { corsMiddleware } from './shared/middleware/cors.js';
+import { checkConfig } from './shared/config/checkConfig.js';
+import { connectMongo } from './shared/db/mongodb.js';
+import Logger from './shared/utils/logger.js';
+import { logIntegrations } from './shared/utils/utils.js';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 
 import 'dotenv/config';
 
-// Routes
-import spotifyRouter from './routes/spotify.js';
-import riotRouter from './routes/riot.js';
-import discordRouter from './routes/discord.js';
-import healthRouter from './routes/health.js';
-import nexusRouter from './routes/nexus.js';
-import { connectMongo } from './db/mongodb.js';
-import { startSpotifyScheduler } from './jobs/spotifyScheduler.js';
-import { startRiotScheduler } from './jobs/riotScheduler.js';
+import spotifyRouter from './modules/spotify/routes/public.js';
+import riotRouter from './modules/riot/routes.js';
+import discordRouter from './modules/discord/routes.js';
+import healthRouter from './modules/health/routes.js';
+import nexusRouter from './modules/nexus/routes.js';
+import portfolioPublicRouter from './modules/portfolio/routes/public.js';
+import { startSpotifyScheduler } from './modules/spotify/sync/scheduler.js';
+import { startRiotScheduler } from './modules/riot/scheduler.js';
 
 try {
+  Logger.separator();
+  Logger.info('Checking configuration file...');
+  await checkConfig();
+  Logger.success('Configuration file is valid!');
+  Logger.separator();
 
-    await connectMongo();
-    startSpotifyScheduler();
-    startRiotScheduler();
+  Logger.info('Connecting to the database...');
+  const db = await connectMongo();
+  Logger.success(`Connected to the database (${db.databaseName})!`);
+  Logger.separator();
 
-    // Create Hono app
-    const app = new Hono();
+  Logger.info('Starting background schedulers...');
+  startSpotifyScheduler();
+  startRiotScheduler();
+  Logger.separator();
 
-    // Global middleware
-    app.use('*', corsMiddleware);
-    // app.use('*', loggerMiddleware);
+  logIntegrations();
+  Logger.separator();
 
-    // Error handler
-    app.onError(errorHandler);
+  const app = new Hono();
 
-    // Health check route
-    app.route('/health', healthRouter);
+  app.use('*', corsMiddleware);
+  app.onError(errorHandler);
 
-    // API routes
-    app.route('/spotify', spotifyRouter);
-    app.route('/riot', riotRouter);
-    app.route('/discord', discordRouter);
-    app.route('/nexus', nexusRouter);
+  app.route('/health', healthRouter);
+  app.route('/spotify', spotifyRouter);
+  app.route('/riot', riotRouter);
+  app.route('/discord', discordRouter);
+  app.route('/nexus', nexusRouter);
+  app.route('/portfolio', portfolioPublicRouter);
 
-    // Root route
-    app.get('/', (c) => {
-        return c.json({
-            success: true,
-            message: 'API endpoint',
-            version: '2.0.0',
-            endpoints: {
-                health: '/health',
-                spotify: '/spotify',
-                riot: '/riot',
-                discord: '/discord',
-                nexus: '/nexus'
-            }
-        });
+  app.get('/', (c) => {
+    return c.json({
+      success: true,
+      message: 'API endpoint',
+      version: '2.0.0',
+      endpoints: {
+        health: '/health',
+        spotify: '/spotify',
+        riot: '/riot',
+        discord: '/discord',
+        nexus: '/nexus',
+        portfolio: '/portfolio',
+      },
     });
+  });
 
-    // 404 handler
-    app.notFound((c) => {
-        return c.json({
-            success: false,
-            error: 'Not Found',
-            message: 'The requested resource was not found'
-        }, 404);
-    });
+  app.notFound((c) => {
+    return c.json(
+      {
+        success: false,
+        error: 'Not Found',
+        message: 'The requested resource was not found',
+      },
+      404,
+    );
+  });
 
-    // Start server
-    const port = parseInt(process.env.PORT ?? '3000', 10);
+  const port = parseInt(process.env.PORT ?? '3000', 10);
 
-    console.log('🚀 Starting API...');
-    console.log(`🎮 Riot API: ${process.env.RIOT_API_KEY ? `Configured (${process.env.RIOT_API_KEY.substring(0, 8)}...)` : 'Not configured'}`);
-    console.log(`🎵 Spotify API: ${process.env.SPOTIFY_CLIENT_ID ? 'Configured' : 'Not configured'}`);
-    console.log(`💬 Discord API: ${process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_USER_ID ? 'Configured' : 'Not configured'}`);
-    console.log(`🔐 Nexus: ${process.env.NEXUS_MASTER_PASSWORD ? 'Configured' : 'Not configured'}`);
-    console.log(`🍃 MongoDB: ${process.env.MONGODB_URL ? 'Configured' : 'Not configured'}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  Logger.info('Starting server...');
 
-    serve({
-        fetch: app.fetch,
-        port,
-    }, (info) => {
-        console.log(`🚀 Server running on http://${info.address}:${info.port}`);
-    });
-
+  serve(
+    {
+      fetch: app.fetch,
+      port,
+    },
+    () => {
+      Logger.success(`Server listening on http://localhost:${port}`);
+      Logger.separator();
+    },
+  );
 } catch (error) {
-    console.error('Error loading environment variables:', error);
-    process.exit(1);
+  Logger.error('Failed to start application', error);
+  process.exit(1);
 }

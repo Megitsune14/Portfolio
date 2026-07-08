@@ -1,14 +1,14 @@
-import * as React from 'react';
-import * as LabelPrimitive from '@radix-ui/react-label';
-import { cn } from '@/lib/utils';
+import * as React from 'react'
+import { cn } from '@/lib/utils'
 
-function Label({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function Label({ className, ...props }: React.ComponentProps<'label'>) {
   return (
-    <LabelPrimitive.Root
-      className={cn('text-xs font-medium text-muted-foreground', className)}
+    <label
+      data-slot="label"
+      className={cn('text-sm font-medium leading-none', className)}
       {...props}
     />
-  );
+  )
 }
 
-export { Label };
+export { Label }

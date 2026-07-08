@@ -1,53 +1,38 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { NexusAuthProvider } from './components/nexus/NexusAuthProvider';
-import { useVisitorTracking } from './hooks/useVisitorTracking';
-import PortfolioPage from './pages/PortfolioPage';
-import SpotifyAuthRedirect from './pages/SpotifyAuthRedirect';
-import NexusLogin from './pages/NexusLogin';
-import NexusHomePage from './pages/NexusHomePage';
-import NexusAnalyticsPage from './pages/NexusAnalyticsPage';
-import NexusSpotifyPage from './pages/NexusSpotifyPage';
-import NexusGoalsPage from './pages/NexusGoalsPage';
-import NexusGoalsOnboardingPage from './pages/NexusGoalsOnboardingPage';
-import NexusGoalsDashboardPage from './pages/NexusGoalsDashboardPage';
-import NexusGoalsMeasuresPage from './pages/NexusGoalsMeasuresPage';
-import NexusGoalsProfilePage from './pages/NexusGoalsProfilePage';
-import GoalsProfileGuard from './components/goals/GoalsProfileGuard';
-import NexusProtectedRoute from './components/NexusProtectedRoute';
-import NexusDashboardLayout from './components/nexus/NexusDashboardLayout';
+import { useEffect } from 'react'
+import { BackgroundEffects } from '@/components/layout/BackgroundEffects'
+import { Footer } from '@/components/layout/Footer'
+import { Navbar } from '@/components/layout/Navbar'
+import { HeroSection } from '@/components/sections/HeroSection'
+import { ProjectsSection } from '@/components/sections/ProjectsSection'
+import { SocialSection } from '@/components/sections/SocialSection'
+import { StatsSection } from '@/components/sections/StatsSection'
+import { I18nProvider } from '@/i18n/I18nProvider'
+import { trackVisit } from '@/lib/api'
 
-function VisitorTracker() {
-  useVisitorTracking();
-  return null;
-}
+function AppContent() {
+  useEffect(() => {
+    void trackVisit('/')
+  }, [])
 
-function App() {
   return (
-    <Router>
-      <NexusAuthProvider>
-        <VisitorTracker />
-        <Routes>
-          <Route path="/" element={<PortfolioPage />} />
-          <Route path="/spotify-auth" element={<SpotifyAuthRedirect />} />
-          <Route path="/nexus/login" element={<NexusLogin />} />
-          <Route element={<NexusProtectedRoute />}>
-            <Route element={<NexusDashboardLayout />}>
-              <Route path="/nexus" element={<NexusHomePage />} />
-              <Route path="/nexus/analytics" element={<NexusAnalyticsPage />} />
-              <Route path="/nexus/spotify" element={<NexusSpotifyPage />} />
-              <Route path="/nexus/goals/onboarding" element={<NexusGoalsOnboardingPage />} />
-              <Route element={<GoalsProfileGuard />}>
-                <Route path="/nexus/goals/dashboard" element={<NexusGoalsDashboardPage />} />
-                <Route path="/nexus/goals/measures" element={<NexusGoalsMeasuresPage />} />
-                <Route path="/nexus/goals/profile" element={<NexusGoalsProfilePage />} />
-                <Route path="/nexus/goals" element={<NexusGoalsPage />} />
-              </Route>
-            </Route>
-          </Route>
-        </Routes>
-      </NexusAuthProvider>
-    </Router>
-  );
+    <div className="relative min-h-screen overflow-x-hidden bg-background">
+      <BackgroundEffects />
+      <Navbar />
+      <main>
+        <HeroSection />
+        <ProjectsSection />
+        <SocialSection />
+        <StatsSection />
+      </main>
+      <Footer />
+    </div>
+  )
 }
 
-export default App;
+export default function App() {
+  return (
+    <I18nProvider>
+      <AppContent />
+    </I18nProvider>
+  )
+}
