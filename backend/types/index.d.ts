@@ -17,6 +17,12 @@ export interface SpotifyAuthResponse {
   authenticated?: boolean;
 }
 
+export interface SpotifyUserToken {
+  accessToken: string;
+  expiresAt: number;
+  refreshToken?: string;
+}
+
 export interface SpotifyRecentlyPlayedResponse {
   tracks: SpotifyTrack[];
   authenticated: boolean;
