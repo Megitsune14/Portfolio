@@ -14,8 +14,6 @@ import type {
   SpotifyPeriodSelection,
 } from '../types/nexus'
 
-const DEFAULT_LIST_MAX_HEIGHT = 472
-
 type TopKind = 'tracks' | 'artists'
 type SpotifyRange = 'short_term' | 'medium_term' | 'long_term'
 
@@ -121,27 +119,19 @@ function RecentPlaysList({ items }: { items: NexusSpotifyRecentPlay[] }) {
   )
 }
 
-function TopRankList({
-  items,
-  kind,
-  maxHeight,
-}: {
-  items: RankItem[]
-  kind: TopKind
-  maxHeight: number
-}) {
+function TopRankList({ items, kind }: { items: RankItem[]; kind: TopKind }) {
   const isTracks = kind === 'tracks'
 
   if (items.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
+      <p className="flex flex-1 items-center justify-center py-8 text-center text-sm text-muted-foreground">
         Aucune donnée pour ce classement.
       </p>
     )
   }
 
   return (
-    <div className="overflow-y-auto pr-1" style={{ maxHeight }}>
+    <div className="min-h-0 flex-1 overflow-y-auto pr-1">
       <ol className="space-y-2">
         {items.map((item, index) => (
           <li
@@ -267,8 +257,7 @@ export function SpotifyTopsPanel({
   const tops = useFetch(getSpotifyTops)
   const [selectedView, setSelectedView] = useState<ViewId>('local-tracks')
   const leftCardRef = useRef<HTMLDivElement>(null)
-  const rightHeaderRef = useRef<HTMLDivElement>(null)
-  const [listMaxHeight, setListMaxHeight] = useState(DEFAULT_LIST_MAX_HEIGHT)
+  const [cardHeight, setCardHeight] = useState(0)
 
   useEffect(() => {
     if (refreshKey > 0) {
@@ -331,11 +320,7 @@ export function SpotifyTopsPanel({
     if (!leftCard) return
 
     const updateHeight = () => {
-      const leftHeight = leftCard.getBoundingClientRect().height
-      const headerHeight = rightHeaderRef.current?.getBoundingClientRect().height ?? 0
-      const contentPadding = 40
-      const next = Math.round(leftHeight - headerHeight - contentPadding)
-      if (next > 0) setListMaxHeight(next)
+      setCardHeight(Math.round(leftCard.getBoundingClientRect().height))
     }
 
     updateHeight()
@@ -347,7 +332,7 @@ export function SpotifyTopsPanel({
       observer.disconnect()
       window.removeEventListener('resize', updateHeight)
     }
-  }, [loading, selectedView])
+  }, [loading])
 
   const isCurrentMonth =
     selection.mode === 'year' &&
@@ -370,45 +355,46 @@ export function SpotifyTopsPanel({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-[minmax(260px,300px)_1fr] lg:items-stretch">
+      <div className="grid gap-4 lg:grid-cols-[minmax(260px,300px)_1fr] lg:items-start">
         <div ref={leftCardRef} className="lg:sticky lg:top-6">
-          <Card className="glass flex h-full flex-col">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-heading text-base">Classements</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Actuellement = période sélectionnée · autres = tops Spotify
-            </p>
-          </CardHeader>
-          <CardContent className="flex flex-1 flex-col space-y-2 p-2 pt-0 pb-6">
-            <ViewGroup
-              title="Morceaux"
-              views={TRACK_VIEWS}
-              itemsByView={itemsByView}
-              selectedId={selectedView}
-              onSelect={setSelectedView}
-              kind="tracks"
-            />
-            <ViewGroup
-              title="Artistes"
-              views={ARTIST_VIEWS}
-              itemsByView={itemsByView}
-              selectedId={selectedView}
-              onSelect={setSelectedView}
-              kind="artists"
-            />
-          </CardContent>
-        </Card>
+          <Card className="glass flex flex-col">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-heading text-base">Classements</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Actuellement = période sélectionnée · autres = tops Spotify
+              </p>
+            </CardHeader>
+            <CardContent className="flex flex-col space-y-2 p-2 pt-0 pb-6">
+              <ViewGroup
+                title="Morceaux"
+                views={TRACK_VIEWS}
+                itemsByView={itemsByView}
+                selectedId={selectedView}
+                onSelect={setSelectedView}
+                kind="tracks"
+              />
+              <ViewGroup
+                title="Artistes"
+                views={ARTIST_VIEWS}
+                itemsByView={itemsByView}
+                selectedId={selectedView}
+                onSelect={setSelectedView}
+                kind="artists"
+              />
+            </CardContent>
+          </Card>
         </div>
 
-        <Card className="glass">
-          <div ref={rightHeaderRef}>
-            <CardHeader className="border-b border-border/40 pb-4">
-              <CardTitle className="font-heading text-lg">{detailMeta.title}</CardTitle>
-              <p className="text-sm text-muted-foreground">{detailMeta.subtitle}</p>
-            </CardHeader>
-          </div>
-          <CardContent className="pt-4">
-            <TopRankList items={activeItems} kind={activeKind} maxHeight={listMaxHeight} />
+        <Card
+          className="glass flex flex-col overflow-hidden"
+          style={cardHeight > 0 ? { height: cardHeight } : undefined}
+        >
+          <CardHeader className="shrink-0 border-b border-border/40 pb-4">
+            <CardTitle className="font-heading text-lg">{detailMeta.title}</CardTitle>
+            <p className="text-sm text-muted-foreground">{detailMeta.subtitle}</p>
+          </CardHeader>
+          <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden pt-4 pb-6">
+            <TopRankList items={activeItems} kind={activeKind} />
           </CardContent>
         </Card>
       </div>
