@@ -13,6 +13,8 @@ db.createUser(
     }
 );
 
+db.createCollection("portfolio_projects")
+db.createCollection("portfolio_social")
 db.createCollection("goals")
 db.createCollection("profiles")
 db.createCollection("weight_entries")
