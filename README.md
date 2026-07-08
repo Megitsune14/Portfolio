@@ -27,7 +27,6 @@ Espace d'administration accessible après authentification :
 - Gestion des projets et liens sociaux
 - Analytics des visiteurs
 - Intégration Spotify (sync, tops, statut)
-- Module **Goals** — suivi d'objectifs, pesées et profil
 
 ## Backend & intégrations
 
@@ -39,7 +38,7 @@ L'API expose notamment :
 | **Spotify** | Écoute en cours, historique, synchronisation |
 | **Riot / LoL** | Stats League of Legends |
 | **Discord** | Statut et présence |
-| **Nexus** | Auth, visiteurs, goals, config |
+| **Nexus** | Auth, visiteurs, config |
 
 Les données Spotify et Riot sont synchronisées en arrière-plan via des schedulers.
 
