@@ -55,10 +55,30 @@ export const checkConfig = async (): Promise<void> => {
     }
 
     if (envParse.NODE_ENV === 'production') {
-      const files = await fs.readdir('./dist');
+      const distPath = path.resolve(process.cwd(), 'dist');
+      let hasCompiledOutput = false;
 
-      if (files.length === 0) {
-        throw new Error("No files found in the dist folder. Please run 'npm run build' first.");
+      try {
+        const files = await fs.readdir(distPath);
+        hasCompiledOutput = files.length > 0;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+          throw error;
+        }
+      }
+
+      // Docker image copies dist/ contents directly into /app (server.js at root).
+      if (!hasCompiledOutput) {
+        try {
+          await fs.access(path.resolve(process.cwd(), 'server.js'));
+          hasCompiledOutput = true;
+        } catch {
+          // fall through
+        }
+      }
+
+      if (!hasCompiledOutput) {
+        throw new Error("No compiled output found. Please run 'npm run build' first.");
       }
 
       if (npmScript !== 'start') {
