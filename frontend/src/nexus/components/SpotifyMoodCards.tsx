@@ -41,14 +41,11 @@ function MoodCard({
 export function SpotifyMoodCards() {
   const mood = useFetch(getSpotifyMood)
 
-  const errorMessage =
-    mood.error instanceof Error
-      ? mood.error.message.includes('openai:login') || mood.error.message.includes('.env.auth')
-        ? 'IA non configurée'
-        : mood.error.message
+  const errorMessage = mood.error
+    ? mood.error.includes('openai:login') || mood.error.includes('.env.auth')
+      ? 'IA non configurée'
       : mood.error
-        ? 'Analyse indisponible'
-        : null
+    : null
 
   const dayMood = mood.data?.day.mood ?? null
   const monthMood = mood.data?.month.mood ?? null
