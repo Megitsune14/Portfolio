@@ -47,8 +47,22 @@ export function SpotifyStatsCard({
               {showTodayPlays ? <Skeleton className="h-20 rounded-xl" /> : null}
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Skeleton className="h-20 rounded-xl" />
-              <Skeleton className="h-20 rounded-xl" />
+              <StatItem
+                label="Mood du jour"
+                value={
+                  <span className="text-base font-normal text-muted-foreground">Analyse en cours</span>
+                }
+                tone="gold"
+                className="min-h-20"
+              />
+              <StatItem
+                label="Mood du mois"
+                value={
+                  <span className="text-base font-normal text-muted-foreground">Analyse en cours</span>
+                }
+                tone="gold"
+                className="min-h-20"
+              />
             </div>
           </div>
         ) : (

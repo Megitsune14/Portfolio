@@ -1,5 +1,4 @@
 import { useFetch } from '@/hooks/useFetch'
-import { Skeleton } from '@/components/ui/skeleton'
 import { StatItem } from '@/components/stats/StatCardUi'
 import { getSpotifyMood } from '../api/nexusApi'
 
@@ -15,7 +14,16 @@ function MoodCard({
   error: string | null
 }) {
   if (loading) {
-    return <Skeleton className="h-20 rounded-xl" />
+    return (
+      <StatItem
+        label={label}
+        value={
+          <span className="text-base font-normal text-muted-foreground">Analyse en cours</span>
+        }
+        tone="gold"
+        className="min-h-20"
+      />
+    )
   }
 
   if (error) {

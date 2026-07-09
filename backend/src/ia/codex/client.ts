@@ -1,8 +1,16 @@
-import { collectCompletedResponseFromSse } from './sse.js'
+import { collectTextFromSse } from './sse.js'
 import { loadAuthTokens, type AuthLoaderOptions, type EffectiveAuth } from './auth.js'
 
 export const DEFAULT_CODEX_BASE_URL = 'https://chatgpt.com/backend-api/codex'
 export const DEFAULT_CODEX_MODEL = process.env.CODEX_MODEL ?? 'gpt-5.4'
+export const DEFAULT_CODEX_INSTRUCTIONS =
+  'You are a helpful assistant. Reply concisely and follow the requested output format exactly.'
+
+type CodexInputItem = {
+  type: 'message'
+  role: 'user' | 'assistant' | 'system'
+  content: Array<{ type: 'input_text'; text: string }>
+}
 
 export type CodexClientOptions = AuthLoaderOptions & {
   baseURL?: string
@@ -37,6 +45,8 @@ const extractTextFromContent = (content: unknown): string => {
   for (const item of content) {
     if (!isRecord(item)) continue
     if (item.type === 'output_text' && typeof item.text === 'string') {
+      parts.push(item.text)
+    } else if (item.type === 'input_text' && typeof item.text === 'string') {
       parts.push(item.text)
     } else if (item.type === 'text' && typeof item.text === 'string') {
       parts.push(item.text)
@@ -83,13 +93,23 @@ export const extractTextFromCodexResponse = (response: Record<string, unknown>):
   return ''
 }
 
-const buildInput = (options: GenerateTextOptions): CodexMessage[] => {
+const buildInput = (options: GenerateTextOptions): CodexInputItem[] => {
   if (options.messages && options.messages.length > 0) {
-    return options.messages
+    return options.messages.map((message) => ({
+      type: 'message',
+      role: message.role,
+      content: [{ type: 'input_text', text: message.content }],
+    }))
   }
 
   if (typeof options.prompt === 'string' && options.prompt.length > 0) {
-    return [{ role: 'user', content: options.prompt }]
+    return [
+      {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: options.prompt }],
+      },
+    ]
   }
 
   throw new Error('Either prompt or messages must be provided.')
@@ -110,7 +130,7 @@ export const createCodexClient = async (
 
   const generateText = async (generateOptions: GenerateTextOptions): Promise<string> => {
     const input = buildInput(generateOptions)
-    const instructions = generateOptions.instructions ?? ''
+    const instructions = generateOptions.instructions ?? DEFAULT_CODEX_INSTRUCTIONS
 
     const body = {
       model: generateOptions.model ?? model,
@@ -118,6 +138,7 @@ export const createCodexClient = async (
       instructions,
       store: false,
       stream: true,
+      reasoning: { effort: 'low' },
     }
 
     const response = await fetch(`${baseURL}/responses`, {
@@ -127,6 +148,7 @@ export const createCodexClient = async (
         'chatgpt-account-id': auth.accountId,
         'OpenAI-Beta': 'responses=experimental',
         'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
       },
       body: JSON.stringify(body),
     })
@@ -142,8 +164,8 @@ export const createCodexClient = async (
       throw new Error('Codex response body is empty.')
     }
 
-    const completed = await collectCompletedResponseFromSse(response.body)
-    const text = extractTextFromCodexResponse(completed)
+    const text = await collectTextFromSse(response.body)
+
     if (!text) {
       throw new Error('Codex returned an empty response.')
     }
