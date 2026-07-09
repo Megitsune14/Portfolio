@@ -2,6 +2,7 @@ import Logger from '../../../shared/utils/logger.js';
 import { Context } from 'hono';
 import type { ApiResponse } from '../../../../types/index.js';
 import { runSpotifySync } from '../sync/sync.service.js';
+import { invalidateMoodCache } from '../mood/mood.cache.repository.js';
 import {
   getAllTopSnapshots,
   getNexusSpotifyStatus,
@@ -118,6 +119,7 @@ export async function postSync(c: Context): Promise<Response> {
   try {
     const backfill = c.req.query('backfill') === 'true';
     await runSpotifySync({ backfill });
+    await invalidateMoodCache();
     const data = await getNexusSpotifyStatus();
     return c.json({ success: true, data, message: 'Synchronisation terminée' } as ApiResponse);
   } catch (error) {

@@ -178,6 +178,19 @@ export interface NexusSpotifyWrapped {
   lastPlayAt?: string | null
 }
 
+export interface NexusSpotifyMoodResult {
+  mood: string
+  periodLabel: string
+  trackCount: number
+  generatedAt: string
+  fromCache: boolean
+}
+
+export interface NexusSpotifyMood {
+  day: NexusSpotifyMoodResult
+  month: NexusSpotifyMoodResult
+}
+
 export type SpotifyPeriodSelection =
   | { mode: 'all-time' }
   | { mode: 'year'; year: number; month: 'current' | 'full-year' | number }

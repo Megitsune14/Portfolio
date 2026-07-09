@@ -21,7 +21,8 @@
 		"start:backend": "cd backend && npm run start",
 		"update": "npm-run-all --parallel update:backend update:frontend",
 		"update:frontend": "cd frontend && npm run update",
-		"update:backend": "cd backend && npm run update"
+		"update:backend": "cd backend && npm run update",
+		"openai:login": "cd backend && npm run openai:login"
 	},
 	"devDependencies": {
 		"wait-on": "^7.2.0",

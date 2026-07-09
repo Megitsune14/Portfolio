@@ -12,6 +12,7 @@
     "dev": "tsx watch src/server.ts",
     "test": "tsx --test tests/unit.test.ts",
     "seed:portfolio": "tsx src/scripts/seed-portfolio.ts",
+    "openai:login": "tsx src/ia/scripts/login.ts",
     "update": "ncu -u && npm install"
   },
   "dependencies": {

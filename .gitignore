@@ -1,5 +1,7 @@
 node_modules/
 .env
+.env.auth
 .cursorignore
 dist/
 db.env
+backend/.codex/

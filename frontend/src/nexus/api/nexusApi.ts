@@ -14,6 +14,7 @@ import type {
   NexusSpotifyStatus,
   NexusSpotifyTops,
   NexusSpotifyWrapped,
+  NexusSpotifyMood,
   NexusVisitorStats,
   NexusVisitorsResponse,
   NexusWeightEntry,
@@ -158,6 +159,10 @@ export function getSpotifyWrapped(selection: SpotifyPeriodSelection) {
 
 export function getSpotifyTops() {
   return nexusFetch<NexusSpotifyTops>('/spotify/tops')
+}
+
+export function getSpotifyMood() {
+  return nexusFetch<NexusSpotifyMood>('/spotify/mood')
 }
 
 export function postSpotifySync(backfill = false) {

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatGrid, StatItem } from '@/components/stats/StatCardUi'
+import { SpotifyMoodCards } from './SpotifyMoodCards'
 import {
   formatListeningHoursMinutes,
   isCurrentMonthSelection,
@@ -35,60 +36,43 @@ export function SpotifyStatsCard({
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div
-            className={`grid gap-3 sm:grid-cols-2 ${showTodayPlays ? 'lg:grid-cols-3 xl:grid-cols-5' : 'lg:grid-cols-4'}`}
-          >
-            <Skeleton className="h-20 rounded-xl" />
-            <Skeleton className="h-20 rounded-xl" />
-            <Skeleton className="h-20 rounded-xl" />
-            <Skeleton className="h-20 rounded-xl" />
-            {showTodayPlays ? <Skeleton className="h-20 rounded-xl" /> : null}
+          <div className="space-y-3">
+            <div
+              className={`grid gap-3 sm:grid-cols-2 ${showTodayPlays ? 'lg:grid-cols-3 xl:grid-cols-5' : 'lg:grid-cols-4'}`}
+            >
+              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl" />
+              {showTodayPlays ? <Skeleton className="h-20 rounded-xl" /> : null}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl" />
+            </div>
           </div>
         ) : (
-          <StatGrid cols={showTodayPlays ? 5 : 4}>
-            <StatItem
-              label="Total écoutes"
-              value={totalPlays.toLocaleString('fr-FR')}
-              tone="accent"
-            />
-            <StatItem
-              label={periodPlaysLabel(selection, periodLabel)}
-              value={periodPlays.toLocaleString('fr-FR')}
-              tone="primary"
-            />
-            <StatItem
-              label="Jour le plus actif"
-              value={
-                activeDay ? (
-                  <span className="block space-y-1">
-                    <span className="block">{activeDay.label}</span>
-                    {activeDayListeningMs > 0 ? (
-                      <span className="block text-base font-medium text-muted-foreground">
-                        {formatListeningHoursMinutes(activeDayListeningMs)}
-                      </span>
-                    ) : null}
-                  </span>
-                ) : (
-                  '—'
-                )
-              }
-              tone="gold"
-            />
-            <StatItem
-              label="Temps d'écoute"
-              value={listeningMs > 0 ? formatListeningHoursMinutes(listeningMs) : '—'}
-              tone="accent"
-            />
-            {showTodayPlays ? (
+          <div className="space-y-3">
+            <StatGrid cols={showTodayPlays ? 5 : 4}>
               <StatItem
-                label="Écoutes d'aujourd'hui"
+                label="Total écoutes"
+                value={totalPlays.toLocaleString('fr-FR')}
+                tone="accent"
+              />
+              <StatItem
+                label={periodPlaysLabel(selection, periodLabel)}
+                value={periodPlays.toLocaleString('fr-FR')}
+                tone="primary"
+              />
+              <StatItem
+                label="Jour le plus actif"
                 value={
-                  todayPlays ? (
+                  activeDay ? (
                     <span className="block space-y-1">
-                      <span className="block">{todayPlays.count.toLocaleString('fr-FR')}</span>
-                      {todayPlays.estimatedListeningMs > 0 ? (
+                      <span className="block">{activeDay.label}</span>
+                      {activeDayListeningMs > 0 ? (
                         <span className="block text-base font-medium text-muted-foreground">
-                          {formatListeningHoursMinutes(todayPlays.estimatedListeningMs)}
+                          {formatListeningHoursMinutes(activeDayListeningMs)}
                         </span>
                       ) : null}
                     </span>
@@ -96,10 +80,36 @@ export function SpotifyStatsCard({
                     '—'
                   )
                 }
-                tone="primary"
+                tone="gold"
               />
-            ) : null}
-          </StatGrid>
+              <StatItem
+                label="Temps d'écoute"
+                value={listeningMs > 0 ? formatListeningHoursMinutes(listeningMs) : '—'}
+                tone="accent"
+              />
+              {showTodayPlays ? (
+                <StatItem
+                  label="Écoutes d'aujourd'hui"
+                  value={
+                    todayPlays ? (
+                      <span className="block space-y-1">
+                        <span className="block">{todayPlays.count.toLocaleString('fr-FR')}</span>
+                        {todayPlays.estimatedListeningMs > 0 ? (
+                          <span className="block text-base font-medium text-muted-foreground">
+                            {formatListeningHoursMinutes(todayPlays.estimatedListeningMs)}
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : (
+                      '—'
+                    )
+                  }
+                  tone="primary"
+                />
+              ) : null}
+            </StatGrid>
+            <SpotifyMoodCards />
+          </div>
         )}
       </CardContent>
     </Card>
