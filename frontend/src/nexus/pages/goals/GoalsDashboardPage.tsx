@@ -6,6 +6,7 @@ import { useFetch } from '@/hooks/useFetch'
 import { getGoalsDashboard } from '../../api/nexusApi'
 import { useNexusPageTitle } from '../../layout/useNexusPageTitle'
 import { WeightJourneyChart } from '../../goals/WeightJourneyChart'
+import { formatImcValue, getImcCategoryLabel } from '@/lib/goals/imc'
 
 export function GoalsDashboardPage() {
   useNexusPageTitle('Dashboard')
@@ -68,12 +69,17 @@ export function GoalsDashboardPage() {
         </Card>
         <Card className="glass">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">BMI</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">IMC</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold font-heading text-accent">
-              {summary?.bmi ?? '-'}
+              {formatImcValue(summary?.bmi)}
             </p>
+            {getImcCategoryLabel(summary?.bmi) ? (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {getImcCategoryLabel(summary?.bmi)}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
         <Card className="glass">

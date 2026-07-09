@@ -79,7 +79,7 @@ export function GoalsConfigurationPage() {
         <CardHeader>
           <CardTitle className="font-heading">Profil physique</CardTitle>
           <CardDescription>
-            Ces valeurs servent de base au dashboard et au calcul du BMI.
+            Ces valeurs servent de base au dashboard et au calcul de l'IMC.
           </CardDescription>
         </CardHeader>
         <CardContent>

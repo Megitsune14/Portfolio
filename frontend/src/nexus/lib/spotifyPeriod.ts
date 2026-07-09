@@ -24,6 +24,10 @@ export function defaultSpotifyPeriodSelection(): SpotifyPeriodSelection {
   return { mode: 'year', year: SPOTIFY_CURRENT_YEAR, month: 'current' }
 }
 
+export function isCurrentMonthSelection(selection: SpotifyPeriodSelection): boolean {
+  return selection.mode === 'year' && selection.month === 'current'
+}
+
 export function periodPlaysLabel(
   selection: SpotifyPeriodSelection,
   periodLabel?: string,

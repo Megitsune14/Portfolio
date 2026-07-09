@@ -1,7 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatGrid, StatItem } from '@/components/stats/StatCardUi'
-import { formatListeningHoursMinutes, periodPlaysLabel } from '../lib/spotifyPeriod'
+import {
+  formatListeningHoursMinutes,
+  isCurrentMonthSelection,
+  periodPlaysLabel,
+} from '../lib/spotifyPeriod'
 import type { NexusSpotifyWrapped, SpotifyPeriodSelection } from '../types/nexus'
 
 export function SpotifyStatsCard({
@@ -21,6 +25,8 @@ export function SpotifyStatsCard({
   const listeningMs = wrapped?.estimatedListeningMs ?? 0
 
   const activeDayListeningMs = activeDay?.estimatedListeningMs ?? 0
+  const todayPlays = wrapped?.todayPlays
+  const showTodayPlays = isCurrentMonthSelection(selection)
 
   return (
     <Card className="glass">
@@ -29,14 +35,17 @@ export function SpotifyStatsCard({
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            className={`grid gap-3 sm:grid-cols-2 ${showTodayPlays ? 'lg:grid-cols-3 xl:grid-cols-5' : 'lg:grid-cols-4'}`}
+          >
             <Skeleton className="h-20 rounded-xl" />
             <Skeleton className="h-20 rounded-xl" />
             <Skeleton className="h-20 rounded-xl" />
             <Skeleton className="h-20 rounded-xl" />
+            {showTodayPlays ? <Skeleton className="h-20 rounded-xl" /> : null}
           </div>
         ) : (
-          <StatGrid cols={4}>
+          <StatGrid cols={showTodayPlays ? 5 : 4}>
             <StatItem
               label="Total écoutes"
               value={totalPlays.toLocaleString('fr-FR')}
@@ -70,6 +79,26 @@ export function SpotifyStatsCard({
               value={listeningMs > 0 ? formatListeningHoursMinutes(listeningMs) : '—'}
               tone="accent"
             />
+            {showTodayPlays ? (
+              <StatItem
+                label="Écoutes d'aujourd'hui"
+                value={
+                  todayPlays ? (
+                    <span className="block space-y-1">
+                      <span className="block">{todayPlays.count.toLocaleString('fr-FR')}</span>
+                      {todayPlays.estimatedListeningMs > 0 ? (
+                        <span className="block text-base font-medium text-muted-foreground">
+                          {formatListeningHoursMinutes(todayPlays.estimatedListeningMs)}
+                        </span>
+                      ) : null}
+                    </span>
+                  ) : (
+                    '—'
+                  )
+                }
+                tone="primary"
+              />
+            ) : null}
           </StatGrid>
         )}
       </CardContent>

@@ -1,4 +1,5 @@
 import type { Gender, Profile } from '../../types/goals';
+import { getImcCategoryLabel } from './imc';
 
 export type PromptDashboardSummary = {
   currentWeight: number | null;
@@ -76,7 +77,12 @@ export function buildGoalDescriptionPromptText(opts: {
   }
 
   if (bmi != null && Number.isFinite(bmi)) {
-    lines.push(`L'IMC indicatif est d'environ ${formatKg(bmi)}.`);
+    const category = getImcCategoryLabel(bmi);
+    lines.push(
+      category
+        ? `L'IMC indicatif est d'environ ${formatKg(bmi)} (${category}).`
+        : `L'IMC indicatif est d'environ ${formatKg(bmi)}.`,
+    );
   }
 
   lines.push('');

@@ -5,6 +5,7 @@ import { NexusErrorState, NexusLoadingState } from '@/components/nexus/NexusStat
 import { WeightChart } from '@/components/goals/WeightChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DashboardResponse } from '@/types/goals';
+import { formatImcValue, getImcCategoryLabel } from '@/lib/goals/imc';
 import { goalsApiRequest } from '@/utils/nexus-goals-api';
 
 export default function NexusGoalsDashboardPage() {
@@ -45,7 +46,11 @@ export default function NexusGoalsDashboardPage() {
           label="Poids actuel"
           value={summary.currentWeight != null ? `${summary.currentWeight} kg` : '-'}
         />
-        <NexusStatCard label="IMC" value={summary.bmi != null ? String(summary.bmi) : '-'} />
+        <NexusStatCard
+          label="IMC"
+          value={formatImcValue(summary.bmi)}
+          detail={getImcCategoryLabel(summary.bmi) ?? undefined}
+        />
         <NexusStatCard
           label="Taille"
           value={summary.heightCm != null ? `${summary.heightCm} cm` : '-'}
