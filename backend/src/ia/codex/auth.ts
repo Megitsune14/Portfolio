@@ -236,10 +236,21 @@ const ensureDirectory = async (filePath: string): Promise<void> => {
 
 const writeAuthFile = async (filePath: string, data: AuthFile): Promise<void> => {
   await ensureDirectory(filePath)
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), {
-    encoding: 'utf-8',
-    mode: 0o600,
-  })
+  try {
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), {
+      encoding: 'utf-8',
+      mode: 0o600,
+    })
+  } catch (error) {
+    const code = isRecord(error) && typeof error.code === 'string' ? error.code : undefined
+    if (code === 'EROFS' || code === 'EACCES') {
+      console.warn(
+        `[auth] Impossible d'écrire ${filePath} (${code}) — tokens rafraîchis en mémoire uniquement`,
+      )
+      return
+    }
+    throw error
+  }
 }
 
 const refreshChatGptTokens = async (

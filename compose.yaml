@@ -9,7 +9,7 @@ services:
       NODE_ENV: production
     volumes:
       - ./.env:/app/.env:ro
-      - ./.env.auth:/app/.env.auth:ro
+      - ./.env.auth:/app/.env.auth
     expose:
       - "3000"
     networks:
