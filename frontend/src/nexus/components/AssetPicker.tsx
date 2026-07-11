@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { useFetch } from '@/hooks/useFetch'
 import { deleteAsset, getAssets, uploadAsset, type AssetFolder } from '../api/nexusApi'
+import { resolvePublicAssetUrl } from '@/lib/assets'
 
 type AssetPickerProps = {
   label: string
@@ -86,7 +87,7 @@ export function AssetPicker({ label, folder, value, onChange }: AssetPickerProps
 
       {value && (
         <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-background/40 p-3">
-          <img src={value} alt="" className="size-12 rounded-md object-contain" />
+          <img src={resolvePublicAssetUrl(value)} alt="" className="size-12 rounded-md object-contain" />
           <code className="text-xs text-muted-foreground">{value}</code>
         </div>
       )}
@@ -111,7 +112,7 @@ export function AssetPicker({ label, folder, value, onChange }: AssetPickerProps
                 )}
               >
                 <img
-                  src={asset.path}
+                  src={resolvePublicAssetUrl(asset.path)}
                   alt={asset.filename}
                   className="aspect-square w-full object-contain p-1"
                 />

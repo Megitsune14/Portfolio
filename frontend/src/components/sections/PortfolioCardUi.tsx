@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { ExternalLink } from 'lucide-react'
+import { resolvePublicAssetUrl } from '@/lib/assets'
 import { cn } from '@/lib/utils'
 
 export const portfolioCardClass = 'glass stat-card'
@@ -91,7 +92,7 @@ export function ProjectCard({
       {imageUrl && (
         <div className="mb-4 overflow-hidden rounded-lg border border-border/50">
           <img
-            src={imageUrl}
+            src={resolvePublicAssetUrl(imageUrl)}
             alt=""
             className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           />
@@ -201,7 +202,7 @@ export function SocialCard({
         )}
       >
         {icon ? (
-          <img src={icon} alt="" className="size-9 object-contain" />
+          <img src={resolvePublicAssetUrl(icon)} alt="" className="size-9 object-contain" />
         ) : (
           initial
         )}

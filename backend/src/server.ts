@@ -5,6 +5,7 @@ import { connectMongo } from './shared/db/mongodb.js';
 import Logger from './shared/utils/logger.js';
 import { logIntegrations } from './shared/utils/utils.js';
 import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 
 import 'dotenv/config';
@@ -15,6 +16,7 @@ import discordRouter from './modules/discord/routes.js';
 import healthRouter from './modules/health/routes.js';
 import nexusRouter from './modules/nexus/routes.js';
 import portfolioPublicRouter from './modules/portfolio/routes/public.js';
+import { getPublicAssetsRoot } from './modules/portfolio/assets.service.js';
 import { startSpotifyScheduler } from './modules/spotify/sync/scheduler.js';
 import { startRiotScheduler } from './modules/riot/scheduler.js';
 
@@ -41,6 +43,13 @@ try {
   const app = new Hono();
 
   app.use('*', corsMiddleware);
+  app.use(
+    '/assets/*',
+    serveStatic({
+      root: getPublicAssetsRoot(),
+      rewriteRequestPath: (requestPath) => requestPath.replace(/^\/assets\//, ''),
+    }),
+  );
   app.onError(errorHandler);
 
   app.route('/health', healthRouter);

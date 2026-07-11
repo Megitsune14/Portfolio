@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetch } from '@/hooks/useFetch'
 import { emptyLocalized } from '@/lib/localized'
+import { resolvePublicAssetUrl } from '@/lib/assets'
 import type { LocalizedStringOptional } from '@/lib/localized'
 import { deleteSocialLink, getSocialLinks, postSocialLink, putSocialLink } from '../../api/nexusApi'
 import { AssetPicker } from '../../components/AssetPicker'
@@ -169,7 +170,7 @@ export function ConfigSocialPage() {
                     <td className="px-4 py-3 text-muted-foreground">{link.username?.en ?? '-'}</td>
                     <td className="px-4 py-3">
                       {link.icon ? (
-                        <img src={link.icon} alt="" className="size-8 rounded object-cover" />
+                        <img src={resolvePublicAssetUrl(link.icon)} alt="" className="size-8 rounded object-cover" />
                       ) : (
                         '-'
                       )}

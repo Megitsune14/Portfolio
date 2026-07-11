@@ -1,4 +1,5 @@
 import type { SocialLink } from '@/data/social'
+import { resolvePublicAssetUrl } from '@/lib/assets'
 
 export type BrandIconKey = 'spotify' | 'discord' | 'riot' | 'lol'
 
@@ -28,7 +29,10 @@ export function mergeBrandIcons(
   const icons: Partial<Record<BrandIconKey, string>> = { ...fromApi }
 
   for (const key of Object.keys(BRAND_ICON_STATIC_FALLBACKS) as BrandIconKey[]) {
-    if (icons[key]) continue
+    if (icons[key]) {
+      icons[key] = resolvePublicAssetUrl(icons[key])
+      continue
+    }
 
     const socialIcon = socialLinks.find((link) => {
       const en = link.name.en ?? ''
@@ -36,7 +40,7 @@ export function mergeBrandIcons(
       return matchesBrand(en, BRAND_SOCIAL_MATCHERS[key]) || matchesBrand(fr, BRAND_SOCIAL_MATCHERS[key])
     })?.icon
 
-    icons[key] = socialIcon || BRAND_ICON_STATIC_FALLBACKS[key]
+    icons[key] = resolvePublicAssetUrl(socialIcon || BRAND_ICON_STATIC_FALLBACKS[key])
   }
 
   return icons

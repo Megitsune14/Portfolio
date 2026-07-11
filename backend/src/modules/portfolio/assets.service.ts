@@ -9,11 +9,21 @@ export const ASSET_FOLDERS = ['projects', 'social'] as const;
 export type AssetFolder = (typeof ASSET_FOLDERS)[number];
 
 function getAssetsRoot(): string {
-  if (process.env.PUBLIC_ASSETS_DIR) {
-    return path.resolve(process.env.PUBLIC_ASSETS_DIR);
+  // Docker: toujours utiliser le volume monté, même si .env définit un chemin relatif invalide.
+  if (process.cwd() === '/app') {
+    return '/app/public/assets';
+  }
+
+  const configured = process.env.PUBLIC_ASSETS_DIR?.trim();
+  if (configured) {
+    return path.resolve(configured);
   }
 
   return path.resolve(process.cwd(), '../frontend/public/assets');
+}
+
+export function getPublicAssetsRoot(): string {
+  return getAssetsRoot();
 }
 
 export function getAssetsDirectory(folder: AssetFolder): string {

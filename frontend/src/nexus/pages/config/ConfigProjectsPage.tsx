@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFetch } from '@/hooks/useFetch'
 import { emptyLocalized } from '@/lib/localized'
+import { resolvePublicAssetUrl } from '@/lib/assets'
 import type { LocalizedString } from '@/lib/localized'
 import { deleteProject, getProjects, postProject, putProject } from '../../api/nexusApi'
 import { AssetPicker } from '../../components/AssetPicker'
@@ -169,7 +170,7 @@ export function ConfigProjectsPage() {
                     </td>
                     <td className="px-4 py-3">
                       {p.imageUrl ? (
-                        <img src={p.imageUrl} alt="" className="size-8 rounded object-cover" />
+                        <img src={resolvePublicAssetUrl(p.imageUrl)} alt="" className="size-8 rounded object-cover" />
                       ) : (
                         '-'
                       )}
