@@ -167,7 +167,7 @@ export function ProjectCard({
   )
 }
 
-const socialAccents: PortfolioAccent[] = ['primary', 'accent', 'gold', 'primary', 'accent', 'gold', 'primary', 'accent', 'gold', 'primary']
+const SOCIAL_ACCENT_CYCLE: PortfolioAccent[] = ['primary', 'accent', 'gold']
 
 export function SocialCard({
   index,
@@ -182,7 +182,7 @@ export function SocialCard({
   url?: string
   icon?: string
 }) {
-  const accent = socialAccents[index % socialAccents.length]!
+  const accent = SOCIAL_ACCENT_CYCLE[index % SOCIAL_ACCENT_CYCLE.length]!
   const initial = name.charAt(0).toUpperCase()
 
   const content = (
