@@ -22,6 +22,7 @@ jobs:
         run: |
           rsync -avz ./compose.yaml ./mongo-init.js ${{ secrets.REMOTE_HOST }}:./portfolio
           rsync -avz --delete ./backend/ ${{ secrets.REMOTE_HOST }}:./portfolio/backend
+          ssh ${{ secrets.REMOTE_HOST }} 'mkdir -p ./portfolio/frontend/public/assets'
           rsync -avz ./frontend/public/assets/ ${{ secrets.REMOTE_HOST }}:./portfolio/frontend/public/assets/
         shell: bash
 
