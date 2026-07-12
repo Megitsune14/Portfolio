@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SiteContainer } from '@/components/layout/SiteContainer'
+import { BadAppleTrigger } from '@/components/easter-egg/BadAppleEasterEgg'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { LanguageToggle } from '@/components/layout/LanguageToggle'
 import { useNexusSession } from '@/hooks/useNexusSession'
@@ -65,6 +66,7 @@ export function Navbar() {
             </div>
 
             <div className="flex items-center gap-1">
+              <BadAppleTrigger />
               <ThemeToggle />
               <LanguageToggle />
               <Button

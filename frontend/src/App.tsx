@@ -1,4 +1,9 @@
 import { useEffect } from 'react'
+import {
+  BadAppleContentWrapper,
+  BadAppleOverlay,
+  BadAppleProvider,
+} from '@/components/easter-egg/BadAppleEasterEgg'
 import { BackgroundEffects } from '@/components/layout/BackgroundEffects'
 import { Footer } from '@/components/layout/Footer'
 import { Navbar } from '@/components/layout/Navbar'
@@ -17,14 +22,17 @@ function AppContent() {
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background">
       <BackgroundEffects />
-      <Navbar />
-      <main>
-        <HeroSection />
-        <ProjectsSection />
-        <SocialSection />
-        <StatsSection />
-      </main>
-      <Footer />
+      <BadAppleContentWrapper>
+        <Navbar />
+        <main>
+          <HeroSection />
+          <ProjectsSection />
+          <SocialSection />
+          <StatsSection />
+        </main>
+        <Footer />
+      </BadAppleContentWrapper>
+      <BadAppleOverlay />
     </div>
   )
 }
@@ -32,7 +40,9 @@ function AppContent() {
 export default function App() {
   return (
     <I18nProvider>
-      <AppContent />
+      <BadAppleProvider>
+        <AppContent />
+      </BadAppleProvider>
     </I18nProvider>
   )
 }

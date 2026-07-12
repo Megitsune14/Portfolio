@@ -17,7 +17,7 @@ export function HeroSection() {
           <p className="mt-4 text-xl font-heading text-gradient-subtle sm:text-2xl">
             {t('hero.subtitle')}
           </p>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground lg:mx-0">
             {t('hero.bio', { age })}
           </p>
         </div>
