@@ -12,7 +12,7 @@ import {
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import badAppleVideo from '@/assets/video/bad-apple.mp4'
+import { BAD_APPLE_VIDEO_URL } from '@/lib/badAppleVideo'
 
 type BadApplePhase = 'idle' | 'exiting' | 'playing' | 'entering'
 
@@ -191,7 +191,7 @@ export function BadAppleOverlay() {
     <div className="pointer-events-none fixed inset-0 z-100 overflow-hidden">
       <video
         ref={videoRef}
-        src={badAppleVideo}
+        src={BAD_APPLE_VIDEO_URL}
         playsInline
         className="absolute top-1/2 left-1/2 h-auto w-auto min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover object-center"
       />
